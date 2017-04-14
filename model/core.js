@@ -11,13 +11,15 @@ let canvasWidth = canvas.width,
 // Mouse
 let mouseX = null,
     mouseY = null;
-// Main Objects
+// Main Constants
 let Game = null;
 let Shared = null;
+let Player = null;
 
 class GameLogic {
     constructor() {
-        this.board = this.createBoard();
+        this.board = this.null;
+        this.players = [];
     }
 
     createBoard() {
@@ -86,62 +88,23 @@ class GameLogic {
 
         return empty;
     }
-}
 
-class Wall {
-    constructor(name, direction) {
-        this.name = name;
-        this.direction = direction;
-    }
-}
-
-class Direction {
-    constructor(name, value, xDelta, yDelta) {
-        this.name = name;
-        this.value = value;
-        this.xDelta = xDelta;
-        this.yDelta = yDelta;
-    }
-}
-
-class SharedUtilities {
-    constructor() {
-        this.EAST = new Direction("East", 4, 1, 0);
-        this.NORTH = new Direction("North", 1, 0, -1);
-        this.WEST = new Direction("West", 8, -1, 0);
-        this.SOUTH = new Direction("South", 2, 0, 1);
-    }
-}
-
-
-class Space {
-    constructor() {
-        this.wallEast = null;
-        this.wallNorth = null;
-        this.wallWest = null;
-        this.wallSouth = null;
+    newGame() {
+        this.board = this.createBoard();
+        Player.setLocation(14, 4);
+        this.addPlayer(Player);
     }
 
-    addWall(wall) {
-        // takes a Wall object
-        if (wall.direction == Shared.EAST) {
-            this.wallEast = wall;
-        }
-        else if (wall.direction == Shared.NORTH) {
-            this.wallNorth = wall;
-        }
-        else if (wall.direction == Shared.WEST) {
-            this.wallWest = wall;
-        }
-        else if (wall.direction == Shared.SOUTH) {
-            this.wallSouth = wall;
-        }
+    addPlayer(player) {
+        this.players.push(player);
     }
 }
 
 function init() {
     Shared = new SharedUtilities();
     Game = new GameLogic();
+    Player = new GamePiece();
+    Game.newGame();
 }
 
 function display() {
@@ -160,7 +123,6 @@ function display() {
         ctx.lineTo(originX + (boardSize * spaceSize), originY + (boardSize * spaceSize));
         ctx.lineTo(originX, originY + (boardSize * spaceSize));
         ctx.lineTo(originX, originY);
-        
         // draw each space
         for (let r = 0; r < boardSize; r++) {
             let row = Game.board[r];
@@ -187,10 +149,24 @@ function display() {
         ctx.stroke();
     }
 
-
+    function drawGamePieces() {
+        for (let p = 0; p < Game.players.length; p++) {
+            ctx.beginPath();
+            ctx.fillStyle = '#ff0000';
+            ctx.arc(
+                originX + (spaceSize * Game.players[p].x) + (spaceSize / 2),
+                originY + (spaceSize * Game.players[p].y) + (spaceSize / 2),
+                10,
+                0,
+                2 * Math.PI
+            );
+        }
+        ctx.fill();
+    }
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawBoard();
+    drawGamePieces();
 }
 
 
