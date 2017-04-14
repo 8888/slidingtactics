@@ -32,47 +32,48 @@ class GameLogic {
             empty.push(row);
         }
         //A1 [0-7][0-7]
-        empty[1][0].addWall(new Wall("East", Shared.EAST));
-        empty[4][1].addWall(new Wall("North", Shared.NORTH));
-        empty[4][1].addWall(new Wall("West", Shared.WEST));
-        empty[1][2].addWall(new Wall("North", Shared.NORTH));
-        empty[1][2].addWall(new Wall("East", Shared.EAST));
-        empty[6][3].addWall(new Wall("South", Shared.SOUTH));
-        empty[6][3].addWall(new Wall("East", Shared.EAST));
-        empty[0][5].addWall(new Wall("South", Shared.SOUTH));
+        empty[0][1].addWall(new Wall("East", Shared.EAST));
+        empty[1][4].addWall(new Wall("North", Shared.NORTH));
+        empty[1][4].addWall(new Wall("West", Shared.WEST));
+        empty[2][1].addWall(new Wall("North", Shared.NORTH));
+        empty[2][1].addWall(new Wall("East", Shared.EAST));
         empty[3][6].addWall(new Wall("South", Shared.SOUTH));
-        empty[3][6].addWall(new Wall("West", Shared.WEST));
-        //B1 @ 90 degrees [0-7][8-15] [col][(7-row)+8 or just 15-row]
-        empty[0][11].addWall(new Wall("South", Shared.SOUTH));
-        empty[1][9].addWall(new Wall("West", Shared.WEST));
-        empty[1][9].addWall(new Wall("South", Shared.SOUTH));
-        empty[2][14].addWall(new Wall("East", Shared.EAST));
-        empty[2][14].addWall(new Wall("North", Shared.NORTH));
-        empty[5][15].addWall(new Wall("West", Shared.WEST));
-        empty[5][9].addWall(new Wall("East", Shared.EAST));
-        empty[5][9].addWall(new Wall("South", Shared.SOUTH));
-        empty[6][12].addWall(new Wall("West", Shared.WEST));
-        empty[6][12].addWall(new Wall("North", Shared.NORTH));
-        //C1 @ 180 degrees [8-15][8-15] [15-row][15-col]
-        empty[14][15].addWall(new Wall("West", Shared.WEST));
-        empty[12][14].addWall(new Wall("South", Shared.SOUTH));
+        empty[3][6].addWall(new Wall("East", Shared.EAST));
+        empty[5][0].addWall(new Wall("South", Shared.SOUTH));
+        empty[6][3].addWall(new Wall("South", Shared.SOUTH));
+        empty[6][3].addWall(new Wall("West", Shared.WEST));
+        //B1 @ 90 degrees
+        empty[0][9].addWall(new Wall("East", Shared.EAST));
+        empty[1][13].addWall(new Wall("East", Shared.EAST));
+        empty[1][13].addWall(new Wall("North", Shared.NORTH));
+        empty[3][9].addWall(new Wall("West", Shared.WEST));
+        empty[3][9].addWall(new Wall("North", Shared.NORTH));
+        empty[4][15].addWall(new Wall("South", Shared.SOUTH));
+        empty[6][10].addWall(new Wall("East", Shared.EAST));
+        empty[6][10].addWall(new Wall("South", Shared.SOUTH));
+        empty[6][14].addWall(new Wall("South", Shared.SOUTH));
+        empty[6][14].addWall(new Wall("West", Shared.WEST));
+        //C1 @ 180 degrees
+        empty[8][15].addWall(new Wall("South", Shared.SOUTH));
+        empty[9][11].addWall(new Wall("South", Shared.SOUTH));
+        empty[9][11].addWall(new Wall("West", Shared.WEST));
+        empty[12][14].addWall(new Wall("North", Shared.NORTH));
         empty[12][14].addWall(new Wall("East", Shared.EAST));
-        empty[9][12].addWall(new Wall("North", Shared.NORTH));
-        empty[9][12].addWall(new Wall("East", Shared.EAST));
-        empty[15][9].addWall(new Wall("North", Shared.NORTH));
-        empty[11][9].addWall(new Wall("South", Shared.SOUTH));
-        empty[11][9].addWall(new Wall("West", Shared.WEST));
-        //D1 @ 270 degrees [8-15][0-7] [15-col][row]
-        empty[15][5].addWall(new Wall("South", Shared.SOUTH));
-        empty[12][1].addWall(new Wall("East", Shared.EAST));
-        empty[12][1].addWall(new Wall("South", Shared.SOUTH));
-        empty[11][6].addWall(new Wall("East", Shared.EAST));
-        empty[11][6].addWall(new Wall("North", Shared.NORTH));
-        empty[10][0].addWall(new Wall("East", Shared.EAST));
-        empty[9][2].addWall(new Wall("West", Shared.WEST));
-        empty[9][2].addWall(new Wall("North", Shared.NORTH));
-        empty[9][3].addWall(new Wall("East", Shared.EAST));
-        empty[9][3].addWall(new Wall("South", Shared.SOUTH));
+        empty[12][9].addWall(new Wall("North", Shared.NORTH));
+        empty[12][9].addWall(new Wall("West", Shared.WEST));
+        empty[14][12].addWall(new Wall("East", Shared.EAST));
+        empty[14][12].addWall(new Wall("South", Shared.SOUTH));
+        empty[15][14].addWall(new Wall("West", Shared.WEST));        
+        //D1 @ 270
+        empty[9][0].addWall(new Wall("South", Shared.SOUTH));
+        empty[9][4].addWall(new Wall("North", Shared.NORTH));
+        empty[9][4].addWall(new Wall("East", Shared.EAST));
+        empty[12][6].addWall(new Wall("East", Shared.EAST));
+        empty[12][6].addWall(new Wall("South", Shared.SOUTH));
+        empty[13][5].addWall(new Wall("East", Shared.EAST));
+        empty[14][3].addWall(new Wall("West", Shared.WEST));
+        empty[14][3].addWall(new Wall("South", Shared.SOUTH));
+        empty[15][5].addWall(new Wall("West", Shared.WEST));       
         //Center
         empty[7][7].addWall(new Wall("West", Shared.WEST));
         empty[7][7].addWall(new Wall("North", Shared.NORTH));
@@ -147,7 +148,7 @@ function display() {
     let originX = canvasBounds.left + 50,
         originY = canvasBounds.top + 50,
         boardSize = Game.board.length,
-        spaceSize = 20;
+        spaceSize = 30;
 
     function drawBoard() { 
         ctx.lineWidth = 1;
