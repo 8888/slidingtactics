@@ -33,13 +33,15 @@ class Board {
         let width = Math.sqrt(this.area.length);
         for(let c = 0; c < width; c++) {
             for(let r = width-1; r >= 0; r--) {
-                let s = areaCopy[r + c*width];
-                for(let d in Shared.ALL) {
+                let s = areaCopy[c + r*width];
+                let s2 = 0;
+                for(let i = 0; i < Shared.ALL.length; i++) {
+                    let d = Shared.ALL[i];
                     if (s & d) {
-                        s += Shared.rotate[d] - +d;
+                        s2 += Shared.rotate[d];
                     }
                 }
-                section[width - r + c*width] = s;
+                section[width - 1 - r + c*width] = s2;
             }
         }
 

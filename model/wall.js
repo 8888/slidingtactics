@@ -20,10 +20,10 @@ walls.rotate[walls.S] = walls.W;
 walls.rotate[walls.W] = walls.N;
 
 walls.ALL = [
-    walls.N,
-    walls.E,
+    walls.W,
     walls.S,
-    walls.W
+    walls.E,
+    walls.N
 ];
 
 module.exports = walls;

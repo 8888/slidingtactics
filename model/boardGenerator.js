@@ -9,14 +9,14 @@ class BoardGenerator {
         this.boardWidth = 8;
         let N = Shared.N, E = Shared.E, S = Shared.S, W = Shared.W;
         this.boardTemplate = [
-            N|W, N, N, N, N, N, N, N,
+            W|N, N, N, N, N, N, N, N,
             W, 0, 0, 0, 0, 0, 0, 0,
             W, 0, 0, 0, 0, 0, 0, 0,
             W, 0, 0, 0, 0, 0, 0, 0,
             W, 0, 0, 0, 0, 0, 0, 0,
             W, 0, 0, 0, 0, 0, 0, 0,
             W, 0, 0, 0, 0, 0, 0, 0,
-            W, 0, 0, 0, 0, 0, 0, N|W
+            W, 0, 0, 0, 0, 0, 0, W|N
         ];
         this.boardSections = [];
         for(let i = 0, w = BoardPieces.length; i < w; i++) {
@@ -28,7 +28,7 @@ class BoardGenerator {
                 let wall = section.walls[a];
                 for(let d = 0; d < wall[2].length; d++) {
                     let direction = wall[2][d];
-                    board.area[wall[1] + wall[0] * this.boardWidth] |= Shared[direction];
+                    board.area[wall[0] + wall[1] * this.boardWidth] |= Shared[direction];
                 }
             }
 
@@ -47,10 +47,10 @@ class BoardGenerator {
         let boardTop = [],
             boardBot = [];
         for(let i = 0; i < this.boardWidth; i++) {
-            boardTop.push(...section[0].splice(this.boardWidth));
-            boardTop.push(...section[1].splice(this.boardWidth));
-            boardBot.push(...section[3].splice(this.boardWidth));
-            boardBot.push(...section[2].splice(this.boardWidth));
+            boardTop.push(...section[0].splice(0, this.boardWidth));
+            boardTop.push(...section[1].splice(0, this.boardWidth));
+            boardBot.push(...section[3].splice(0, this.boardWidth));
+            boardBot.push(...section[2].splice(0, this.boardWidth));
         }
 
         let board = new Board("test", "test");
