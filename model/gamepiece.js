@@ -12,3 +12,5 @@ class GamePiece {
         this.y = y;
     }
 }
+
+module.exports = GamePiece;
