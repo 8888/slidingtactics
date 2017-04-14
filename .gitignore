@@ -1,0 +1,6 @@
+# Istanbul Code Coverage Reports
+coverage/
+# Node Module Installation
+node_modules/
+# Browserify produced bundle
+bundle.js

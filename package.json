@@ -1,0 +1,25 @@
+{
+  "name": "slidingtactics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "browserify": "^14.3.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "sinon": "^2.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://matyea3@prototypeholdings.com/home/matyea3/git/slidingtactics.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
