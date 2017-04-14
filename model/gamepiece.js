@@ -1,9 +1,10 @@
 'use strict';
 
 class GamePiece {
-    constructor() {
+    constructor(color) {
         this.x = null;
         this.y = null;
+        this.color = color;
     }
 
     setLocation(x, y) {

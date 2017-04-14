@@ -23,4 +23,14 @@ class Space {
             this.wallSouth = wall;
         }
     }
+
+    hasWall(direction) {
+        // returns if the space has a wall at that direction
+        for (let wall in this) {
+            if (this[wall] && this[wall].direction == direction) {
+                return true;
+            }
+        }
+        return false;        
+    }
 }

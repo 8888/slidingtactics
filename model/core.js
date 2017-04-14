@@ -7,19 +7,24 @@ canvas.focus();
 let canvasWidth = canvas.width,
     canvasHeight = canvas.height,
     canvasBounds = canvas.getBoundingClientRect(),
-    ctx = canvas.getContext("2d");
+    ctx = canvas.getContext("2d"),
+    originX = 50,
+    originY = 50,
+    spaceSize = 30;
 // Mouse
 let mouseX = null,
     mouseY = null;
 // Main Constants
 let Game = null;
 let Shared = null;
-let Player = null;
 
 class GameLogic {
     constructor() {
-        this.board = this.null;
-        this.players = [];
+        this.board = null;
+        this.playerPieces = [];
+        this.player = null;
+        this.clickedPiece = null; // used for user input movement
+        this.dragDirection = null;
     }
 
     createBoard() {
@@ -91,27 +96,74 @@ class GameLogic {
 
     newGame() {
         this.board = this.createBoard();
-        Player.setLocation(14, 4);
-        this.addPlayer(Player);
+        this.createPlayers();
+    }
+
+    createPlayers() {
+        Game.player = new GamePiece('#ff0000');        
+        Game.player.setLocation(14, 4);
+        this.addPlayer(Game.player);
+        for (let i = 0; i < 3; i++) {
+            this.addPlayer(new GamePiece('#0000ff'));            
+        }
+        this.playerPieces[1].setLocation(12, 3);
+        this.playerPieces[2].setLocation(12, 5);
+        this.playerPieces[3].setLocation(10, 14);
     }
 
     addPlayer(player) {
-        this.players.push(player);
+        this.playerPieces.push(player);
+    }
+
+    movePiece(piece, direction) {
+        let moving = true;
+        while (moving) {
+            moving = false;
+            let advancedCellY = piece.y + direction.yDelta;
+            let advancedCellX = piece.x + direction.xDelta;
+            if (
+                0 <= advancedCellY && advancedCellY < this.board.length &&
+                0 <= advancedCellX && advancedCellX < this.board.length
+            ) {
+                if (
+                    !this.board[advancedCellY][advancedCellX].hasWall(Shared.directionReverse(direction)) &&
+                    !this.board[piece.y][piece.x].hasWall(direction) &&
+                    !this.playerFromCell(advancedCellX, advancedCellY)
+                ) {
+                    piece.setLocation(advancedCellX, advancedCellY);
+                    moving = true;
+                }
+            }
+        }
+    }
+
+    cellFromClick(x, y) {
+        // returns what cell was clicked
+        let cellX = Math.floor((x - originX) / spaceSize),
+            cellY = Math.floor((y - originY) / spaceSize);
+        if (cellX >= 0 && cellX < Game.board.length && cellY >=0 && cellY < Game.board.length) {
+            return [cellX, cellY];
+        }
+    }
+
+    playerFromCell(x, y) {
+        // returns the player object from that cell
+        for (let p = 0; p < this.playerPieces.length; p++) {
+            if (this.playerPieces[p].x == x && this.playerPieces[p].y == y) {
+                return this.playerPieces[p];
+            }
+        }
     }
 }
 
 function init() {
     Shared = new SharedUtilities();
     Game = new GameLogic();
-    Player = new GamePiece();
     Game.newGame();
 }
 
 function display() {
-    let originX = canvasBounds.left + 50,
-        originY = canvasBounds.top + 50,
-        boardSize = Game.board.length,
-        spaceSize = 30;
+    let boardSize = Game.board.length;
 
     function drawBoard() { 
         ctx.lineWidth = 1;
@@ -150,18 +202,18 @@ function display() {
     }
 
     function drawGamePieces() {
-        for (let p = 0; p < Game.players.length; p++) {
+        for (let p = 0; p < Game.playerPieces.length; p++) {
             ctx.beginPath();
-            ctx.fillStyle = '#ff0000';
+            ctx.fillStyle = Game.playerPieces[p].color;
             ctx.arc(
-                originX + (spaceSize * Game.players[p].x) + (spaceSize / 2),
-                originY + (spaceSize * Game.players[p].y) + (spaceSize / 2),
+                originX + (spaceSize * Game.playerPieces[p].x) + (spaceSize / 2),
+                originY + (spaceSize * Game.playerPieces[p].y) + (spaceSize / 2),
                 10,
                 0,
                 2 * Math.PI
             );
+            ctx.fill();            
         }
-        ctx.fill();
     }
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -169,6 +221,44 @@ function display() {
     drawGamePieces();
 }
 
+canvas.addEventListener("mousedown", function(event) {
+    if (event.button === 0) { // left click
+        let cell = Game.cellFromClick(mouseX, mouseY);
+        if (cell) {
+            let player = Game.playerFromCell(cell[0], cell[1]);
+            if (player) {
+                Game.clickedPiece = player;
+            }
+        }
+    }
+});
+
+canvas.addEventListener("mousemove", function(event) {
+    mouseX = event.clientX - canvasBounds.left;
+    mouseY = event.clientY - canvasBounds.top;
+});
+
+canvas.addEventListener("mouseup", function(event) {
+    if (event.button === 0) { // release left click
+        Game.clickedPiece = null;
+    }
+});
+
+canvas.addEventListener("keydown", function(event) {
+    if (event.key === "ArrowLeft" && Game.clickedPiece) {
+        Game.movePiece(Game.clickedPiece, Shared.WEST);
+    }
+    else if (event.key === "ArrowUp" && Game.clickedPiece) {
+        Game.movePiece(Game.clickedPiece, Shared.NORTH);
+    }
+    else if (event.key === "ArrowRight" && Game.clickedPiece) {
+        Game.movePiece(Game.clickedPiece, Shared.EAST);
+    }
+    else if (event.key === "ArrowDown" && Game.clickedPiece) {
+        Game.movePiece(Game.clickedPiece, Shared.SOUTH);
+    }
+    Game.clickedPiece = null;   
+});
 
 window.onload = function() {
     init();  
