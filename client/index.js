@@ -40,8 +40,10 @@ function init() {
     }
 }
 
-function update() {
-
+function update(delta) {
+    for(let i = 0; i < gameInstances.length; i++) {
+        gameInstances[i].update(delta);
+    }
 }
 
 function display() {
