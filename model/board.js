@@ -47,11 +47,11 @@ class Board {
         }
 
         let goalsRotated = [];
-        for(let i = 0; i < this.goals.length; i++){
-            let g = this.goals[i];
+        for(let i = 0; i < goals.length; i++){
+            let g = goals[i];
             let y = g[1],
                 x = g[0];
-            goalsRotated.push([width-1-y, x]);//[width-1-y, x]);
+            goalsRotated.push([width-1-y, x]);
         }
 
         return this.rotate(iterations-1, section, goalsRotated);

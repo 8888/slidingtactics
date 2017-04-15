@@ -177,12 +177,15 @@ class GameLogic {
         ctx.rect(x + (cellWidth * goalX), y + (cellWidth * goalY), cellWidth, cellWidth);
         ctx.fill();
         // all goal options
+        ctx.strokeStyle = '#f442f1';
         for(let i = 0; i < this.board.goals.length; i++) {
             let g = this.board.goals[i];
             let gX = g % 16,
                 gY = Math.floor(g / 16);
-            ctx.moveTo(x + (cellWidth * gX), y + (cellWidth * gY));
-            ctx.lineTo(x + (cellWidth * gX) + cellWidth, y + (cellWidth * gY) + cellWidth);
+            ctx.moveTo(x + (cellWidth * gX) + cellWidth/4, y + (cellWidth * gY) + cellWidth/4);
+            ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth*3/4);
+            ctx.moveTo(x + (cellWidth * gX) + cellWidth/4, y + (cellWidth * gY) + cellWidth*3/4);
+            ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth/4);
             ctx.stroke();
         }
         // draw the outline
