@@ -2,8 +2,6 @@
 
 class GamePiece {
     constructor(color) {
-        this.x = null;
-        this.y = null;
         this.color = color;
     }
 

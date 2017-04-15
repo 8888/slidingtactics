@@ -4,13 +4,15 @@ let GameLogic = require('../model/core.js'),
     Direction = require('../model/direction.js');
 
 // Canvas Parameters
-let canvas = document.getElementById("canvasElement");
+let canvas = document.getElementById('cnvsForeground');
 canvas.tabIndex = 0;
 canvas.focus();
 let canvasWidth = canvas.width,
     canvasHeight = canvas.height,
     canvasBounds = canvas.getBoundingClientRect(),
-    ctx = canvas.getContext("2d"),
+    ctx = canvas.getContext('2d'),
+    ctxBack = document.getElementById('cnvsBackground').getContext('2d'),
+    ctxDebug = document.getElementById('cnvsDebug').getContext('2d'),
     originX = 50,
     originY = 50;
 // Mouse
@@ -19,36 +21,60 @@ let mouseX = null,
 
 // Main Constants
 let gameInstances = [];
-let gamesWidth = 6,
-    gamesHeight = 3,
+let gamesWidth = null,
+    gamesHeight = null,
     gamesBorder = 10,
-    cellSpace = null;
+    cellSpace = null,
+    isMultipleGames = false,
+    gamePrimaryInput = null;
+
+var qs = {};
+location.search.substr(1).split("&").forEach(function(p) {
+    let s = p.split('='); qs[s[0]] = s[1];
+});
+
 function init() {
-    
+    ctx.font = "14px Serif";
+    document.getElementById('commandNorm').onclick = commandNorm;
+    document.getElementById('commandFast').onclick = commandFast;
+    gamesWidth = qs['x'] ? qs['x'] : 1;
+    gamesHeight = qs['y'] ? qs['y'] : 1;
+    isMultipleGames = gamesWidth + gamesHeight > 2;
+
     let cellSpaceX = (canvasWidth / gamesWidth - gamesBorder * 2) / 16,
         cellSpaceY = (canvasHeight / gamesHeight - gamesBorder * 2) / 16;
-    cellSpace = Math.min(cellSpaceX, cellSpaceY);
+    cellSpace = Math.max(Math.min(cellSpaceX, cellSpaceY), 1);
 
     for(let x = 0; x < gamesWidth; x++) {
         for(let y = 0; y < gamesHeight; y++) {
             let g = new GameLogic(
+                ctxBack,
                 (gamesBorder + cellSpace * 16) * x + gamesBorder,
                 gamesBorder + (gamesBorder + cellSpace * 16) * y,
-                cellSpace);
+                cellSpace,
+                gamesBorder);
             gameInstances.push(g);
         }
     }
+    ctxDebug.font = "24px sans-serif";
+    ctxDebug.strokeStyle = "red";
 }
+
+var fps = {
+    frames: 60,
+    deltas: [],
+    sum: 0
+};
 
 let commands = [],
     commandDetla = 0,
     commandDelay = 250,
     devAutoCommandEnabled = true,
-    devSelect2Text = {};
-devSelect2Text[0] = '2673';
-devSelect2Text[1] = '2674';
-devSelect2Text[2] = '2675';
-devSelect2Text[3] = '2676';
+    devSelect2Text = {0: '2673', 1: '2674', 2: '2675', 3: '2676'};
+function commandNorm() { commandDelay = 250; }
+function commandFast() { commandDelay = 25; }
+
+
 function update(delta) {
     for(let i = 0; i < gameInstances.length; i++) {
         gameInstances[i].update(delta);
@@ -77,8 +103,16 @@ function update(delta) {
             commands.shift();
         }
     }
+
+    fps.deltas.unshift(delta);
+    if (fps.deltas.length > fps.frames) {
+        fps.deltas.pop();
+    }
+    fps.sum = fps.deltas.reduce(function(a, b) { return a + b; });
 }
 
+let fpsTextDelta = null,
+    fpsTextSum = null;
 function display() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     for(let i = 0; i < gameInstances.length; i++) {
@@ -95,6 +129,15 @@ function display() {
         }
         ctx.font = "10px sans-serif";
     }
+
+    let deltaText = fps.deltas[0], sumText = fps.sum;
+    if (deltaText != fpsTextDelta || sumText != fpsTextSum) {
+        fpsTextDelta = deltaText;
+        fpsTextSum = sumText;
+        let fpsText = fpsTextDelta.toFixed(2).toString() + "ms " + (1000/(fpsTextSum/fps.frames)).toFixed(0) + "fps";
+        ctxDebug.clearRect(0, 0, 200, 100);
+        ctxDebug.strokeText(fpsText, 10, 25);
+    }
 }
 
 let LEFT_MOUSE_CLICK = 0;
@@ -109,6 +152,9 @@ canvas.addEventListener("mousedown", function(event) {
 canvas.addEventListener("mousemove", function(event) {
     mouseX = event.clientX - canvasBounds.left;
     mouseY = event.clientY - canvasBounds.top;
+    if (isMultipleGames) {
+        console.log(mouseX, mouseY);
+    }
 });
 
 canvas.addEventListener("mouseup", function(event) {

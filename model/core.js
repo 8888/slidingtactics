@@ -7,38 +7,70 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(x, y, spaceSize) {
+    constructor(ctxBack, x, y, spaceSize, border) {
+        this.ctxBack = ctxBack;
         this.x = x;
         this.y = y;
         this.spaceSize = spaceSize;
+        this.border = border;
         this.newGame();
     }
 
     newGame() {
         let bg = new BoardGenerator();
         this.board = bg.generate();
-        this.createPlayers();
         this.createGoal();
+        this.createPlayers();
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
+        // Lookup data instead of searching
+        this.playerLastMove = {};
+        // Draw once
+        this.displayBoard();
     }
 
     createPlayers() {
+        let randboardloc = function(players, goal) {
+            let noSpace = players.map(function(p) { return p.location; }).concat(goal).concat([119,120,135,136]);
+            let space = null,
+                attemptCount = 0,
+                attemptCountMax = 20;
+            while (space === null && attemptCount < attemptCountMax) {
+                attemptCount++;
+                let s = Math.floor(Math.random() * 16 * 16);
+                if (noSpace.indexOf(s) === -1) {
+                    space = s;
+                }
+            }
+
+            if (space === null) {
+                throw new Error('Could not place player!');
+            }
+
+            return space; 
+        };
         this.playerPieces = [];
-        this.player = new GamePiece('#ff0000');        
-        this.player.setLocation(14 + 4 * 16);
+        this.playerIndexByLocation = {};
+        this.player = new GamePiece('#ff0000');
+        let l = randboardloc(this.playerPieces, this.goal);
+        this.player.setLocation(l);
+        this.playerIndexByLocation[l] = 0;
         this.addPlayer(this.player);
         for (let i = 0; i < 3; i++) {
-            this.addPlayer(new GamePiece('#0000ff'));            
+            let p = new GamePiece('#0000ff');
+            let l = randboardloc(this.playerPieces, this.goal);
+            p.setLocation(l);
+            this.playerIndexByLocation[l] = i+1;
+            this.addPlayer(p);
         }
-        this.playerPieces[1].setLocation(12 + 3 * 16);
-        this.playerPieces[2].setLocation(12 + 5 * 16);
-        this.playerPieces[3].setLocation(10 + 14 * 16);
     }
 
     createGoal() {
         this.goal = this.board.goals[Math.floor(Math.random() * this.board.goals.length)];
+        this.goalX = this.x + (this.goal % 16) * this.spaceSize + this.spaceSize * 0.1;
+        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize + this.spaceSize * 0.1;
+        this.goalW = this.spaceSize * 0.8;
     }
 
     addPlayer(player) {
@@ -46,55 +78,45 @@ class GameLogic {
     }
 
     movePiece(piece, direction) {
-        let lastMove = this.lastMove(piece);
-        if (lastMove && lastMove[1] == Direction.reverse[direction]) {
+        if (this.playerLastMove[piece] == Direction.reverse[direction]) {
             return;
         }
-        let moving = true;
+        let moving = true,
+            movementCount = 0,
+            movementCountMax = 20;
         let start = piece.location;
-        while (moving) {
+        while (moving && movementCount < movementCountMax) {
             moving = false;
+            movementCount++;
             let currentIndex = piece.location;
             let advancedIndex = currentIndex + Direction.delta[direction];
-            if (
-                0 <= advancedIndex && advancedIndex <= 255
+            if ( (0 <= advancedIndex && advancedIndex <= 255) &&
+                !(this.board.item(advancedIndex) & Direction.reverse[direction]) &&
+                !(this.board.item(currentIndex) & direction) &&
+                (this.playerIndexByLocation[advancedIndex] === undefined)
             ) {
-                if (
-                    !(this.board.item(advancedIndex) & Direction.reverse[direction]) &&
-                    !(this.board.item(currentIndex) & direction) &&
-                    !(this.playerFromCell(advancedIndex))
-                ) {
-                    piece.setLocation(advancedIndex);
-                    moving = true;
-                }
+                piece.setLocation(advancedIndex);
+                moving = true;
             }
         }
+
+        if (moving) {
+            throw new Error('Player continued moving past max limit!');
+        }
+        
+        let pIndex = this.playerIndexByLocation[start];
+        delete this.playerIndexByLocation[start];
+        this.playerIndexByLocation[piece.location] = pIndex;
         if (piece.location != start) {
+            this.playerLastMove[piece] = direction;
             this.moveHistory.push([piece, direction, start, piece.location]);
-            this.moveTrail.push(new Trail(start, piece.location));
-            if (this.playerReachedGoal()) {
+            this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
+            if (this.moveHistory.length > 25) {
+                this.moveHistory.shift();
+            }
+            if (this.player.location == this.goal) {
                 this.puzzleComplete();
             }
-        }
-    }
-
-    lastMove(piece) {
-        // returns the last move of the given GamePiece
-        for (let m = this.moveHistory.length - 1; m >= 0; m--) {
-            // itterate from back to front
-            if (this.moveHistory[m][0] == piece) {
-                return this.moveHistory[m];
-            }
-        }
-    }
-
-    playerReachedGoal() {
-        // return if the player is on the goal
-        if (this.player.location == this.goal) {
-            return true;
-        }
-        else {
-            return false;
         }
     }
 
@@ -111,30 +133,14 @@ class GameLogic {
         }
     }
 
-    playerFromCell(locationIndex) {
-        // returns the player object from that cell
-        for (let p = 0; p < this.playerPieces.length; p++) {
-            if (this.playerPieces[p].location == locationIndex) {
-                return this.playerPieces[p];
-            }
-        }
-    }
-
     onMouse1Down(x, y) {
         let cell = this.cellFromClick(x, y);
         if (cell !== undefined) {
-            let player = this.playerFromCell(cell);
-            if (player) {
-                this.clickedPiece = player;
-            }
-            else {
-                this.clickedPiece = null;
-            }
+            this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
         }
     }
 
     onMouse1Up() {
-    
     }
 
     onDirection(direction) {
@@ -147,41 +153,22 @@ class GameLogic {
         this.clickedPiece = this.playerPieces[index];
     }
 
-    update(delta) {
-        for (let t = 0; t < this.moveTrail.length; t++) {
-            this.moveTrail[t].update(delta);
-            if (!this.moveTrail[t].isActive) {
-                this.moveTrail.splice(t, 1);
-                t--;
-            }
-        }
-    }
-
-    display(ctx) {
+    displayBoard() {
         let boardSize = 16,
             x = this.x,
             y = this.y,
-            cellWidth = this.spaceSize;
+            cellWidth = this.spaceSize,
+            ctx = this.ctxBack;
+        ctx.clearRect(x - this.border/2, y - this.border, cellWidth * 16 + this.border, cellWidth * 16 + this.border + 1);
         // name of the board
         ctx.fillText(this.board.name, x, y-1);
-        // draw the goal
-        ctx.fillStyle = '#f442f1';
-        ctx.beginPath();
-        let goalX = this.goal % 16,
-            goalY = Math.floor(this.goal / 16);
-        ctx.rect(x + (cellWidth * goalX), y + (cellWidth * goalY), cellWidth, cellWidth);
-        ctx.fill();
         // all goal options
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
         for(let i = 0; i < this.board.goals.length; i++) {
             let g = this.board.goals[i];
             let gX = g % 16,
-                gY = Math.floor(g / 16);/*
-            ctx.moveTo(x + (cellWidth * gX) + cellWidth/4, y + (cellWidth * gY) + cellWidth/4);
-            ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth*3/4);
-            ctx.moveTo(x + (cellWidth * gX) + cellWidth/4, y + (cellWidth * gY) + cellWidth*3/4);
-            ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth/4);*/
+                gY = Math.floor(g / 16);
             ctx.beginPath();
             ctx.arc(
                 x + (cellWidth * gX) + (cellWidth / 2),
@@ -222,6 +209,29 @@ class GameLogic {
             }
         }
         ctx.stroke();
+    }
+
+    update(delta) {
+        for (let t = 0; t < this.moveTrail.length; t++) {
+            this.moveTrail[t].update(delta);
+            if (!this.moveTrail[t].isActive) {
+                this.moveTrail.splice(t, 1);
+                t--;
+            }
+        }
+    }
+
+    display(ctx) {
+        let boardSize = 16,
+            x = this.x,
+            y = this.y,
+            cellWidth = this.spaceSize;
+        // draw the goal
+        ctx.beginPath();
+        ctx.fillStyle = '#f442f1';
+        ctx.rect(this.goalX, this.goalY, this.goalW, this.goalW);
+        ctx.fill();
+
         // draw the move trail
         for (let i = 0; i < this.moveTrail.length; i++) {
             let m = this.moveTrail[i];
@@ -238,12 +248,7 @@ class GameLogic {
                 py = Math.floor(p.location / 16),
                 px = p.location % 16;
             ctx.beginPath();
-            if (this.clickedPiece == p) {
-                ctx.fillStyle = '#ffff00';
-            }
-            else {
-                ctx.fillStyle = p.color;                
-            }
+            ctx.fillStyle = this.clickedPiece == p ? '#ffff00' : p.color;
             ctx.arc(
                 x + (cellWidth * px) + (cellWidth / 2),
                 y + (cellWidth * py) + (cellWidth / 2),
