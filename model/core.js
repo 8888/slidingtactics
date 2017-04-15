@@ -76,6 +76,27 @@ class GameLogic {
         }
     }
 
+    onMouse1Down(x, y) {
+        let cell = this.cellFromClick(x, y);
+        if (cell) {
+            let player = this.playerFromCell(cell);
+            if (player) {
+                this.clickedPiece = player;
+            }
+        }
+    }
+
+    onMouse1Up() {
+        this.clickedPiece = null;
+    }
+
+    onDirection(direction) {
+        if (this.clickedPiece) {
+            this.movePiece(this.clickedPiece, direction);
+            this.clickedPiece = null;
+        }
+    }
+
     display(ctx) {
         let boardSize = 16,
             x = this.x,
@@ -123,7 +144,7 @@ class GameLogic {
             ctx.arc(
                 x + (cellWidth * px) + (cellWidth / 2),
                 y + (cellWidth * py) + (cellWidth / 2),
-                10,
+                cellWidth / 2,
                 0,
                 2 * Math.PI
             );

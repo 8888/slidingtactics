@@ -12,18 +12,32 @@ let canvasWidth = canvas.width,
     canvasBounds = canvas.getBoundingClientRect(),
     ctx = canvas.getContext("2d"),
     originX = 50,
-    originY = 50,
-    spaceSize = 30;
+    originY = 50;
 // Mouse
 let mouseX = null,
     mouseY = null;
 
 // Main Constants
-let Game = null;
-let Shared = null;
+let gameInstances = [];
 function init() {
-    Game = new GameLogic(canvasBounds.left + 50, canvasBounds.top + 50, 30);
-    Game.newGame();
+    let gamesWidth = 6,
+        gamesHeight = 3,
+        gamesBorder = 10;
+    
+    let cellSpaceX = (canvasWidth / gamesWidth - gamesBorder * 2) / 16,
+        cellSpaceY = (canvasHeight / gamesHeight - gamesBorder * 2) / 16;
+    let cellSpace = Math.min(cellSpaceX, cellSpaceY);
+
+    for(let x = 0; x < gamesWidth; x++) {
+        for(let y = 0; y < gamesHeight; y++) {
+            let g = new GameLogic(
+                (gamesBorder + cellSpace * 16) * x + gamesBorder,
+                gamesBorder + (gamesBorder + cellSpace * 16) * y,
+                cellSpace);
+            g.newGame();
+            gameInstances.push(g);
+        }
+    }
 }
 
 function update() {
@@ -32,17 +46,16 @@ function update() {
 
 function display() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    Game.display(ctx);
+    for(let i = 0; i < gameInstances.length; i++) {
+        gameInstances[i].display(ctx);
+    }
 }
 
+let LEFT_MOUSE_CLICK = 0;
 canvas.addEventListener("mousedown", function(event) {
-    if (event.button === 0) { // left click
-        let cell = Game.cellFromClick(mouseX, mouseY);
-        if (cell) {
-            let player = Game.playerFromCell(cell);
-            if (player) {
-                Game.clickedPiece = player;
-            }
+    if (event.button === LEFT_MOUSE_CLICK) {
+        for(let i = 0; i < gameInstances.length; i++) {
+            gameInstances[i].onMouse1Down(mouseX, mouseY);
         }
     }
 });
@@ -53,25 +66,31 @@ canvas.addEventListener("mousemove", function(event) {
 });
 
 canvas.addEventListener("mouseup", function(event) {
-    if (event.button === 0) { // release left click
-        Game.clickedPiece = null;
+    if (event.button === LEFT_MOUSE_CLICK) {
+        for(let i = 0; i < gameInstances.length; i++) {
+            gameInstances[i].onMouse1Up(mouseX, mouseY);
+        }
     }
 });
 
-canvas.addEventListener("keydown", function(event) { 
-    if (event.key === "ArrowLeft" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Direction.W);
+canvas.addEventListener("keydown", function(event) {
+    let direction = null;
+
+    if (event.key === "ArrowLeft") {
+        direction = Direction.W;
+    } else if (event.key === "ArrowUp") {
+        direction = Direction.N;
+    } else if (event.key === "ArrowRight") {
+        direction = Direction.E;
+    } else if (event.key === "ArrowDown") {
+        direction = Direction.S;
     }
-    else if (event.key === "ArrowUp" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Direction.N);
+
+    if (direction) {
+        for(let i = 0; i < gameInstances.length; i++) {
+            gameInstances[i].onDirection(direction);
+        }
     }
-    else if (event.key === "ArrowRight" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Direction.E);
-    }
-    else if (event.key === "ArrowDown" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Direction.S);
-    }
-    Game.clickedPiece = null;   
 });
 
 window.onload = function() {
