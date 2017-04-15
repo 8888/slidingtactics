@@ -13,6 +13,7 @@ class GameLogic {
         this.playerPieces = [];
         this.player = null;
         this.clickedPiece = null;
+        this.moveHistory = []; // moves stored as [piece, direction, start, end]
     }
 
     newGame() {
@@ -39,6 +40,7 @@ class GameLogic {
 
     movePiece(piece, direction) {
         let moving = true;
+        let start = piece.location;
         while (moving) {
             moving = false;
             let currentIndex = piece.location;
@@ -54,6 +56,19 @@ class GameLogic {
                     piece.setLocation(advancedIndex);
                     moving = true;
                 }
+            }
+        }
+        if (piece.location != start) {
+            this.moveHistory.push([piece, direction, start, piece.location]);
+        }
+    }
+
+    lastMove(piece) {
+        // returns the last move of the given GamePiece
+        for (let m = this.moveHistory.length - 1; m > 0; m--) {
+            // itterate from back to front
+            if (this.moveHistory[m][0] == piece) {
+                return this.moveHistory[m];
             }
         }
     }
