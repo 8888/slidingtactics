@@ -75,6 +75,7 @@ canvas.addEventListener("mouseup", function(event) {
 
 canvas.addEventListener("keydown", function(event) {
     let direction = null;
+    let devSelect = null;
 
     if (event.key === "ArrowLeft") {
         direction = Direction.W;
@@ -84,11 +85,25 @@ canvas.addEventListener("keydown", function(event) {
         direction = Direction.E;
     } else if (event.key === "ArrowDown") {
         direction = Direction.S;
+    } else if (event.key === "1") {
+        devSelect = 0;
+    } else if (event.key === "2") {
+        devSelect = 1;
+    } else if (event.key === "3") {
+        devSelect = 2;
+    } else if (event.key === "4") {
+        devSelect = 3;
     }
 
     if (direction) {
         for(let i = 0; i < gameInstances.length; i++) {
             gameInstances[i].onDirection(direction);
+        }
+    }
+
+    if (devSelect !== null) {
+        for(let i = 0; i < gameInstances.length; i++) {
+            gameInstances[i].onDevSelect(devSelect);
         }
     }
 });

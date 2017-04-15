@@ -128,11 +128,14 @@ class GameLogic {
             if (player) {
                 this.clickedPiece = player;
             }
+            else {
+                this.clickedPiece = null;
+            }
         }
     }
 
     onMouse1Up() {
-        this.clickedPiece = null;
+    
     }
 
     onDirection(direction) {
@@ -140,6 +143,10 @@ class GameLogic {
             this.movePiece(this.clickedPiece, direction);
             this.clickedPiece = null;
         }
+    }
+
+    onDevSelect(index) {
+        this.clickedPiece = this.playerPieces[index];
     }
 
     display(ctx) {
@@ -192,7 +199,12 @@ class GameLogic {
                 py = Math.floor(p.location / 16),
                 px = p.location % 16;
             ctx.beginPath();
-            ctx.fillStyle = p.color;
+            if (this.clickedPiece == p) {
+                ctx.fillStyle = '#ffff00';
+            }
+            else {
+                ctx.fillStyle = p.color;                
+            }
             ctx.arc(
                 x + (cellWidth * px) + (cellWidth / 2),
                 y + (cellWidth * py) + (cellWidth / 2),
@@ -200,7 +212,7 @@ class GameLogic {
                 0,
                 2 * Math.PI
             );
-            ctx.fill();            
+            ctx.fill();
         }
     }
 }
