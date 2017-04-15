@@ -7,9 +7,8 @@ class GamePiece {
         this.color = color;
     }
 
-    setLocation(x, y) {
-        this.x = x;
-        this.y = y;
+    setLocation(locationIndex) {
+        this.location = locationIndex;
     }
 }
 

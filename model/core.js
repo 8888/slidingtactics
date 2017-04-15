@@ -38,14 +38,14 @@ class GameLogic {
 
     createPlayers() {
         Game.player = new GamePiece('#ff0000');        
-        Game.player.setLocation(14, 4);
+        Game.player.setLocation(14 + 4 * 16);
         this.addPlayer(Game.player);
         for (let i = 0; i < 3; i++) {
             this.addPlayer(new GamePiece('#0000ff'));            
         }
-        this.playerPieces[1].setLocation(12, 3);
-        this.playerPieces[2].setLocation(12, 5);
-        this.playerPieces[3].setLocation(10, 14);
+        this.playerPieces[1].setLocation(12 + 3 * 16);
+        this.playerPieces[2].setLocation(12 + 5 * 16);
+        this.playerPieces[3].setLocation(10 + 14 * 16);
     }
 
     addPlayer(player) {
@@ -56,24 +56,17 @@ class GameLogic {
         let moving = true;
         while (moving) {
             moving = false;
-            let currentIndex = piece.y * 16 + piece.x;
-            let advancedIndex = currentIndex + Walls.yDelta[direction] + Walls.xDelta[direction];
-            let advancedCellY = piece.y + Walls.yDelta[direction];
-            let advancedCellX = piece.x + Walls.xDelta[direction];
+            let currentIndex = piece.location;
+            let advancedIndex = currentIndex + Walls.delta[direction];
             if (
-                0 <= advancedCellY && advancedCellY < 16 &&
-                0 <= advancedCellX && advancedCellX < 16
+                0 <= advancedIndex && advancedIndex < 255
             ) {
                 if (
-                    this.board.item(advancedIndex) != Walls.reverse[direction] &&
-                    this.board.item(currentIndex) != direction
-                    /*
-                    !this.board[advancedCellY][advancedCellX].hasWall(Shared.directionReverse(direction)) &&
-                    !this.board[piece.y][piece.x].hasWall(direction) &&
-                    !this.playerFromCell(advancedCellX, advancedCellY)
-                    */
+                    !(this.board.item(advancedIndex) & Walls.reverse[direction]) &&
+                    !(this.board.item(currentIndex) & direction) &&
+                    !(this.playerFromCell(advancedIndex))
                 ) {
-                    piece.setLocation(advancedCellX, advancedCellY);
+                    piece.setLocation(advancedIndex);
                     moving = true;
                 }
             }
@@ -85,14 +78,14 @@ class GameLogic {
         let cellX = Math.floor((x - originX) / spaceSize),
             cellY = Math.floor((y - originY) / spaceSize);
         if (cellX >= 0 && cellX < 16 && cellY >=0 && cellY < 16) {
-            return [cellX, cellY];
+            return cellX + cellY*16;
         }
     }
 
-    playerFromCell(x, y) {
+    playerFromCell(locationIndex) {
         // returns the player object from that cell
         for (let p = 0; p < this.playerPieces.length; p++) {
-            if (this.playerPieces[p].x == x && this.playerPieces[p].y == y) {
+            if (this.playerPieces[p].location == locationIndex) {
                 return this.playerPieces[p];
             }
         }
@@ -147,12 +140,15 @@ function display() {
     }
 
     function drawGamePieces() {
-        for (let p = 0; p < Game.playerPieces.length; p++) {
+        for (let i = 0; i < Game.playerPieces.length; i++) {
+            let p = Game.playerPieces[i],
+                y = Math.floor(p.location / 16),
+                x = p.location % 16;
             ctx.beginPath();
-            ctx.fillStyle = Game.playerPieces[p].color;
+            ctx.fillStyle = p.color;
             ctx.arc(
-                originX + (spaceSize * Game.playerPieces[p].x) + (spaceSize / 2),
-                originY + (spaceSize * Game.playerPieces[p].y) + (spaceSize / 2),
+                originX + (spaceSize * x) + (spaceSize / 2),
+                originY + (spaceSize * y) + (spaceSize / 2),
                 10,
                 0,
                 2 * Math.PI
@@ -170,7 +166,7 @@ canvas.addEventListener("mousedown", function(event) {
     if (event.button === 0) { // left click
         let cell = Game.cellFromClick(mouseX, mouseY);
         if (cell) {
-            let player = Game.playerFromCell(cell[0], cell[1]);
+            let player = Game.playerFromCell(cell);
             if (player) {
                 Game.clickedPiece = player;
             }
