@@ -153,6 +153,8 @@ class GameLogic {
             x = this.x,
             y = this.y,
             cellWidth = this.spaceSize;
+        // name of the board
+        ctx.fillText(this.board.name, x, y-1);
         // draw the goal
         ctx.fillStyle = '#f442f1';
         ctx.beginPath();
@@ -160,6 +162,15 @@ class GameLogic {
             goalY = Math.floor(this.goal / 16);
         ctx.rect(x + (cellWidth * goalX), y + (cellWidth * goalY), cellWidth, cellWidth);
         ctx.fill();
+        // all goal options
+        for(let i = 0; i < this.board.goals.length; i++) {
+            let g = this.board.goals[i];
+            let gX = g % 16,
+                gY = Math.floor(g / 16);
+            ctx.moveTo(x + (cellWidth * gX), y + (cellWidth * gY));
+            ctx.lineTo(x + (cellWidth * gX) + cellWidth, y + (cellWidth * gY) + cellWidth);
+            ctx.stroke();
+        }
         // draw the outline
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#000000';

@@ -51,7 +51,7 @@ class Board {
             let g = this.goals[i];
             let y = g[1],
                 x = g[0];
-            goalsRotated.push([width-1-y, x]);
+            goalsRotated.push([width-1-y, x]);//[width-1-y, x]);
         }
 
         return this.rotate(iterations-1, section, goalsRotated);

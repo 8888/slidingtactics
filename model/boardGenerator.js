@@ -42,12 +42,13 @@ class BoardGenerator {
 
     generate() {
         let xy2index = function(g) { return g[0] + g[1] * 16; };
-
+        let names = [];
         let section = [];
         let boardSectionsLength = this.boardSections.length;
         for(let i = 0; i < 4; i++) {
             let b = this.boardSections[Math.floor(Math.random() * boardSectionsLength)];
             section.push(b.rotate(i));
+            names.push(b.name);
         }
 
         let boardTop = [],
@@ -59,7 +60,7 @@ class BoardGenerator {
             boardBot.push(...section[2][0].splice(0, this.boardWidth));
         }
 
-        let board = new Board("test", "test");
+        let board = new Board(names.join(), "classic");
         board.area = boardTop.concat(boardBot);
         let thisBoardWidth = this.boardWidth;
         board.goals = section[0][1].map(xy2index).concat(
@@ -67,6 +68,7 @@ class BoardGenerator {
             section[2][1].map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1] + thisBoardWidth]); }),
             section[3][1].map(function(g){ return xy2index([g[0], g[1] + thisBoardWidth]); })
         );
+        board.goals = section[3][1].map(function(g){ return xy2index([g[0], g[1] + thisBoardWidth]); });
         console.log(board.goals);
         return board;
     }
