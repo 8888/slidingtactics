@@ -2,7 +2,7 @@
 
 let BoardPieces = require('../model/boardPieces.js'),
     Board = require('../model/board.js'),
-    Shared = require('../model/wall.js');
+    Shared = require('../model/direction.js');
 
 class BoardGenerator {
     constructor() {

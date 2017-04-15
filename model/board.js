@@ -1,7 +1,7 @@
 'use strict';
 
 let t = require('../model/testUtility.js'),
-    Shared = require('../model/wall.js');
+    Shared = require('../model/direction.js');
 
 class Board {
     constructor(name, type) {
