@@ -22,7 +22,7 @@ let mouseX = null,
 let Game = null;
 let Shared = null;
 function init() {
-    Game = new GameLogic();
+    Game = new GameLogic(canvasBounds.left + 50, canvasBounds.top + 50, 30);
     Game.newGame();
 }
 
@@ -31,68 +31,8 @@ function update() {
 }
 
 function display() {
-    let originX = canvasBounds.left + 50,
-        originY = canvasBounds.top + 50,
-        boardSize = Game.board.length,
-        spaceSize = 30;
-
-    function drawBoard() {
-        let boardSize = 16;
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = '#000000';
-        ctx.beginPath();
-        // draw the outline
-        ctx.moveTo(originX, originY);
-        ctx.lineTo(originX + (boardSize * spaceSize), originY);
-        ctx.lineTo(originX + (boardSize * spaceSize), originY + (boardSize * spaceSize));
-        ctx.lineTo(originX, originY + (boardSize * spaceSize));
-        ctx.lineTo(originX, originY);
-        // draw each space
-        for (let r = 0; r < boardSize; r++) {
-            for (let s = 0; s < boardSize; s++) {
-                let space = Game.board.item(r * boardSize + s);
-                if (space & Direction.N) {
-                    ctx.moveTo(originX + (spaceSize * s), originY + (spaceSize * r));
-                    ctx.lineTo(originX + (spaceSize * s) + spaceSize, originY + (spaceSize * r));
-                }
-                if (space & Direction.E) {
-                    ctx.moveTo(originX + (spaceSize * s) + spaceSize, originY + (spaceSize * r));
-                    ctx.lineTo(originX + (spaceSize * s) + spaceSize, originY + (spaceSize * r) + spaceSize);
-                }
-                if (space & Direction.S) {
-                    ctx.moveTo(originX + (spaceSize * s), originY + (spaceSize * r) + spaceSize);
-                    ctx.lineTo(originX + (spaceSize * s) + spaceSize, originY + (spaceSize * r) + spaceSize);                   
-                }
-                if (space & Direction.W) {
-                    ctx.moveTo(originX + (spaceSize * s), originY + (spaceSize * r) + spaceSize);
-                    ctx.lineTo(originX + (spaceSize * s), originY + (spaceSize * r));
-                }
-            }
-        }
-        ctx.stroke();
-    }
-
-    function drawGamePieces() {
-        for (let i = 0; i < Game.playerPieces.length; i++) {
-            let p = Game.playerPieces[i],
-                y = Math.floor(p.location / 16),
-                x = p.location % 16;
-            ctx.beginPath();
-            ctx.fillStyle = p.color;
-            ctx.arc(
-                originX + (spaceSize * x) + (spaceSize / 2),
-                originY + (spaceSize * y) + (spaceSize / 2),
-                10,
-                0,
-                2 * Math.PI
-            );
-            ctx.fill();            
-        }
-    }
-
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    drawBoard();
-    drawGamePieces();
+    Game.display(ctx);
 }
 
 canvas.addEventListener("mousedown", function(event) {

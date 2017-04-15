@@ -4,12 +4,11 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     GamePiece = require('../model/gamePiece.js'),
     Direction = require('../model/direction.js');
 
-let originX = 50,
-    originY = 50,
-    spaceSize = 30;
-
 class GameLogic {
-    constructor() {
+    constructor(x, y, spaceSize) {
+        this.x = x;
+        this.y = y;
+        this.spaceSize = spaceSize;
         this.board = null;
         this.playerPieces = [];
         this.player = null;
@@ -61,8 +60,8 @@ class GameLogic {
 
     cellFromClick(x, y) {
         // returns what cell was clicked
-        let cellX = Math.floor((x - originX) / spaceSize),
-            cellY = Math.floor((y - originY) / spaceSize);
+        let cellX = Math.floor((x - this.x) / this.spaceSize),
+            cellY = Math.floor((y - this.y) / this.spaceSize);
         if (cellX >= 0 && cellX < 16 && cellY >=0 && cellY < 16) {
             return cellX + cellY*16;
         }
@@ -74,6 +73,61 @@ class GameLogic {
             if (this.playerPieces[p].location == locationIndex) {
                 return this.playerPieces[p];
             }
+        }
+    }
+
+    display(ctx) {
+        let boardSize = 16,
+            x = this.x,
+            y = this.y,
+            cellWidth = this.spaceSize;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000000';
+        ctx.beginPath();
+        // draw the outline
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (boardSize * cellWidth), y);
+        ctx.lineTo(x + (boardSize * cellWidth), y + (boardSize * cellWidth));
+        ctx.lineTo(x, y + (boardSize * cellWidth));
+        ctx.lineTo(x, y);
+        // draw each space
+        for (let r = 0; r < boardSize; r++) {
+            for (let s = 0; s < boardSize; s++) {
+                let space = this.board.item(r * boardSize + s);
+                if (space & Direction.N) {
+                    ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r));
+                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r));
+                }
+                if (space & Direction.E) {
+                    ctx.moveTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r));
+                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r) + cellWidth);
+                }
+                if (space & Direction.S) {
+                    ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r) + cellWidth);
+                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r) + cellWidth);                   
+                }
+                if (space & Direction.W) {
+                    ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r) + cellWidth);
+                    ctx.lineTo(x + (cellWidth * s), y + (cellWidth * r));
+                }
+            }
+        }
+        ctx.stroke();
+
+        for (let i = 0; i < this.playerPieces.length; i++) {
+            let p = this.playerPieces[i],
+                py = Math.floor(p.location / 16),
+                px = p.location % 16;
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.arc(
+                x + (cellWidth * px) + (cellWidth / 2),
+                y + (cellWidth * py) + (cellWidth / 2),
+                10,
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();            
         }
     }
 }
