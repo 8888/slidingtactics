@@ -40,7 +40,7 @@ class GameLogic {
     }
 
     createGoal() {
-        this.goal = new Goal(2, 4);
+        this.goal = this.board.goals[Math.floor(Math.random() * this.board.goals.length)];
     }
 
     addPlayer(player) {
@@ -91,7 +91,7 @@ class GameLogic {
 
     playerReachedGoal() {
         // return if the player is on the goal
-        if (this.player.location == this.goal.y * 16 + this.goal.x) {
+        if (this.player.location == this.goal) {
             return true;
         }
         else {
@@ -150,7 +150,9 @@ class GameLogic {
         // draw the goal
         ctx.fillStyle = '#f442f1';
         ctx.beginPath();
-        ctx.rect(x + (cellWidth * this.goal.x), y + (cellWidth * this.goal.y), cellWidth, cellWidth);
+        let goalX = this.goal % 16,
+            goalY = Math.floor(this.goal / 16);
+        ctx.rect(x + (cellWidth * goalX), y + (cellWidth * goalY), cellWidth, cellWidth);
         ctx.fill();
         // draw the outline
         ctx.lineWidth = 1;

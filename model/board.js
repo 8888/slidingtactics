@@ -21,12 +21,13 @@ class Board {
         return this.area[index];
     }
 
-    rotate(iterations, section) {
+    rotate(iterations, section, goals) {
         iterations = t.defaultValue(iterations, 1);
         t.assertIntegerPositive(iterations);
         section = t.defaultValue(section, this.area.slice());
+        goals = t.defaultValue(goals, this.goals.slice());
         if (iterations === 0) {
-            return section;
+            return [section, goals];
         }
 
         let areaCopy = section.slice();
@@ -45,7 +46,15 @@ class Board {
             }
         }
 
-        return this.rotate(iterations-1, section);
+        let goalsRotated = [];
+        for(let i = 0; i < this.goals.length; i++){
+            let g = this.goals[i];
+            let y = g[1],
+                x = g[0];
+            goalsRotated.push([width-1-y, x]);
+        }
+
+        return this.rotate(iterations-1, section, goalsRotated);
     }
 }
 
