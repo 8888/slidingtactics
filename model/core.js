@@ -145,6 +145,10 @@ class GameLogic {
         }
     }
 
+    onDevSelect(index) {
+        this.clickedPiece = this.playerPieces[index];
+    }
+
     display(ctx) {
         let boardSize = 16,
             x = this.x,
