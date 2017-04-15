@@ -39,6 +39,10 @@ class GameLogic {
     }
 
     movePiece(piece, direction) {
+        let lastMove = this.lastMove(piece);
+        if (lastMove && lastMove[1] == Direction.reverse[direction]) {
+            return;
+        }
         let moving = true;
         let start = piece.location;
         while (moving) {
@@ -65,7 +69,7 @@ class GameLogic {
 
     lastMove(piece) {
         // returns the last move of the given GamePiece
-        for (let m = this.moveHistory.length - 1; m > 0; m--) {
+        for (let m = this.moveHistory.length - 1; m >= 0; m--) {
             // itterate from back to front
             if (this.moveHistory[m][0] == piece) {
                 return this.moveHistory[m];
