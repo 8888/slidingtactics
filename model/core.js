@@ -141,7 +141,6 @@ class GameLogic {
     onDirection(direction) {
         if (this.clickedPiece) {
             this.movePiece(this.clickedPiece, direction);
-            this.clickedPiece = null;
         }
     }
 
