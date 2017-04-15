@@ -56,16 +56,22 @@ class GameLogic {
         let moving = true;
         while (moving) {
             moving = false;
-            let advancedCellY = piece.y + direction.yDelta;
-            let advancedCellX = piece.x + direction.xDelta;
+            let currentIndex = piece.y * 16 + piece.x;
+            let advancedIndex = currentIndex + Walls.yDelta[direction] + Walls.xDelta[direction];
+            let advancedCellY = piece.y + Walls.yDelta[direction];
+            let advancedCellX = piece.x + Walls.xDelta[direction];
             if (
-                0 <= advancedCellY && advancedCellY < this.board.length &&
-                0 <= advancedCellX && advancedCellX < this.board.length
+                0 <= advancedCellY && advancedCellY < 16 &&
+                0 <= advancedCellX && advancedCellX < 16
             ) {
                 if (
+                    this.board.item(advancedIndex) != Walls.reverse[direction] &&
+                    this.board.item(currentIndex) != direction
+                    /*
                     !this.board[advancedCellY][advancedCellX].hasWall(Shared.directionReverse(direction)) &&
                     !this.board[piece.y][piece.x].hasWall(direction) &&
                     !this.playerFromCell(advancedCellX, advancedCellY)
+                    */
                 ) {
                     piece.setLocation(advancedCellX, advancedCellY);
                     moving = true;
@@ -78,7 +84,7 @@ class GameLogic {
         // returns what cell was clicked
         let cellX = Math.floor((x - originX) / spaceSize),
             cellY = Math.floor((y - originY) / spaceSize);
-        if (cellX >= 0 && cellX < Game.board.length && cellY >=0 && cellY < Game.board.length) {
+        if (cellX >= 0 && cellX < 16 && cellY >=0 && cellY < 16) {
             return [cellX, cellY];
         }
     }
@@ -104,7 +110,8 @@ function display() {
         boardSize = Game.board.length,
         spaceSize = 30;
 
-    function drawBoard() { 
+    function drawBoard() {
+        let boardSize = 16;
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#000000';
         ctx.beginPath();
@@ -182,24 +189,24 @@ canvas.addEventListener("mouseup", function(event) {
     }
 });
 
-canvas.addEventListener("keydown", function(event) {
+canvas.addEventListener("keydown", function(event) { 
     if (event.key === "ArrowLeft" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Shared.WEST);
+        Game.movePiece(Game.clickedPiece, Walls.W);
     }
     else if (event.key === "ArrowUp" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Shared.NORTH);
+        Game.movePiece(Game.clickedPiece, Walls.N);
     }
     else if (event.key === "ArrowRight" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Shared.EAST);
+        Game.movePiece(Game.clickedPiece, Walls.E);
     }
     else if (event.key === "ArrowDown" && Game.clickedPiece) {
-        Game.movePiece(Game.clickedPiece, Shared.SOUTH);
+        Game.movePiece(Game.clickedPiece, Walls.S);
     }
     Game.clickedPiece = null;   
 });
 
 window.onload = function() {
-    init();  
+    init();
     var mainloop_updateLast = performance.now();
     (function mainLoop(nowTime) {
         //update(nowTime - mainloop_updateLast);

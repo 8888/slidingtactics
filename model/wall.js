@@ -26,4 +26,17 @@ walls.ALL = [
     walls.N
 ];
 
+walls.xDelta = {};
+walls.xDelta[walls.N] = 0;
+walls.xDelta[walls.E] = 1;
+walls.xDelta[walls.S] = 0;
+walls.xDelta[walls.W] = -1;
+
+walls.yDelta = {};
+walls.yDelta[walls.N] = -16;
+walls.yDelta[walls.E] = 0;
+walls.yDelta[walls.S] = 16;
+walls.yDelta[walls.W] = 0;
+
+
 module.exports = walls;
