@@ -2,7 +2,8 @@
 
 let BoardGenerator = require('../model/boardGenerator.js'),
     GamePiece = require('../model/gamePiece.js'),
-    Direction = require('../model/direction.js');
+    Direction = require('../model/direction.js'),
+    Goal = require('../model/goal.js');
 
 class GameLogic {
     constructor(x, y, spaceSize) {
@@ -14,15 +15,19 @@ class GameLogic {
         this.player = null;
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
+        this.goal = null;
     }
 
     newGame() {
         let bg = new BoardGenerator();
         this.board = bg.generate();
         this.createPlayers();
+        this.createGoal();
+        this.moveHistory = [];
     }
 
     createPlayers() {
+        this.playerPieces = [];
         this.player = new GamePiece('#ff0000');        
         this.player.setLocation(14 + 4 * 16);
         this.addPlayer(this.player);
@@ -32,6 +37,10 @@ class GameLogic {
         this.playerPieces[1].setLocation(12 + 3 * 16);
         this.playerPieces[2].setLocation(12 + 5 * 16);
         this.playerPieces[3].setLocation(10 + 14 * 16);
+    }
+
+    createGoal() {
+        this.goal = new Goal(2, 4);
     }
 
     addPlayer(player) {
@@ -64,6 +73,9 @@ class GameLogic {
         }
         if (piece.location != start) {
             this.moveHistory.push([piece, direction, start, piece.location]);
+            if (this.playerReachedGoal()) {
+                this.puzzleComplete();
+            }
         }
     }
 
@@ -75,6 +87,20 @@ class GameLogic {
                 return this.moveHistory[m];
             }
         }
+    }
+
+    playerReachedGoal() {
+        // return if the player is on the goal
+        if (this.player.location == this.goal.y * 16 + this.goal.x) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    puzzleComplete() {
+        this.newGame();
     }
 
     cellFromClick(x, y) {
@@ -121,10 +147,15 @@ class GameLogic {
             x = this.x,
             y = this.y,
             cellWidth = this.spaceSize;
+        // draw the goal
+        ctx.fillStyle = '#f442f1';
+        ctx.beginPath();
+        ctx.rect(x + (cellWidth * this.goal.x), y + (cellWidth * this.goal.y), cellWidth, cellWidth);
+        ctx.fill();
+        // draw the outline
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#000000';
         ctx.beginPath();
-        // draw the outline
         ctx.moveTo(x, y);
         ctx.lineTo(x + (boardSize * cellWidth), y);
         ctx.lineTo(x + (boardSize * cellWidth), y + (boardSize * cellWidth));
@@ -153,7 +184,7 @@ class GameLogic {
             }
         }
         ctx.stroke();
-
+        // draw the pieces
         for (let i = 0; i < this.playerPieces.length; i++) {
             let p = this.playerPieces[i],
                 py = Math.floor(p.location / 16),

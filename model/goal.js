@@ -1,8 +1,10 @@
 'use strict';
 
 class Goal {
-    constructor() {
-        this.x = null;
-        this.y = null;
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
+
+module.exports = Goal;
