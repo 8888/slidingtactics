@@ -177,15 +177,21 @@ class GameLogic {
         ctx.rect(x + (cellWidth * goalX), y + (cellWidth * goalY), cellWidth, cellWidth);
         ctx.fill();
         // all goal options
-        ctx.strokeStyle = '#f442f1';
+        ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
         for(let i = 0; i < this.board.goals.length; i++) {
             let g = this.board.goals[i];
             let gX = g % 16,
-                gY = Math.floor(g / 16);
+                gY = Math.floor(g / 16);/*
             ctx.moveTo(x + (cellWidth * gX) + cellWidth/4, y + (cellWidth * gY) + cellWidth/4);
             ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth*3/4);
             ctx.moveTo(x + (cellWidth * gX) + cellWidth/4, y + (cellWidth * gY) + cellWidth*3/4);
-            ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth/4);
+            ctx.lineTo(x + (cellWidth * gX) + cellWidth*3/4, y + (cellWidth * gY) + cellWidth/4);*/
+            ctx.beginPath();
+            ctx.arc(
+                x + (cellWidth * gX) + (cellWidth / 2),
+                y + (cellWidth * gY) + (cellWidth / 2),
+                cellWidth / 4, 0, 2 * Math.PI
+            );
             ctx.stroke();
         }
         // draw the outline
@@ -245,9 +251,7 @@ class GameLogic {
             ctx.arc(
                 x + (cellWidth * px) + (cellWidth / 2),
                 y + (cellWidth * py) + (cellWidth / 2),
-                cellWidth / 2,
-                0,
-                2 * Math.PI
+                cellWidth / 2, 0, 2 * Math.PI
             );
             ctx.fill();
         }
