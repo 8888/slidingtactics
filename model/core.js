@@ -12,13 +12,13 @@ class GameLogic {
         this.board = null;
         this.playerPieces = [];
         this.player = null;
-        this.clickedPiece = null; // used for user input movement
+        this.clickedPiece = null;
     }
 
     newGame() {
         let bg = new BoardGenerator();
         this.board = bg.generate();
-        this.createPlayers();        
+        this.createPlayers();
     }
 
     createPlayers() {
@@ -44,7 +44,7 @@ class GameLogic {
             let currentIndex = piece.location;
             let advancedIndex = currentIndex + Direction.delta[direction];
             if (
-                0 <= advancedIndex && advancedIndex < 255
+                0 <= advancedIndex && advancedIndex <= 255
             ) {
                 if (
                     !(this.board.item(advancedIndex) & Direction.reverse[direction]) &&

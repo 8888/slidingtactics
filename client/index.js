@@ -38,7 +38,7 @@ function display() {
 canvas.addEventListener("mousedown", function(event) {
     if (event.button === 0) { // left click
         let cell = Game.cellFromClick(mouseX, mouseY);
-        if (cell) {
+        if (cell !== undefined) {
             let player = Game.playerFromCell(cell);
             if (player) {
                 Game.clickedPiece = player;
