@@ -11,13 +11,7 @@ class GameLogic {
         this.x = x;
         this.y = y;
         this.spaceSize = spaceSize;
-        this.board = null;
-        this.playerPieces = [];
-        this.player = null;
-        this.clickedPiece = null;
-        this.moveHistory = []; // moves stored as [piece, direction, start, end]
-        this.goal = null;
-        this.moveTrail = [];
+        this.newGame();
     }
 
     newGame() {
@@ -25,7 +19,8 @@ class GameLogic {
         this.board = bg.generate();
         this.createPlayers();
         this.createGoal();
-        this.moveHistory = [];
+        this.clickedPiece = null;
+        this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
     }
 
@@ -177,6 +172,7 @@ class GameLogic {
         ctx.rect(x + (cellWidth * goalX), y + (cellWidth * goalY), cellWidth, cellWidth);
         ctx.fill();
         // all goal options
+        ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
         for(let i = 0; i < this.board.goals.length; i++) {
             let g = this.board.goals[i];

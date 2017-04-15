@@ -32,4 +32,10 @@ direction.delta[direction.E] = 1;
 direction.delta[direction.S] = 16;
 direction.delta[direction.W] = -1;
 
+direction.unicode = {};
+direction.unicode[direction.N] = '261D';
+direction.unicode[direction.E] = '261E';
+direction.unicode[direction.S] = '261F';
+direction.unicode[direction.W] = '261C';
+
 module.exports = direction;

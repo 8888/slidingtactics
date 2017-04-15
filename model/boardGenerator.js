@@ -68,7 +68,6 @@ class BoardGenerator {
             section[2][1].map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1] + thisBoardWidth]); }),
             section[3][1].map(function(g){ return xy2index([g[0], g[1] + thisBoardWidth]); })
         );
-        console.log(board.goals);
         return board;
     }
 }

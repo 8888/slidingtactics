@@ -19,14 +19,15 @@ let mouseX = null,
 
 // Main Constants
 let gameInstances = [];
+let gamesWidth = 6,
+    gamesHeight = 3,
+    gamesBorder = 10,
+    cellSpace = null;
 function init() {
-    let gamesWidth = 6,
-        gamesHeight = 3,
-        gamesBorder = 10;
     
     let cellSpaceX = (canvasWidth / gamesWidth - gamesBorder * 2) / 16,
         cellSpaceY = (canvasHeight / gamesHeight - gamesBorder * 2) / 16;
-    let cellSpace = Math.min(cellSpaceX, cellSpaceY);
+    cellSpace = Math.min(cellSpaceX, cellSpaceY);
 
     for(let x = 0; x < gamesWidth; x++) {
         for(let y = 0; y < gamesHeight; y++) {
@@ -34,15 +35,47 @@ function init() {
                 (gamesBorder + cellSpace * 16) * x + gamesBorder,
                 gamesBorder + (gamesBorder + cellSpace * 16) * y,
                 cellSpace);
-            g.newGame();
             gameInstances.push(g);
         }
     }
 }
 
+let commands = [],
+    commandDetla = 0,
+    commandDelay = 250,
+    devAutoCommandEnabled = true,
+    devSelect2Text = {};
+devSelect2Text[0] = '2673';
+devSelect2Text[1] = '2674';
+devSelect2Text[2] = '2675';
+devSelect2Text[3] = '2676';
 function update(delta) {
     for(let i = 0; i < gameInstances.length; i++) {
         gameInstances[i].update(delta);
+    }
+
+    commandDetla += delta;
+    if (commandDetla > commandDelay && devAutoCommandEnabled) {
+        commandDetla = 0;
+        let roll = Math.random();
+        let c = null;
+        if (roll < 0.85 && commands.length) {
+            c = Direction.ALL[Math.floor(Math.random() * Direction.ALL.length)];
+            commands.push(Direction.unicode[c]);
+            for(let i = 0; i < gameInstances.length; i++) {
+                gameInstances[i].onDirection(c);
+            }
+        } else {
+            c = Math.floor(Math.random() * 4);
+            commands.push(devSelect2Text[c]);
+            for(let i = 0; i < gameInstances.length; i++) {
+                gameInstances[i].onDevSelect(c);
+            }
+        }
+
+        if (commands.length > 20) {
+            commands.shift();
+        }
     }
 }
 
@@ -50,6 +83,17 @@ function display() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     for(let i = 0; i < gameInstances.length; i++) {
         gameInstances[i].display(ctx);
+    }
+
+    if (commands.length) {
+        ctx.fillText('Press "p" to toggle auto commands', gamesBorder, canvasHeight - 50);
+        ctx.font = "48px sans-serif";
+        for(let i = 0, l = commands.length; i < l; i++) {
+            let c = commands[i];
+            ctx.fillStyle = i == l - 1 ? 'red' : 'black';
+            ctx.fillText(String.fromCharCode(parseInt(c, 16)), gamesBorder + 48 * (l - i), canvasHeight - 10);
+        }
+        ctx.font = "10px sans-serif";
     }
 }
 
@@ -95,6 +139,8 @@ canvas.addEventListener("keydown", function(event) {
         devSelect = 2;
     } else if (event.key === "4") {
         devSelect = 3;
+    } else if (event.key == "p") {
+        devAutoCommandEnabled = !devAutoCommandEnabled;
     }
 
     if (direction) {
