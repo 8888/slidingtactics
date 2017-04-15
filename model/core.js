@@ -3,7 +3,8 @@
 let BoardGenerator = require('../model/boardGenerator.js'),
     GamePiece = require('../model/gamePiece.js'),
     Direction = require('../model/direction.js'),
-    Goal = require('../model/goal.js');
+    Goal = require('../model/goal.js'),
+    Trail = require('../model/trail.js');
 
 class GameLogic {
     constructor(x, y, spaceSize) {
@@ -16,6 +17,7 @@ class GameLogic {
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.goal = null;
+        this.moveTrail = [];
     }
 
     newGame() {
@@ -24,6 +26,7 @@ class GameLogic {
         this.createPlayers();
         this.createGoal();
         this.moveHistory = [];
+        this.moveTrail = [];
     }
 
     createPlayers() {
@@ -73,6 +76,7 @@ class GameLogic {
         }
         if (piece.location != start) {
             this.moveHistory.push([piece, direction, start, piece.location]);
+            this.moveTrail.push(new Trail(start, piece.location));
             if (this.playerReachedGoal()) {
                 this.puzzleComplete();
             }
@@ -148,6 +152,16 @@ class GameLogic {
         this.clickedPiece = this.playerPieces[index];
     }
 
+    update(delta) {
+        for (let t = 0; t < this.moveTrail.length; t++) {
+            this.moveTrail[t].update(delta);
+            if (!this.moveTrail[t].isActive) {
+                this.moveTrail.splice(t, 1);
+                t--;
+            }
+        }
+    }
+
     display(ctx) {
         let boardSize = 16,
             x = this.x,
@@ -203,6 +217,16 @@ class GameLogic {
             }
         }
         ctx.stroke();
+        // draw the move trail
+        for (let i = 0; i < this.moveTrail.length; i++) {
+            let m = this.moveTrail[i];
+            ctx.beginPath();
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = m.width;
+            ctx.moveTo(x + (cellWidth * m.startX) + (cellWidth / 2), y + (cellWidth * m.startY) + (cellWidth / 2));
+            ctx.lineTo(x + (cellWidth * m.endX) + (cellWidth / 2), y + (cellWidth * m.endY) + (cellWidth / 2));
+            ctx.stroke();
+        }
         // draw the pieces
         for (let i = 0; i < this.playerPieces.length; i++) {
             let p = this.playerPieces[i],
