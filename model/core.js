@@ -272,13 +272,23 @@ class GameLogic {
                 py = Math.floor(p.location / 16),
                 px = p.location % 16;
             ctx.beginPath();
-            ctx.fillStyle = this.clickedPiece == p ? '#ffff00' : p.color;
+            ctx.fillStyle = p.color;
             ctx.arc(
                 x + (cellWidth * px) + (cellWidth / 2),
                 y + (cellWidth * py) + (cellWidth / 2),
                 cellWidth / 2, 0, 2 * Math.PI
             );
             ctx.fill();
+            if (this.clickedPiece == p) {
+                ctx.beginPath();
+                ctx.fillStyle = '#ffff00';
+                ctx.arc(
+                    x + (cellWidth * px) + (cellWidth / 2),
+                    y + (cellWidth * py) + (cellWidth / 2),
+                    cellWidth / 4, 0, 2 * Math.PI
+                );
+                ctx.fill();
+            }
         }
         // draw the level complete menu
         if (this.state == this.gameStates.levelComplete) {
