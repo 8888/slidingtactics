@@ -1,0 +1,6 @@
+Options -Indexes
+SSLOptions +StrictRequire
+SSLRequireSSL
+ErrorDocument 403 https://www.prototypeholdings.com
+Header add Access-Control-Allow-Origin "*"
+Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT"

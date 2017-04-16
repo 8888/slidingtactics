@@ -26,6 +26,7 @@ let gamesWidth = null,
     gamesBorder = 10,
     cellSpace = null,
     isMultipleGames = false,
+    isDebug = false,
     gamePrimaryInput = null;
 
 var qs = {};
@@ -40,6 +41,7 @@ function init() {
     gamesWidth = qs['x'] ? qs['x'] : 1;
     gamesHeight = qs['y'] ? qs['y'] : 1;
     isMultipleGames = gamesWidth + gamesHeight > 2;
+    isDebug = 'debug' in qs;
 
     let cellSpaceX = (canvasWidth / gamesWidth - gamesBorder * 2) / 16,
         cellSpaceY = (canvasHeight / gamesHeight - gamesBorder * 2) / 16;
@@ -71,7 +73,7 @@ var fps = {
 let commands = [],
     commandDetla = 0,
     commandDelay = 250,
-    devAutoCommandEnabled = true,
+    devAutoCommandEnabled = !localStorage.getItem('user_is_authenticated'),
     devSelect2Text = {0: '2673', 1: '2674', 2: '2675', 3: '2676'};
 function commandNorm() { commandDelay = 250; }
 function commandFast() { commandDelay = 25; }
