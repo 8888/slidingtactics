@@ -56,8 +56,6 @@ function init() {
             gameInstances.push(g);
         }
     }
-    ctxDebug.font = "24px sans-serif";
-    ctxDebug.strokeStyle = "red";
 }
 
 var fps = {
@@ -115,19 +113,21 @@ let fpsTextDelta = null,
     fpsTextSum = null;
 function display() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctxDebug.clearRect(0, 0, 1400, 100);
     for(let i = 0; i < gameInstances.length; i++) {
         gameInstances[i].display(ctx);
     }
 
     if (commands.length) {
-        ctx.fillText('Press "p" to toggle auto commands', gamesBorder, canvasHeight - 50);
-        ctx.font = "48px sans-serif";
+        ctxDebug.font = "14px Serif";
+        ctxDebug.fillStyle = "black";        
+        ctxDebug.fillText('Press "p" to toggle auto commands', 10, 35);
+        ctxDebug.font = "48px sans-serif";
         for(let i = 0, l = commands.length; i < l; i++) {
             let c = commands[i];
-            ctx.fillStyle = i == l - 1 ? 'red' : 'black';
-            ctx.fillText(String.fromCharCode(parseInt(c, 16)), gamesBorder + 48 * (l - i), canvasHeight - 10);
+            ctxDebug.fillStyle = i == l - 1 ? 'red' : 'black';
+            ctxDebug.fillText(String.fromCharCode(parseInt(c, 16)), gamesBorder + 48 * (l - i), 80);
         }
-        ctx.font = "10px sans-serif";
     }
 
     let deltaText = fps.deltas[0], sumText = fps.sum;
@@ -135,8 +135,9 @@ function display() {
         fpsTextDelta = deltaText;
         fpsTextSum = sumText;
         let fpsText = fpsTextDelta.toFixed(2).toString() + "ms " + (1000/(fpsTextSum/fps.frames)).toFixed(0) + "fps";
-        ctxDebug.clearRect(0, 0, 200, 100);
-        ctxDebug.strokeText(fpsText, 10, 25);
+        ctxDebug.font = "24px sans-serif";
+        ctxDebug.strokeStyle = "red";
+        ctxDebug.strokeText(fpsText, 1100, 50);
     }
 }
 

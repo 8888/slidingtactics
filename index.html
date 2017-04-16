@@ -18,7 +18,7 @@
         </script>
     </head>
     <body>
-        <table style="border-spacing: 6px;"><tr>
+        <table id="debugMenu" style="border-spacing: 6px; display: none;"><tr>
             <td><a href='?'>01x01=0001</a></td>
             <td><a href='?x=3&y=1'>03x01=0003</a></td>
             <td><a href='?x=4&y=2'>04x02=0008</a></td>
@@ -38,8 +38,16 @@
         <div id="canvasContainer" style='position: relative;'>
             <canvas id="cnvsForeground" width="1400" height="750" oncontextmenu="return false;" class="cnvs" style="z-index: 2;"></canvas>
             <canvas id="cnvsBackground" width="1400" height="750" oncontextmenu="return false;" class="cnvs" style="z-index: 1; background-color: #999;"></canvas>
-            <canvas id="cnvsDebug" width="200" height="100" oncontextmenu="return false;" class="cnvs" style="z-index: 3; background-color: #000; top: 650px; left: 1200px;"></canvas>
+            <canvas id="cnvsDebug" width="1400" height="100" oncontextmenu="return false;" class="cnvs" style="z-index: 3; top: 650px; display: none;"></canvas>
         </div>
         <script type="text/javascript" src="bundle.js"></script>
+        <script>
+            location.search.substr(1).split("&").forEach(function(p) {
+                if (p == "debug") {
+                    hideElement("debugMenu");
+                    hideElement("cnvsDebug");
+                }
+            });
+        </script>
     </body>
 </html>
