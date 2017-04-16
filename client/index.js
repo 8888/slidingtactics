@@ -56,6 +56,10 @@ function init() {
             gameInstances.push(g);
         }
     }
+
+    ctxDebug.font = "14px Serif";
+    ctxDebug.fillStyle = "black";        
+    ctxDebug.fillText('Press "p" to toggle auto commands', 10, 30);
 }
 
 var fps = {
@@ -113,15 +117,12 @@ let fpsTextDelta = null,
     fpsTextSum = null;
 function display() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctxDebug.clearRect(0, 0, 1400, 100);
+    ctxDebug.clearRect(0, 35, 1050, 100);
     for(let i = 0; i < gameInstances.length; i++) {
         gameInstances[i].display(ctx);
     }
 
     if (commands.length) {
-        ctxDebug.font = "14px Serif";
-        ctxDebug.fillStyle = "black";        
-        ctxDebug.fillText('Press "p" to toggle auto commands', 10, 35);
         ctxDebug.font = "48px sans-serif";
         for(let i = 0, l = commands.length; i < l; i++) {
             let c = commands[i];
@@ -132,6 +133,7 @@ function display() {
 
     let deltaText = fps.deltas[0], sumText = fps.sum;
     if (deltaText != fpsTextDelta || sumText != fpsTextSum) {
+        ctxDebug.clearRect(1050, 0, 1400, 100);        
         fpsTextDelta = deltaText;
         fpsTextSum = sumText;
         let fpsText = fpsTextDelta.toFixed(2).toString() + "ms " + (1000/(fpsTextSum/fps.frames)).toFixed(0) + "fps";
@@ -143,6 +145,7 @@ function display() {
 
 let LEFT_MOUSE_CLICK = 0;
 canvas.addEventListener("mousedown", function(event) {
+    console.log(event);
     if (event.button === LEFT_MOUSE_CLICK) {
         for(let i = 0; i < gameInstances.length; i++) {
             gameInstances[i].onMouse1Down(mouseX, mouseY);
@@ -151,8 +154,8 @@ canvas.addEventListener("mousedown", function(event) {
 });
 
 canvas.addEventListener("mousemove", function(event) {
-    mouseX = event.clientX - canvasBounds.left;
-    mouseY = event.clientY - canvasBounds.top;
+    mouseX = event.layerX;
+    mouseY = event.layerY;
     if (isMultipleGames) {
         console.log(mouseX, mouseY);
     }

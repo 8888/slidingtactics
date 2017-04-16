@@ -13,10 +13,17 @@ class GameLogic {
         this.y = y;
         this.spaceSize = spaceSize;
         this.border = border;
+        this.gameStates = {
+            "playing" : "playing",
+            "levelComplete" : "levelComplete"
+        };
+        this.totalMoves = 0;
+        this.puzzlesSolved = 0;
         this.newGame();
     }
 
     newGame() {
+        this.state = this.gameStates.playing;        
         let bg = new BoardGenerator();
         this.board = bg.generate();
         this.createGoal();
@@ -24,6 +31,7 @@ class GameLogic {
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
+        this.moveCount = 0;
         // Lookup data instead of searching
         this.playerLastMove = {};
         // Draw once
@@ -111,6 +119,8 @@ class GameLogic {
             this.playerLastMove[piece] = direction;
             this.moveHistory.push([piece, direction, start, piece.location]);
             this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
+            this.moveCount += 1;
+            this.totalMoves += 1;
             if (this.moveHistory.length > 25) {
                 this.moveHistory.shift();
             }
@@ -121,7 +131,8 @@ class GameLogic {
     }
 
     puzzleComplete() {
-        this.newGame();
+        this.puzzlesSolved += 1;
+        this.state = this.gameStates.levelComplete;
     }
 
     cellFromClick(x, y) {
@@ -134,9 +145,18 @@ class GameLogic {
     }
 
     onMouse1Down(x, y) {
-        let cell = this.cellFromClick(x, y);
-        if (cell !== undefined) {
-            this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
+        if (this.state == this.gameStates.playing) {
+            let cell = this.cellFromClick(x, y);
+            if (cell !== undefined) {
+                this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
+            }
+        }
+        else if (this.state == this.gameStates.levelComplete) {
+            if (this.x + (16 / 4) * this.spaceSize <= x && x <= (this.x + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize &&
+                this.y + (16 / 4) * this.spaceSize <= y && y <= (this.y + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize
+            ) {
+                this.newGame();
+            }
         }
     }
 
@@ -144,13 +164,17 @@ class GameLogic {
     }
 
     onDirection(direction) {
-        if (this.clickedPiece) {
-            this.movePiece(this.clickedPiece, direction);
-        }
+        if (this.state == this.gameStates.playing) {
+            if (this.clickedPiece) {
+                this.movePiece(this.clickedPiece, direction);
+            }
+        }        
     }
 
     onDevSelect(index) {
-        this.clickedPiece = this.playerPieces[index];
+        if (this.state == this.gameStates.playing) {
+            this.clickedPiece = this.playerPieces[index];
+        }
     }
 
     displayBoard() {
@@ -255,6 +279,21 @@ class GameLogic {
                 cellWidth / 2, 0, 2 * Math.PI
             );
             ctx.fill();
+        }
+        // draw the level complete menu
+        if (this.state == this.gameStates.levelComplete) {
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(0,0,0,0.5';
+            ctx.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
+            ctx.fill();
+            ctx.font = cellWidth.toString() + "px sans-serif";
+            ctx.fillStyle = "white";            
+            let text = this.moveCount + " moves!";
+            ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth - cellWidth);
+            text = this.puzzlesSolved + " puzzles";
+            ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + cellWidth);
+            text = this.totalMoves + " moves!";
+            ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + (cellWidth * 2));
         }
     }
 }
