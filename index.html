@@ -9,17 +9,6 @@
                 top: 0px;
             }
         </style>
-        <script>
-            var qs = {};
-            location.search.substr(1).split("&").forEach(function(p) {
-                let s = p.split('='); qs[s[0]] = s[1];
-            });
-            function hideElement(id) {
-                document.getElementById(id).style.display = 
-                    document.getElementById(id).style.display == "none" ?
-                    "inline" : "none";
-            }
-        </script>
     </head>
     <body id='myBody'>
         <div id="canvasContainer" style='position: relative;'>
