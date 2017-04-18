@@ -4,15 +4,13 @@ let GameLogic = require('../model/core.js'),
     Direction = require('../model/direction.js');
 
 // Canvas Parameters
-let canvas = document.getElementById('cnvsForeground');
-canvas.tabIndex = 0;
-canvas.focus();
-let canvasWidth = canvas.width,
-    canvasHeight = canvas.height,
-    canvasBounds = canvas.getBoundingClientRect(),
-    ctx = canvas.getContext('2d'),
-    ctxBack = document.getElementById('cnvsBackground').getContext('2d'),
-    ctxDebug = document.getElementById('cnvsDebug').getContext('2d'),
+let canvas = null, 
+    canvasWidth = null,
+    canvasHeight = null,
+    canvasBounds = null,
+    ctx = null,
+    ctxBack = null,
+    ctxDebug = null,
     originX = 50,
     originY = 50;
 // Mouse
@@ -35,7 +33,37 @@ location.search.substr(1).split("&").forEach(function(p) {
 });
 
 function init() {
-    ctx.font = "14px Serif";
+    document.getElementById('myBody').innerHTML = `<table id='debugMenu' style='border-spacing: 6px;'><tr>
+            <td><a href='?&debug'>01x01=0001</a></td>
+            <td><a href='?x=3&y=1'>03x01=0003</a></td>
+            <td><a href='?x=4&y=2'>04x02=0008</a></td>
+            <td><a href='?x=5&y=2'>05x02=0010</a></td>
+            <td><a href='?x=6&y=3'>06x03=0018</a></td>
+            <td><a href='?x=20&y=10'>20x10=0200</a></td>
+            <td><a href='?x=28&y=15'>28x15=0420</a></td>
+            <td><a href='?x=50&y=25'>50x25=1250</a></td>
+            <td></td>
+            <td><a onclick='javascript:hideElement("cnvsForeground");'>[Fore Canvas]</a></td>
+            <td><a onclick='javascript:hideElement("cnvsBackground");'>[Back Canvas]</a></td>
+            <td><a onclick='javascript:hideElement("cnvsDebug");'>[Debu Canvas]</a></td>
+            <td></td>
+            <td><a id='commandNorm'>[Norm Commands]</a></td>
+            <td><a id='commandFast'>[Fast Commands]</a></td>
+        </tr></table>` + document.getElementById('myBody').innerHTML;
+    document.getElementById('canvasContainer').innerHTML += `
+        <canvas id="cnvsDebug" width="1400" height="100"
+            oncontextmenu="return false;" class="cnvs"
+            style="z-index: 3; top: 650px; display: none;"></canvas>`;
+    ctxDebug = document.getElementById('cnvsDebug').getContext('2d');
+    
+    canvas = document.getElementById('cnvsForeground');
+    canvas.tabIndex = 0;
+    canvas.focus();
+    canvasWidth = canvas.width,
+    canvasHeight = canvas.height,
+    canvasBounds = canvas.getBoundingClientRect(),
+    ctx = canvas.getContext('2d'),
+    ctxBack = document.getElementById('cnvsBackground').getContext('2d'),
     document.getElementById('commandNorm').onclick = commandNorm;
     document.getElementById('commandFast').onclick = commandFast;
     gamesWidth = qs['x'] ? qs['x'] : 1;
@@ -43,6 +71,7 @@ function init() {
     isMultipleGames = gamesWidth + gamesHeight > 2;
     isDebug = 'debug' in qs;
 
+    ctx.font = "14px Serif";
     let cellSpaceX = (canvasWidth / gamesWidth - gamesBorder * 2) / 16,
         cellSpaceY = (canvasHeight / gamesHeight - gamesBorder * 2) / 16;
     cellSpace = Math.max(Math.min(cellSpaceX, cellSpaceY), 1);
@@ -58,10 +87,7 @@ function init() {
             gameInstances.push(g);
         }
     }
-
-    ctxDebug.font = "14px Serif";
-    ctxDebug.fillStyle = "black";        
-    ctxDebug.fillText('Press "p" to toggle auto commands', 10, 30);
+    eventsListenersAdd();
 }
 
 var fps = {
@@ -77,7 +103,6 @@ let commands = [],
     devSelect2Text = {0: '2673', 1: '2674', 2: '2675', 3: '2676'};
 function commandNorm() { commandDelay = 250; }
 function commandFast() { commandDelay = 25; }
-
 
 function update(delta) {
     for(let i = 0; i < gameInstances.length; i++) {
@@ -119,7 +144,7 @@ let fpsTextDelta = null,
     fpsTextSum = null;
 function display() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctxDebug.clearRect(0, 35, 1050, 100);
+    ctxDebug.clearRect(0, 0, 1050, 100);
     for(let i = 0; i < gameInstances.length; i++) {
         gameInstances[i].display(ctx);
     }
@@ -145,68 +170,70 @@ function display() {
     }
 }
 
-let LEFT_MOUSE_CLICK = 0;
-canvas.addEventListener("mousedown", function(event) {
-    console.log(event);
-    if (event.button === LEFT_MOUSE_CLICK) {
-        for(let i = 0; i < gameInstances.length; i++) {
-            gameInstances[i].onMouse1Down(mouseX, mouseY);
+function eventsListenersAdd() {
+    let LEFT_MOUSE_CLICK = 0;
+    canvas.addEventListener("mousedown", function(event) {
+        console.log(event);
+        if (event.button === LEFT_MOUSE_CLICK) {
+            for(let i = 0; i < gameInstances.length; i++) {
+                gameInstances[i].onMouse1Down(mouseX, mouseY);
+            }
         }
-    }
-});
+    });
 
-canvas.addEventListener("mousemove", function(event) {
-    mouseX = event.layerX;
-    mouseY = event.layerY;
-    if (isMultipleGames) {
-        console.log(mouseX, mouseY);
-    }
-});
-
-canvas.addEventListener("mouseup", function(event) {
-    if (event.button === LEFT_MOUSE_CLICK) {
-        for(let i = 0; i < gameInstances.length; i++) {
-            gameInstances[i].onMouse1Up(mouseX, mouseY);
+    canvas.addEventListener("mousemove", function(event) {
+        mouseX = event.layerX;
+        mouseY = event.layerY;
+        if (isMultipleGames) {
+            console.log(mouseX, mouseY);
         }
-    }
-});
+    });
 
-canvas.addEventListener("keydown", function(event) {
-    let direction = null;
-    let devSelect = null;
-
-    if (event.key === "ArrowLeft") {
-        direction = Direction.W;
-    } else if (event.key === "ArrowUp") {
-        direction = Direction.N;
-    } else if (event.key === "ArrowRight") {
-        direction = Direction.E;
-    } else if (event.key === "ArrowDown") {
-        direction = Direction.S;
-    } else if (event.key === "1") {
-        devSelect = 0;
-    } else if (event.key === "2") {
-        devSelect = 1;
-    } else if (event.key === "3") {
-        devSelect = 2;
-    } else if (event.key === "4") {
-        devSelect = 3;
-    } else if (event.key == "p") {
-        devAutoCommandEnabled = !devAutoCommandEnabled;
-    }
-
-    if (direction) {
-        for(let i = 0; i < gameInstances.length; i++) {
-            gameInstances[i].onDirection(direction);
+    canvas.addEventListener("mouseup", function(event) {
+        if (event.button === LEFT_MOUSE_CLICK) {
+            for(let i = 0; i < gameInstances.length; i++) {
+                gameInstances[i].onMouse1Up(mouseX, mouseY);
+            }
         }
-    }
+    });
 
-    if (devSelect !== null) {
-        for(let i = 0; i < gameInstances.length; i++) {
-            gameInstances[i].onDevSelect(devSelect);
+    canvas.addEventListener("keydown", function(event) {
+        let direction = null;
+        let devSelect = null;
+
+        if (event.key === "ArrowLeft") {
+            direction = Direction.W;
+        } else if (event.key === "ArrowUp") {
+            direction = Direction.N;
+        } else if (event.key === "ArrowRight") {
+            direction = Direction.E;
+        } else if (event.key === "ArrowDown") {
+            direction = Direction.S;
+        } else if (event.key === "1") {
+            devSelect = 0;
+        } else if (event.key === "2") {
+            devSelect = 1;
+        } else if (event.key === "3") {
+            devSelect = 2;
+        } else if (event.key === "4") {
+            devSelect = 3;
+        } else if (event.key == "p") {
+            devAutoCommandEnabled = !devAutoCommandEnabled;
         }
-    }
-});
+
+        if (direction) {
+            for(let i = 0; i < gameInstances.length; i++) {
+                gameInstances[i].onDirection(direction);
+            }
+        }
+
+        if (devSelect !== null) {
+            for(let i = 0; i < gameInstances.length; i++) {
+                gameInstances[i].onDevSelect(devSelect);
+            }
+        }
+    });
+}
 
 window.onload = function() {
     init();

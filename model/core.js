@@ -291,14 +291,10 @@ class GameLogic {
             );
             ctx.fill();
             if (this.clickedPiece == p) {
-                ctx.beginPath();
-                ctx.fillStyle = '#ffff00';
-                ctx.arc(
-                    x + (cellWidth * px) + (cellWidth / 2),
-                    y + (cellWidth * py) + (cellWidth / 2),
-                    cellWidth / 4, 0, 2 * Math.PI
-                );
-                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ffff00';
+                ctx.stroke();
+                ctx.lineWidth = 1;
             }
         }
         // draw the level complete menu
