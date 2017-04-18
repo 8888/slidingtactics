@@ -14,11 +14,6 @@
             location.search.substr(1).split("&").forEach(function(p) {
                 let s = p.split('='); qs[s[0]] = s[1];
             });
-            if (!localStorage.getItem('user_is_authenticated') && (qs['x'] != 6 || qs['y'] != 3)) {
-                window.location = "?x=6&y=3";
-            } else if (localStorage.getItem('user_is_authenticated') && 'x' in qs && !('debug' in qs)) {
-                window.location = "?";
-            }
         </script>
     </head>
     <body>
@@ -44,20 +39,6 @@
             <canvas id="cnvsBackground" width="1400" height="750" oncontextmenu="return false;" class="cnvs" style="z-index: 1; background-color: #999;"></canvas>
             <canvas id="cnvsDebug" width="1400" height="100" oncontextmenu="return false;" class="cnvs" style="z-index: 3; top: 650px; display: none;"></canvas>
         </div>
-        <div id="dimmer" style="margin: auto;position: absolute;z-index: 9;background-color: rgba(199, 52, 52, 0.34);width: 100%;top: 0px;height: 100%;left: 0px;">
-            <div id="user" style="margin: auto;position: absolute;z-index: 10;background-color: lightslategray;width: 270px;top: 250px;left: 500px;">
-                Sliding Tactics:<br/>
-                To keep your stats and train your skill, please login or create an account:<br/>
-                <table>
-                    <tr><td>Handle:&nbsp;</td><td><input id="name" /></td></tr>
-                    <tr><td>Credentials:&nbsp;</td><td><input id="answer" type="password" /></td></tr>
-                    <tr><td colspan='2'><span id="response">&nbsp;</span></td></tr>
-                    <tr><td colspan='2' style="text-align: center;"><button onclick='javascript:login();'>Login / Register</button></td></tr>
-                    <tr><td colspan='2'>&nbsp;</td></tr>
-                    <tr><td colspan='2' style="text-align: center;"><button onclick='javascript:hideElement("dimmer");'>Play as Guest</button></td></tr>
-                </table>
-            </div>
-        </div>
         <script type="text/javascript" src="bundle.js"></script>
         <script>
             if ('debug' in qs) {
@@ -65,48 +46,10 @@
                 hideElement("cnvsDebug");
             }
 
-            if (localStorage.getItem('user_is_authenticated')) {
-                hideElement("dimmer");
-            }
-
             function hideElement(id) {
                 document.getElementById(id).style.display = 
                     document.getElementById(id).style.display == "none" ?
                     "inline" : "none";
-            }
-
-            function login() {
-                document.getElementById('response').innerHTML = '';
-                let params = "un="+document.getElementById('name').value+"&an="+document.getElementById('answer').value;
-                let xhr = new XMLHttpRequest();
-                xhr.open("POST", "https://tactics.prototypeholdings.com/x/login.php?action=authenticate", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState == 4) {
-                        console.log("<Request: '"+params+"'");
-                        console.log("<Response: '"+xhr.responseText+"'");
-                        if (xhr.responseText == "not authorized") {
-                            localStorage.clear();
-                        } else {
-                            let user = JSON.parse(xhr.responseText);
-                            if (user.is_authenticated) {
-                                localStorage.setItem('user_key', user.user_key);
-                                localStorage.setItem('user_name', user.username);
-                                localStorage.setItem('user_is_authenticated', user.is_authenticated);
-                                localStorage.setItem('user_is_first', user.is_first);
-                                localStorage.setItem('user_is_active', user.is_active);
-                                localStorage.setItem('user_token', user.token);
-                                window.location = "?";
-                            } else {
-                                localStorage.clear();
-                                document.getElementById('response').innerHTML = '>>>Incorrect password';
-                            }
-                        }
-                    }
-                };
-
-                console.log(">Request: '"+params+"'");
-                xhr.send(params);
             }
         </script>
     </body>

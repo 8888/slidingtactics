@@ -186,6 +186,17 @@ class GameLogic {
         ctx.clearRect(x - this.border/2, y - this.border, cellWidth * 16 + this.border, cellWidth * 16 + this.border + 1);
         // name of the board
         ctx.fillText(this.board.name, x, y-1);
+        // grid
+        ctx.beginPath();
+        for (let i = 1; i < boardSize; i++) {
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#888888';
+            ctx.moveTo(x + (cellWidth * i), y);
+            ctx.lineTo(x + (cellWidth * i), y + (boardSize * cellWidth));
+            ctx.moveTo(x, y + (cellWidth * i));
+            ctx.lineTo(x + (boardSize * cellWidth), y + (cellWidth * i));
+        }
+        ctx.stroke();
         // all goal options
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
