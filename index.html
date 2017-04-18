@@ -11,10 +11,104 @@
         </style>
     </head>
     <body id='myBody'>
-        <div id="canvasContainer" style='position: relative;'>
-            <canvas id="cnvsForeground" width="1400" height="750" oncontextmenu="return false;" class="cnvs" style="z-index: 2;"></canvas>
-            <canvas id="cnvsBackground" width="1400" height="750" oncontextmenu="return false;" class="cnvs" style="z-index: 1; background-color: #999;"></canvas>
-        </div>
-        <script type="text/javascript" src="bundle.js"></script>
+        <table style='width: 100%'>
+            <tr>
+                <td style='width: 85%;'>Sliding Tactics</td>
+                <td>
+                    <table>
+                        <tr>
+                            <td>username:</td>
+                            <td id='txtboxcontainer'><input id="un"/><span id='sun'/></td>
+                        </tr>
+                        <tr>
+                            <td colspan='2' style='text-align: center;'>
+                                <button id='in' onclick='javascript:login();'>set it!</button>
+                                <button id='out' style='display: none;' onclick='javascript:logout();'>forget it!</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr></tr>
+            <tr>
+                <td>
+                    <table align='center'>
+                        <tr>
+                            <td>all of our game</td>
+                            <td>options</td>
+                            <td>options</td>
+                            <td>options</td>
+                        </tr>
+                        <tr>
+                            <td>Set that username in </td>
+                            <td>top right if you want</td>
+                            <td>to play</td>
+                            <td><button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button></td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td colspan='2'>top by username:</td>
+                        </tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <td colspan='2'>top by other reason:</td>
+                        </tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                        <tr><td>name</td><td>puzzles</td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </body>
+<script>
+    function login() {
+        let un = document.getElementById("un"),
+            uu = localStorage.getItem("username");
+        if (uu) {
+            un = uu;
+        } else if (un) {
+            un = un.value;
+        }
+
+        if (un) {
+            localStorage.setItem("username", un);
+            document.getElementById('sun').innerHTML = un;
+            document.getElementById('un').style.display = 'none';
+            document.getElementById('playbutton').style.display = 'inline';
+            document.getElementById('in').style.display = 'none';
+            document.getElementById('out').style.display = 'inline';
+        }
+    }
+    login();
+    function logout() {
+        localStorage.clear();
+        document.getElementById('sun').innerHTML = '';
+        document.getElementById('un').style.display = 'inline';
+        document.getElementById('playbutton').style.display = 'none';
+        document.getElementById('in').style.display = 'inline';
+        document.getElementById('out').style.display = 'none';
+    }
+</script>
 </html>
