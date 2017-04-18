@@ -85,37 +85,46 @@ class GameLogic {
         this.playerPieces.push(player);
     }
 
-    movePiece(piece, direction) {
-        if (this.playerLastMove[piece] == Direction.reverse[direction]) {
-            return;
-        }
+    moveCell(index, direction) {
         let moving = true,
             movementCount = 0,
-            movementCountMax = 20;
-        let start = piece.location;
+            movementCountMax = 20,
+            currentIndex = index,
+            advancedIndex = null;            
         while (moving && movementCount < movementCountMax) {
             moving = false;
             movementCount++;
-            let currentIndex = piece.location;
-            let advancedIndex = currentIndex + Direction.delta[direction];
+            advancedIndex = currentIndex + Direction.delta[direction];
             if ( (0 <= advancedIndex && advancedIndex <= 255) &&
                 !(this.board.item(advancedIndex) & Direction.reverse[direction]) &&
                 !(this.board.item(currentIndex) & direction) &&
                 (this.playerIndexByLocation[advancedIndex] === undefined)
             ) {
-                piece.setLocation(advancedIndex);
+                currentIndex = advancedIndex;
                 moving = true;
             }
         }
-
         if (moving) {
             throw new Error('Player continued moving past max limit!');
         }
-        
-        let pIndex = this.playerIndexByLocation[start];
-        delete this.playerIndexByLocation[start];
-        this.playerIndexByLocation[piece.location] = pIndex;
-        if (piece.location != start) {
+        return currentIndex;
+    }
+
+    movePiece(piece, direction) {
+        if (this.playerLastMove[piece] == Direction.reverse[direction]) {
+            return;
+        }
+        let start = piece.location,
+            end = this.moveCell(start, direction);
+        if (start != end) {
+            if (piece == this.player && this.playerLastMove[piece] === undefined && end == this.goal) {
+                // The main player piece must move once before moving onto the goal
+                return;
+            }
+            piece.setLocation(end);
+            let pIndex = this.playerIndexByLocation[start];
+            delete this.playerIndexByLocation[start];
+            this.playerIndexByLocation[piece.location] = pIndex;
             this.playerLastMove[piece] = direction;
             this.moveHistory.push([piece, direction, start, piece.location]);
             this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
