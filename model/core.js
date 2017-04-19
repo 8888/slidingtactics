@@ -15,7 +15,8 @@ class GameLogic {
         this.border = border;
         this.gameStates = {
             "playing" : "playing",
-            "levelComplete" : "levelComplete"
+            "levelComplete" : "levelComplete",
+            "gameOver": "gameOver"
         };
         this.totalMoves = 0;
         this.puzzlesSolved = 0;
@@ -64,12 +65,14 @@ class GameLogic {
         this.player = new GamePiece('#ff0000');
         let l = randboardloc(this.playerPieces, this.goal);
         this.player.setLocation(l);
+        this.player.index = 0;
         this.playerIndexByLocation[l] = 0;
         this.addPlayer(this.player);
         for (let i = 0; i < 3; i++) {
             let p = new GamePiece('#0000ff');
             let l = randboardloc(this.playerPieces, this.goal);
             p.setLocation(l);
+            p.index = i+1;
             this.playerIndexByLocation[l] = i+1;
             this.addPlayer(p);
         }
@@ -119,10 +122,9 @@ class GameLogic {
             let pIndex = this.playerIndexByLocation[start];
             delete this.playerIndexByLocation[start];
             this.playerIndexByLocation[piece.location] = pIndex;
-            this.playerLastMove[piece] = direction;
+            this.playerLastMove[piece.index] = direction;
             this.moveHistory.push([piece, direction, start, piece.location]);
             this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
-            this.showPossibleMoves(piece);
             this.moveCount += 1;
             this.totalMoves += 1;
             if (this.moveHistory.length > 25) {
@@ -138,10 +140,10 @@ class GameLogic {
         // piece object, direction object, end index. Returns bool
         if (piece.location == end) {
             return false;
-        } else if (this.playerLastMove[piece] == Direction.reverse[direction]) {
+        } else if (this.playerLastMove[piece.index] == Direction.reverse[direction]) {
             // can not move back the way you last came
             return false;
-        } else if (piece == this.player && this.playerLastMove[piece] === undefined && end == this.goal) {
+        } else if (piece == this.player && this.playerLastMove[piece.index] === undefined && end == this.goal) {
             // The main player piece must move once before moving onto the goal
             return false;
         } else {
@@ -179,7 +181,7 @@ class GameLogic {
         if (this.state == this.gameStates.playing) {
             let cell = this.cellFromClick(x, y);
             if (cell !== undefined) {
-                if (this.possibleMoves.length > 0 && this.possibleMoves.indexOf(cell) != -1) {
+                if (this.possibleMoves.indexOf(cell) != -1) {
                     let direction = null;
                     if (cell < this.clickedPiece.location) {
                         // north or west
@@ -196,9 +198,9 @@ class GameLogic {
                             direction = Direction.E;
                         }
                     }
-                    this.movePiece(this.clickedPiece, direction);
+                    this.onDirection(direction);
                 } else {
-                    this.possibleMoves = [];                
+                    this.possibleMoves = [];
                     this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
                     if (this.clickedPiece) {
                         this.showPossibleMoves(this.clickedPiece);
@@ -206,7 +208,7 @@ class GameLogic {
                 }
             }
         }
-        else if (this.state == this.gameStates.levelComplete) {
+        else if (this.state == this.gameStates.gameOver) {
             if (this.x + (16 / 4) * this.spaceSize <= x && x <= (this.x + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize &&
                 this.y + (16 / 4) * this.spaceSize <= y && y <= (this.y + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize
             ) {
@@ -219,6 +221,15 @@ class GameLogic {
     }
 
     onDirection(direction) {
+        if (this.state == this.gameStates.playing) {
+            if (this.clickedPiece) {
+                this.movePiece(this.clickedPiece, direction);
+                this.showPossibleMoves(this.clickedPiece);
+            }
+        }        
+    }
+
+    onDevDirection(direction) {
         if (this.state == this.gameStates.playing) {
             if (this.clickedPiece) {
                 this.movePiece(this.clickedPiece, direction);
@@ -239,8 +250,6 @@ class GameLogic {
             cellWidth = this.spaceSize,
             ctx = this.ctxBack;
         ctx.clearRect(x - this.border/2, y - this.border, cellWidth * 16 + this.border, cellWidth * 16 + this.border + 1);
-        // name of the board
-        ctx.fillText(this.board.name, x, y-1);
         // grid
         ctx.beginPath();
         for (let i = 1; i < boardSize; i++) {
@@ -312,21 +321,23 @@ class GameLogic {
     }
 
     display(ctx) {
+        if (this.state == this.gameStates.gameOver) {
+            return;
+        }
         let boardSize = 16,
             x = this.x,
             y = this.y,
             cellWidth = this.spaceSize;
+        ctx.clearRect(x, y, cellWidth * 16, cellWidth * 16);
         // draw the goal
-        ctx.beginPath();
         ctx.fillStyle = '#f442f1';
-        ctx.rect(this.goalX, this.goalY, this.goalW, this.goalW);
-        ctx.fill();
+        ctx.fillRect(this.goalX, this.goalY, this.goalW, this.goalW);
 
         // draw the move trail
+        ctx.strokeStyle = '#ffff00';
         for (let i = 0; i < this.moveTrail.length; i++) {
             let m = this.moveTrail[i];
             ctx.beginPath();
-            ctx.strokeStyle = '#ffff00';
             ctx.lineWidth = m.width;
             ctx.moveTo(x + (cellWidth * m.startX) + (cellWidth / 2), y + (cellWidth * m.startY) + (cellWidth / 2));
             ctx.lineTo(x + (cellWidth * m.endX) + (cellWidth / 2), y + (cellWidth * m.endY) + (cellWidth / 2));
@@ -373,7 +384,7 @@ class GameLogic {
         // draw the level complete menu
         if (this.state == this.gameStates.levelComplete) {
             ctx.beginPath();
-            ctx.fillStyle = 'rgba(0,0,0,0.5';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
             ctx.fill();
             ctx.font = cellWidth.toString() + "px sans-serif";
@@ -384,6 +395,7 @@ class GameLogic {
             ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + cellWidth);
             text = this.totalMoves + " moves!";
             ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + (cellWidth * 2));
+            this.state = this.gameStates.gameOver;
         }
     }
 }

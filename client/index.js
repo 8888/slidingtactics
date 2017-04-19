@@ -1,8 +1,6 @@
 'use strict';
 
-let GameLogic = require('../model/core.js'),
-    Direction = require('../model/direction.js'),
-    PlayField = require('../model/playfield.js');
+let PlayField = require('../model/playfield.js');
 
 class SlidingTacticsController {
     constructor() {
@@ -12,6 +10,13 @@ class SlidingTacticsController {
     playfieldAdd(containerElementId) {
         let pf = new PlayField(containerElementId);
         this.playfields.push(pf);
+    }
+
+    play() {
+        for(let i = 0; i < this.playfields.length; i++) {
+            let p = this.playfields[i];
+            p.play();
+        }
     }
 }
 

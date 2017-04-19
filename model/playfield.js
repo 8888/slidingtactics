@@ -5,23 +5,14 @@ let GameLogic = require('../model/core.js'),
 
 class PlayField {
     constructor(containerElementId) {
-        let canvasCreate = function(id, zIndex) {
-            let canvas = document.createElement('CANVAS');
-            canvas.id = id;
-            canvas.style = 'z-index: '+zIndex+';';
-            canvas.setAttribute('class', 'cnvs');
-            canvas.setAttribute('width', 1280);
-            canvas.setAttribute('height', 720);
-            canvas.oncontextmenu = 'return false;';
-            return canvas;
-        };
         let container = document.getElementById(containerElementId);
-        this.canvasFore = canvasCreate(containerElementId + '_foreCanvas', 2);
-        this.canvasBack = canvasCreate(containerElementId + '_backCanvas', 1);
+        this.canvasFore = this.canvasCreate(containerElementId + '_foreCanvas', 2);
+        this.canvasBack = this.canvasCreate(containerElementId + '_backCanvas', 1);
         container.appendChild(this.canvasFore);
         container.appendChild(this.canvasBack);
         this.canvasFore.tabIndex = 0;
         this.canvasFore.focus();
+        this.canvasBack.style.background = 'Lavender';
         this.ctxFore = this.canvasFore.getContext('2d');
         this.ctxBack = this.canvasBack.getContext('2d');
         this.canvasWidth = this.canvasFore.width;
@@ -33,12 +24,20 @@ class PlayField {
         this.cellSpace = null;
         this.mouseX = null;
         this.mouseY = null;
-        this.fps = {
-            frames: 60,
-            deltas: [],
-            sum: 0
-        };
+    }
 
+    canvasCreate(id, zIndex) {
+        let canvas = document.createElement('CANVAS');
+        canvas.id = id;
+        canvas.style = 'z-index: '+zIndex+';';
+        canvas.setAttribute('class', 'cnvs');
+        canvas.setAttribute('width', 1280);
+        canvas.setAttribute('height', 720);
+        canvas.oncontextmenu = 'return false;';
+        return canvas;
+    }
+
+    play() {
         let that = this;
         window.onload = function() {
             that.init();
@@ -55,15 +54,22 @@ class PlayField {
 
     init() {
         let cellSpaceX = (this.canvasFore.width / this.gameWidth - this.gameBorder * 2) / 16,
-            cellSpaceY = (this.canvasFore.height / this.gameWidth - this.gameBorder * 2) / 16;
+            cellSpaceY = (this.canvasFore.height / this.gameHeight - this.gameBorder * 2) / 16;
         this.cellSpace = Math.max(Math.min(cellSpaceX, cellSpaceY), 1);
-        let g = new GameLogic(
-            this.ctxBack,
-            this.gameBorder,
-            this.gameBorder,
-            this.cellSpace,
-            this.gameBorder);
-        this.gameInstances.push(g);
+        this.gameInstances = [];
+        this.ctxFore.clearRect(0, 0, this.canvasFore.width, this.canvasFore.height);
+        this.ctxBack.clearRect(0, 0, this.canvasBack.width, this.canvasBack.height);
+        for(let x = 0; x < this.gameWidth; x++) {
+            for(let y = 0; y < this.gameHeight; y++) {
+                let g = new GameLogic(
+                    this.ctxBack,
+                    (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
+                    this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
+                    this.cellSpace,
+                    this.gameBorder);
+                this.gameInstances.push(g);
+            }
+        }
     }
 
     eventListenersAttach() {
@@ -114,16 +120,9 @@ class PlayField {
         for(let i = 0; i < this.gameInstances.length; i++) {
             this.gameInstances[i].update(delta);
         }
-
-        this.fps.deltas.unshift(delta);
-        if (this.fps.deltas.length > this.fps.frames) {
-            this.fps.deltas.pop();
-        }
-        this.fps.sum = this.fps.deltas.reduce(function(a, b) { return a + b; });
     }
 
     display() {
-        this.ctxFore.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         for(let i = 0; i < this.gameInstances.length; i++) {
             this.gameInstances[i].display(this.ctxFore);
         }
