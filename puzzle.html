@@ -1,0 +1,26 @@
+<!doctype html>
+    <head>
+        <title>Sliding Tactics</title>
+        <style>
+            canvas.cnvs {
+                outline: none;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+            }
+        </style>
+        <script>
+            let un = localStorage.getItem('username');
+            if(!un) {
+                window.location = 'index.html';
+            }
+        </script>
+    </head>
+    <body id='myBody'>
+        <div id="canvasContainer" style='position: relative; width: 90%; margin: 0 auto;'>
+            <canvas id="cnvsForeground" width="1280" height="720" oncontextmenu="return false;" class="cnvs" style="z-index: 2;"></canvas>
+            <canvas id="cnvsBackground" width="1280" height="720" oncontextmenu="return false;" class="cnvs" style="z-index: 1; background-color: #999;"></canvas>
+        </div>
+        <script type="text/javascript" src="bundle.js"></script>
+    </body>
+</html>

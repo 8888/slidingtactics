@@ -24,7 +24,6 @@ let gamesWidth = null,
     gamesBorder = 10,
     cellSpace = null,
     isMultipleGames = false,
-    isDebug = false,
     gamePrimaryInput = null;
 
 var qs = {};
@@ -34,15 +33,8 @@ location.search.substr(1).split("&").forEach(function(p) {
 
 function init() {
     document.getElementById('myBody').innerHTML = `
-            <script>
-                function hideElement(id) {
-                    document.getElementById(id).style.display = 
-                        document.getElementById(id).style.display == "none" ?
-                        "inline" : "none";
-                }
-            </script>
             <table id='debugMenu' style='border-spacing: 6px;'><tr>
-                <td><a href='?&debug'>01x01=0001</a></td>
+                <td><a href='?'>01x01=0001</a></td>
                 <td><a href='?x=3&y=1'>03x01=0003</a></td>
                 <td><a href='?x=4&y=2'>04x02=0008</a></td>
                 <td><a href='?x=5&y=2'>05x02=0010</a></td>
@@ -51,33 +43,40 @@ function init() {
                 <td><a href='?x=28&y=15'>28x15=0420</a></td>
                 <td><a href='?x=50&y=25'>50x25=1250</a></td>
                 <td></td>
-                <td><a onclick='javascript:hideElement("cnvsForeground");'>[Fore Canvas]</a></td>
-                <td><a onclick='javascript:hideElement("cnvsBackground");'>[Back Canvas]</a></td>
-                <td><a onclick='javascript:hideElement("cnvsDebug");'>[Debu Canvas]</a></td>
+                <td><a id='cF'>[Fore Canvas]</a></td>
+                <td><a id='cB'>[Back Canvas]</a></td>
+                <td><a id='cD'>[Debu Canvas]</a></td>
                 <td></td>
                 <td><a id='commandNorm'>[Norm Commands]</a></td>
                 <td><a id='commandFast'>[Fast Commands]</a></td>
             </tr></table>` + document.getElementById('myBody').innerHTML;
     document.getElementById('canvasContainer').innerHTML += `
-        <canvas id="cnvsDebug" width="1400" height="100"
+        <canvas id="cnvsDebug" width="1280" height="100"
             oncontextmenu="return false;" class="cnvs"
-            style="z-index: 3; top: 650px; display: none;"></canvas>`;
+            style="z-index: 3; top: 600px;"></canvas>`;
     ctxDebug = document.getElementById('cnvsDebug').getContext('2d');
-    
     canvas = document.getElementById('cnvsForeground');
     canvas.tabIndex = 0;
     canvas.focus();
-    canvasWidth = canvas.width,
-    canvasHeight = canvas.height,
-    canvasBounds = canvas.getBoundingClientRect(),
-    ctx = canvas.getContext('2d'),
-    ctxBack = document.getElementById('cnvsBackground').getContext('2d'),
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
+    canvasBounds = canvas.getBoundingClientRect();
+    ctx = canvas.getContext('2d');
+    ctxBack = document.getElementById('cnvsBackground').getContext('2d');
+
     document.getElementById('commandNorm').onclick = commandNorm;
     document.getElementById('commandFast').onclick = commandFast;
-    gamesWidth = qs['x'] ? qs['x'] : 1;
-    gamesHeight = qs['y'] ? qs['y'] : 1;
+    let hideElement = function(id) {
+        document.getElementById(id).style.display = 
+            document.getElementById(id).style.display == "none" ?
+            "inline" : "none";
+    };
+    document.getElementById('cF').onclick = function() { hideElement('cnvsForeground'); };
+    document.getElementById('cB').onclick = function() { hideElement('cnvsBackground'); };
+    document.getElementById('cD').onclick = function() { hideElement('cnvsDebug'); };
+    gamesWidth = qs.x ? qs.x : 1;
+    gamesHeight = qs.y ? qs.y : 1;
     isMultipleGames = gamesWidth + gamesHeight > 2;
-    isDebug = 'debug' in qs;
 
     ctx.font = "14px Serif";
     let cellSpaceX = (canvasWidth / gamesWidth - gamesBorder * 2) / 16,
@@ -106,7 +105,7 @@ var fps = {
 
 let commands = [],
     commandDetla = 0,
-    commandDelay = 250,
+    commandDelay = 25,
     devAutoCommandEnabled = !localStorage.getItem('user_is_authenticated'),
     devSelect2Text = {0: '2673', 1: '2674', 2: '2675', 3: '2676'};
 function commandNorm() { commandDelay = 250; }
@@ -181,7 +180,6 @@ function display() {
 function eventsListenersAdd() {
     let LEFT_MOUSE_CLICK = 0;
     canvas.addEventListener("mousedown", function(event) {
-        console.log(event);
         if (event.button === LEFT_MOUSE_CLICK) {
             for(let i = 0; i < gameInstances.length; i++) {
                 gameInstances[i].onMouse1Down(mouseX, mouseY);
@@ -193,7 +191,7 @@ function eventsListenersAdd() {
         mouseX = event.layerX;
         mouseY = event.layerY;
         if (isMultipleGames) {
-            console.log(mouseX, mouseY);
+            //console.log(mouseX, mouseY);
         }
     });
 
