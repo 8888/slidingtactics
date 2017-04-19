@@ -32,6 +32,7 @@ class GameLogic {
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
         this.moveCount = 0;
+        this.possibleMoves = []; // indexes of possible moves
         // Lookup data instead of searching
         this.playerLastMove = {};
         // Draw once
@@ -111,16 +112,9 @@ class GameLogic {
     }
 
     movePiece(piece, direction) {
-        if (this.playerLastMove[piece] == Direction.reverse[direction]) {
-            return;
-        }
         let start = piece.location,
             end = this.moveCell(start, direction);
-        if (start != end) {
-            if (piece == this.player && this.playerLastMove[piece] === undefined && end == this.goal) {
-                // The main player piece must move once before moving onto the goal
-                return;
-            }
+        if (this.isMoveLegal(piece, direction, end)) {
             piece.setLocation(end);
             let pIndex = this.playerIndexByLocation[start];
             delete this.playerIndexByLocation[start];
@@ -128,6 +122,7 @@ class GameLogic {
             this.playerLastMove[piece] = direction;
             this.moveHistory.push([piece, direction, start, piece.location]);
             this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
+            this.showPossibleMoves(piece);
             this.moveCount += 1;
             this.totalMoves += 1;
             if (this.moveHistory.length > 25) {
@@ -139,7 +134,34 @@ class GameLogic {
         }
     }
 
+    isMoveLegal(piece, direction, end) {
+        // piece object, direction object, end index. Returns bool
+        if (piece.location == end) {
+            return false;
+        } else if (this.playerLastMove[piece] == Direction.reverse[direction]) {
+            // can not move back the way you last came
+            return false;
+        } else if (piece == this.player && this.playerLastMove[piece] === undefined && end == this.goal) {
+            // The main player piece must move once before moving onto the goal
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    showPossibleMoves(piece) {
+        this.possibleMoves = [];
+        let start = piece.location;
+        for (let d = 0; d < Direction.ALL.length; d++) {
+            let end = this.moveCell(start, Direction.ALL[d]);
+            if (this.isMoveLegal(piece, Direction.ALL[d], end)) {
+                this.possibleMoves.push(end);
+            }
+        }
+    }
+
     puzzleComplete() {
+        this.possibleMoves = [];
         this.puzzlesSolved += 1;
         this.state = this.gameStates.levelComplete;
     }
@@ -157,7 +179,31 @@ class GameLogic {
         if (this.state == this.gameStates.playing) {
             let cell = this.cellFromClick(x, y);
             if (cell !== undefined) {
-                this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
+                if (this.possibleMoves.length > 0 && this.possibleMoves.indexOf(cell) != -1) {
+                    let direction = null;
+                    if (cell < this.clickedPiece.location) {
+                        // north or west
+                        if ((this.clickedPiece.location - cell) % 16 === 0) {
+                            direction = Direction.N;
+                        } else {
+                            direction = Direction.W;
+                        }
+                    } else {
+                        // east or south
+                        if ((cell - this.clickedPiece.location) % 16 === 0) {
+                            direction = Direction.S;
+                        } else {
+                            direction = Direction.E;
+                        }
+                    }
+                    this.movePiece(this.clickedPiece, direction);
+                } else {
+                    this.possibleMoves = [];                
+                    this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
+                    if (this.clickedPiece) {
+                        this.showPossibleMoves(this.clickedPiece);
+                    }
+                }
             }
         }
         else if (this.state == this.gameStates.levelComplete) {
@@ -305,6 +351,24 @@ class GameLogic {
                 ctx.stroke();
                 ctx.lineWidth = 1;
             }
+        }
+        // draw the possible moves
+        if (this.possibleMoves.length > 0) {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#ffff00';                        
+            for (let i = 0; i < this.possibleMoves.length; i++) {
+                let p = this.possibleMoves[i],
+                    py = Math.floor(p / 16),
+                    px = p % 16;
+                ctx.beginPath();                
+                ctx.arc(
+                    x + (cellWidth * px) + (cellWidth / 2),
+                    y + (cellWidth * py) + (cellWidth / 2),
+                    cellWidth / 2, 0, 2 * Math.PI
+                );
+                ctx.stroke();
+            }
+            ctx.lineWidth = 1;            
         }
         // draw the level complete menu
         if (this.state == this.gameStates.levelComplete) {
