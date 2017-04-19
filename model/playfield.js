@@ -8,13 +8,17 @@ class PlayField {
         let container = document.getElementById(containerElementId);
         this.canvasFore = this.canvasCreate(containerElementId + '_foreCanvas', 2);
         this.canvasBack = this.canvasCreate(containerElementId + '_backCanvas', 1);
+        this.canvasSprite = this.canvasCreate(containerElementId + '_spriteCanvas', 3);
         container.appendChild(this.canvasFore);
         container.appendChild(this.canvasBack);
+        container.appendChild(this.canvasSprite);
         this.canvasFore.tabIndex = 0;
         this.canvasFore.focus();
         this.canvasBack.style.background = 'Lavender';
+        this.canvasSprite.style.display = 'none';
         this.ctxFore = this.canvasFore.getContext('2d');
         this.ctxBack = this.canvasBack.getContext('2d');
+        this.ctxSprite = this.canvasSprite.getContext('2d');
         this.canvasWidth = this.canvasFore.width;
         this.canvasHeight = this.canvasFore.height;
         this.gameInstances = [];
@@ -59,10 +63,12 @@ class PlayField {
         this.gameInstances = [];
         this.ctxFore.clearRect(0, 0, this.canvasFore.width, this.canvasFore.height);
         this.ctxBack.clearRect(0, 0, this.canvasBack.width, this.canvasBack.height);
+        this.createSprites(this.ctxSprite);
         for(let x = 0; x < this.gameWidth; x++) {
             for(let y = 0; y < this.gameHeight; y++) {
                 let g = new GameLogic(
                     this.ctxBack,
+                    this.canvasSprite,
                     (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
                     this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
                     this.cellSpace,
@@ -126,6 +132,46 @@ class PlayField {
         for(let i = 0; i < this.gameInstances.length; i++) {
             this.gameInstances[i].display(this.ctxFore);
         }
+    }
+
+    createSprites(ctx) {
+        this.canvasSprite.setAttribute('width', this.cellSpace);
+        this.canvasSprite.setAttribute('height', this.cellSpace * 6);
+        // red, red selected, blue, blue selected
+        for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.fillStyle = i < 2 ? '#ff0000' : '#0000ff';
+            ctx.arc(
+                this.cellSpace / 2,
+                (this.cellSpace * i) + (this.cellSpace / 2),
+                this.cellSpace / 2, 0, 2 * Math.PI
+            );
+            ctx.fill();
+            if (i == 1 || i == 3) {
+                ctx.beginPath();
+                ctx.lineWidth = this.cellSpace * 0.1;
+                ctx.strokeStyle = '#ffff00';
+                ctx.arc(
+                    this.cellSpace / 2,
+                    (this.cellSpace * i) + (this.cellSpace / 2),
+                    this.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
+                );
+                ctx.stroke();
+            }
+        }
+        // possible moves
+        ctx.beginPath();
+        ctx.lineWidth = this.cellSpace * 0.1;
+        ctx.strokeStyle = '#ffff00';
+        ctx.arc(
+            this.cellSpace / 2,
+            (this.cellSpace * 4) + (this.cellSpace / 2),
+            this.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
+        );
+        ctx.stroke();
+        // goal
+        ctx.fillStyle = '#f442f1';
+        ctx.fillRect(this.cellSpace * 0.1, (this.cellSpace * 0.1) + (this.cellSpace * 5), this.cellSpace * 0.8, this.cellSpace * 0.8);
     }
 }
 

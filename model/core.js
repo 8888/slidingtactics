@@ -7,8 +7,9 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(ctxBack, x, y, spaceSize, border) {
+    constructor(ctxBack, spriteSheet, x, y, spaceSize, border) {
         this.ctxBack = ctxBack;
+        this.spriteSheet = spriteSheet;
         this.x = x;
         this.y = y;
         this.spaceSize = spaceSize;
@@ -62,14 +63,14 @@ class GameLogic {
         };
         this.playerPieces = [];
         this.playerIndexByLocation = {};
-        this.player = new GamePiece('#ff0000');
+        this.player = new GamePiece();
         let l = randboardloc(this.playerPieces, this.goal);
         this.player.setLocation(l);
         this.player.index = 0;
         this.playerIndexByLocation[l] = 0;
         this.addPlayer(this.player);
         for (let i = 0; i < 3; i++) {
-            let p = new GamePiece('#0000ff');
+            let p = new GamePiece();
             let l = randboardloc(this.playerPieces, this.goal);
             p.setLocation(l);
             p.index = i+1;
@@ -80,9 +81,8 @@ class GameLogic {
 
     createGoal() {
         this.goal = this.board.goals[Math.floor(Math.random() * this.board.goals.length)];
-        this.goalX = this.x + (this.goal % 16) * this.spaceSize + this.spaceSize * 0.1;
-        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize + this.spaceSize * 0.1;
-        this.goalW = this.spaceSize * 0.8;
+        this.goalX = this.x + (this.goal % 16) * this.spaceSize;
+        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
     }
 
     addPlayer(player) {
@@ -330,8 +330,7 @@ class GameLogic {
             cellWidth = this.spaceSize;
         ctx.clearRect(x, y, cellWidth * 16, cellWidth * 16);
         // draw the goal
-        ctx.fillStyle = '#f442f1';
-        ctx.fillRect(this.goalX, this.goalY, this.goalW, this.goalW);
+        ctx.drawImage(this.spriteSheet, 0, cellWidth * 5, cellWidth, cellWidth, this.goalX, this.goalY, cellWidth, cellWidth);
 
         // draw the move trail
         ctx.strokeStyle = '#ffff00';
@@ -348,38 +347,28 @@ class GameLogic {
             let p = this.playerPieces[i],
                 py = Math.floor(p.location / 16),
                 px = p.location % 16;
-            ctx.beginPath();
-            ctx.fillStyle = p.color;
-            ctx.arc(
-                x + (cellWidth * px) + (cellWidth / 2),
-                y + (cellWidth * py) + (cellWidth / 2),
-                cellWidth / 2, 0, 2 * Math.PI
-            );
-            ctx.fill();
-            if (this.clickedPiece == p) {
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#ffff00';
-                ctx.stroke();
-                ctx.lineWidth = 1;
+            if (this.player == p) {
+                if (this.clickedPiece == p) {
+                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 1, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
+                } else {
+                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 0, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
+                }
+            } else {
+                if (this.clickedPiece == p) {
+                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 3, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
+                } else {
+                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 2, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
+                }
             }
         }
         // draw the possible moves
         if (this.possibleMoves.length > 0) {
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#ffff00';                        
             for (let i = 0; i < this.possibleMoves.length; i++) {
                 let p = this.possibleMoves[i],
                     py = Math.floor(p / 16),
                     px = p % 16;
-                ctx.beginPath();                
-                ctx.arc(
-                    x + (cellWidth * px) + (cellWidth / 2),
-                    y + (cellWidth * py) + (cellWidth / 2),
-                    cellWidth / 2, 0, 2 * Math.PI
-                );
-                ctx.stroke();
+                ctx.drawImage(this.spriteSheet, 0, cellWidth * 4, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
             }
-            ctx.lineWidth = 1;            
         }
         // draw the level complete menu
         if (this.state == this.gameStates.levelComplete) {
