@@ -269,7 +269,7 @@ class GameLogic {
         ctx.beginPath();
         for (let i = 1; i < boardSize; i++) {
             ctx.lineWidth = 1;
-            ctx.strokeStyle = '#888888';
+            ctx.strokeStyle = 'rgba(136, 136, 136, 0.4)';
             ctx.moveTo(x + (cellWidth * i), y);
             ctx.lineTo(x + (cellWidth * i), y + (boardSize * cellWidth));
             ctx.moveTo(x, y + (cellWidth * i));
@@ -292,7 +292,7 @@ class GameLogic {
             ctx.stroke();
         }
         // draw the outline
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = '#000000';
         ctx.beginPath();
         ctx.moveTo(x, y);
@@ -362,19 +362,8 @@ class GameLogic {
             let p = this.playerPieces[i],
                 py = Math.floor(p.location / 16),
                 px = p.location % 16;
-            if (this.player == p) {
-                if (this.clickedPiece == p) {
-                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 1, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
-                } else {
-                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 0, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
-                }
-            } else {
-                if (this.clickedPiece == p) {
-                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 3, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
-                } else {
-                    ctx.drawImage(this.spriteSheet, 0, cellWidth * 2, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
-                }
-            }
+            let pIndex = (this.clickedPiece == p ? 1 : 0) + (this.player == p ? 0 : 2);
+            ctx.drawImage(this.spriteSheet, 0, cellWidth * pIndex, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
         }
         // draw the possible moves
         if (this.possibleMoves.length > 0) {
