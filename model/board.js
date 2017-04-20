@@ -4,13 +4,15 @@ let t = require('../model/testUtility.js'),
     Shared = require('../model/direction.js');
 
 class Board {
-    constructor(name, type) {
+    constructor(key, name, type) {
         /*  name: string - id for this section(s)
             type: string - edition this board is from
         */
+        t.assertIntegerGreaterThanZero(key);
         t.assertString(name);
         t.assertString(type);
 
+        this.key = key;
         this.name = name;
         this.type = type;
         this.area = [];
