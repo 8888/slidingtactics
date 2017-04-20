@@ -7,7 +7,7 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(ctxBack, spriteSheet, x, y, spaceSize, border) {
+    constructor(ctxBack, spriteSheet, x, y, spaceSize, border, onGameNew, onGameOver) {
         this.ctxBack = ctxBack;
         this.spriteSheet = spriteSheet;
         this.x = x;
@@ -21,6 +21,8 @@ class GameLogic {
         };
         this.totalMoves = 0;
         this.puzzlesSolved = 0;
+        this.onGameNew = onGameNew;
+        this.onGameOver = onGameOver;
         this.newGame();
     }
 
@@ -39,6 +41,9 @@ class GameLogic {
         this.playerLastMove = {};
         // Draw once
         this.displayBoard();
+        if(this.onGameNew) {
+            this.onGameNew(this);
+        }
     }
 
     createPlayers() {
@@ -166,6 +171,9 @@ class GameLogic {
         this.possibleMoves = [];
         this.puzzlesSolved += 1;
         this.state = this.gameStates.levelComplete;
+        if(this.onGameOver) {
+            this.onGameOver(this);
+        }
     }
 
     cellFromClick(x, y) {

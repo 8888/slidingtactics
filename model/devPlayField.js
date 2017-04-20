@@ -35,7 +35,7 @@ class DevPlayField extends PlayField {
     }
 
     init() {
-        super.init();
+        super.init(this.gameNewCallback, this.gameOverCallback);
         this.commands = [];
         this.fps = {
             frames: 60,
@@ -70,6 +70,14 @@ class DevPlayField extends PlayField {
             let g = this.gameInstances[i];
             this.ctxDebu.fillText(g.board.name, g.x, g.y-1);
         }*/
+    }
+
+    gameNewCallback(gamecore) {
+        console.log("new game", gamecore.board.name);
+    }
+
+    gameOverCallback(gamecore) {
+        gamecore.newGame();
     }
 
     eventListenersAttach() {

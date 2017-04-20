@@ -56,7 +56,7 @@ class PlayField {
         };
     }
 
-    init() {
+    init(onGameNewCallback, onGameOverCallback) {
         let cellSpaceX = (this.canvasFore.width / this.gameWidth - this.gameBorder * 2) / 16,
             cellSpaceY = (this.canvasFore.height / this.gameHeight - this.gameBorder * 2) / 16;
         this.cellSpace = Math.max(Math.min(cellSpaceX, cellSpaceY), 1);
@@ -72,7 +72,8 @@ class PlayField {
                     (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
                     this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
                     this.cellSpace,
-                    this.gameBorder);
+                    this.gameBorder,
+                    onGameNewCallback, onGameOverCallback);
                 this.gameInstances.push(g);
             }
         }
