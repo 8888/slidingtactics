@@ -32,8 +32,6 @@ class DevPlayField extends PlayField {
             [28, 15, '28x15=0420'],
             [50, 25, '50x25=1250']
         ];
-        this.moveCount = 0;
-        this.puzzlesSolved = 0;
     }
 
     init() {
@@ -83,14 +81,7 @@ class DevPlayField extends PlayField {
     gameOverCallback(gamecore) {
         this.puzzlesSolved++;
         this.moveCount += gamecore.moveCount;
-        if (this.puzzlesSolved < 5) {
-            gamecore.newGame();
-        } else {
-            // add to local storage
-            localStorage.setItem("sessionLast_solved", this.puzzlesSolved);
-            localStorage.setItem("sessionLast_moves", this.moveCount);
-            window.location = 'index.html';
-        }
+        gamecore.newGame();
     }
 
     eventListenersAttach() {

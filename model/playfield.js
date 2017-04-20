@@ -28,6 +28,8 @@ class PlayField {
         this.cellSpace = null;
         this.mouseX = null;
         this.mouseY = null;
+        this.moveCount = 0;
+        this.puzzlesSolved = 0;
     }
 
     canvasCreate(id, zIndex) {
@@ -57,6 +59,16 @@ class PlayField {
     }
 
     init(onGameNewCallback, onGameOverCallback) {
+        let that = this;
+        onGameOverCallback || ( onGameOverCallback = function(g) {
+            that.puzzlesSolved++;
+            that.moveCount += g.moveCount;
+            if (that.puzzlesSolved == 5) {
+                localStorage.setItem("sessionLast_solved", that.puzzlesSolved);
+                localStorage.setItem("sessionLast_moves", that.moveCount);
+                window.location = 'index.html';
+            }
+        });
         let cellSpaceX = (this.canvasFore.width / this.gameWidth - this.gameBorder * 2) / 16,
             cellSpaceY = (this.canvasFore.height / this.gameHeight - this.gameBorder * 2) / 16;
         this.cellSpace = Math.max(Math.min(cellSpaceX, cellSpaceY), 1);
