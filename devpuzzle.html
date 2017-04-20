@@ -1,0 +1,23 @@
+<!doctype html>
+    <head>
+        <title>Sliding Tactics</title>
+        <style>
+            canvas.cnvs {
+                outline: none;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+            }
+        </style>
+        <script>if(!localStorage.getItem('username')) indow.location = 'index.html';</script>
+    </head>
+    <body id='myBody'>
+        <div id="canvasContainer" style='position: relative; width: 90%; margin: 0 auto;'></div>
+        <script type="text/javascript" src="devbundle.js"></script>
+        <script>
+            let game = new SlidingTacticsController();
+            game.playfieldAdd('canvasContainer');
+            game.play();
+        </script>
+    </body>
+</html>
