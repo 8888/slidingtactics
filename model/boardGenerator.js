@@ -19,9 +19,10 @@ class BoardGenerator {
             W, 0, 0, 0, 0, 0, 0, W|N
         ];
         this.boardSections = [];
+        this.boardByKey = {};
         for(let i = 0, w = BoardPieces.length; i < w; i++) {
             let section = BoardPieces[i];
-            let board = new Board(section.id, section.type);
+            let board = new Board(section.key, section.id, section.type);
             board.area = this.boardTemplate.slice();
             for(let a = 0; a < section.walls.length; a++) {
                 let wall = section.walls[a];
@@ -37,11 +38,25 @@ class BoardGenerator {
             }
 
             this.boardSections.push(board);
+            this.boardByKey[board.key] = board;
         }
     }
 
+    seedGenerate() {
+        let boards = [],
+            goals = [];
+        let boardSectionsLength = this.boardSections.length;
+        for(let i = 0; i < 4; i++) {
+            let b = this.boardSections[Math.floor(Math.random() * boardSectionsLength)];
+            boards.push(b.key);
+            goals.push(b.goals);
+        }
+
+        let goal = this.generateGoals(...goals)[Math.floor(Math.random() * goals.length)];
+        return { 'b': boards, 'g': goal};
+    }
+
     generate() {
-        let xy2index = function(g) { return g[0] + g[1] * 16; };
         let names = [];
         let section = [];
         let boardSectionsLength = this.boardSections.length;
@@ -60,15 +75,22 @@ class BoardGenerator {
             boardBot.push(...section[2][0].splice(0, this.boardWidth));
         }
 
-        let board = new Board(names.join(), "classic");
+        let board = new Board(17, names.join(), "classic");
         board.area = boardTop.concat(boardBot);
-        let thisBoardWidth = this.boardWidth;
-        board.goals = section[0][1].map(xy2index).concat(
-            section[1][1].map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1]]); }),
-            section[2][1].map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1] + thisBoardWidth]); }),
-            section[3][1].map(function(g){ return xy2index([g[0], g[1] + thisBoardWidth]); })
-        );
+        board.goals = this.generateGoals(
+            section[0][1],section[1][1],
+            section[2][1],section[3][1]);
         return board;
+    }
+
+    generateGoals(g1, g2, g3, g4) {
+        let xy2index = function(g) { return g[0] + g[1] * 16; };
+        let thisBoardWidth = this.boardWidth;
+        return g1.map(xy2index).concat(
+            g2.map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1]]); }),
+            g3.map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1] + thisBoardWidth]); }),
+            g4.map(function(g){ return xy2index([g[0], g[1] + thisBoardWidth]); })
+        );
     }
 }
 

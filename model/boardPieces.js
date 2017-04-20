@@ -3,6 +3,7 @@
 let boardPieces = 
 [
 	{
+		"key": 1,
 		"id": "A1",
 		"type": "classic",
 		"walls":[
@@ -21,6 +22,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 2,
 		"id": "A2",
 		"type": "classic",
 		"walls":[
@@ -39,6 +41,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 3,
 		"id": "A3",
 		"type": "classic",
 		"walls":[
@@ -57,6 +60,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 4,
 		"id": "A4",
 		"type": "classic",
 		"walls":[
@@ -77,6 +81,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 5,
 		"id": "B1",
 		"type": "classic",
 		"walls":[
@@ -95,6 +100,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 6,
 		"id": "B2",
 		"type": "classic",
 		"walls":[
@@ -113,6 +119,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 7,
 		"id": "B3",
 		"type": "classic",
 		"walls":[
@@ -131,6 +138,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 8,
 		"id": "B4",
 		"type": "classic",
 		"walls":[
@@ -151,6 +159,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 9,
 		"id": "C1",
 		"type": "classic",
 		"walls":[
@@ -169,6 +178,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 10,
 		"id": "C2",
 		"type": "classic",
 		"walls":[
@@ -187,6 +197,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 11,
 		"id": "C3",
 		"type": "classic",
 		"walls":[
@@ -205,6 +216,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 12,
 		"id": "C4",
 		"type": "classic",
 		"walls":[
@@ -225,6 +237,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 13,
 		"id": "D1",
 		"type": "classic",
 		"walls":[
@@ -243,6 +256,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 14,
 		"id": "D2",
 		"type": "classic",
 		"walls":[
@@ -261,6 +275,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 15,
 		"id": "D3",
 		"type": "classic",
 		"walls":[
@@ -279,6 +294,7 @@ let boardPieces =
 		]
 	},
 	{
+		"key": 16,
 		"id": "D4",
 		"type": "classic",
 		"walls":[

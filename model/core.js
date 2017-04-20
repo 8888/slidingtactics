@@ -23,15 +23,31 @@ class GameLogic {
         this.puzzlesSolved = 0;
         this.onGameNew = onGameNew;
         this.onGameOver = onGameOver;
+        this.boardGenerator = new BoardGenerator();
         this.newGame();
     }
 
+    seedGenerate() {
+        //What we would have from a server
+        let seed = this.boardGenerator.seedGenerate();
+        return seed;
+    }
+
     newGame() {
-        this.state = this.gameStates.playing;        
-        let bg = new BoardGenerator();
-        this.board = bg.generate();
+        this.state = this.gameStates.playing;
+        let seed = this.seedGenerate();
+        console.log(seed);
+        this.board = this.boardGenerator.generate();
         this.createGoal();
-        this.createPlayers();
+        this.playerPieces = this.playersGenerate();
+
+        //this.playerPieces = seed.p;
+        this.playerIndexByLocation = {};
+        this.player = this.playerPieces[0];
+        for (let i = 0; i < this.playerPieces.length; i++) {
+            let p = this.playerPieces[i];
+            this.playerIndexByLocation[p.location] = p.index;
+        }
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
@@ -46,7 +62,7 @@ class GameLogic {
         }
     }
 
-    createPlayers() {
+    playersGenerate(goal) {
         let randboardloc = function(players, goal) {
             let noSpace = players.map(function(p) { return p.location; }).concat(goal).concat([119,120,135,136]);
             let space = null,
@@ -64,24 +80,23 @@ class GameLogic {
                 throw new Error('Could not place player!');
             }
 
-            return space; 
+            return space;
         };
-        this.playerPieces = [];
-        this.playerIndexByLocation = {};
-        this.player = new GamePiece();
-        let l = randboardloc(this.playerPieces, this.goal);
-        this.player.setLocation(l);
-        this.player.index = 0;
-        this.playerIndexByLocation[l] = 0;
-        this.addPlayer(this.player);
+        let players = [];
+        let p = new GamePiece();
+        let l = randboardloc(players, goal);
+        p.setLocation(l);
+        p.index = 0;
+        players.push(p);
         for (let i = 0; i < 3; i++) {
             let p = new GamePiece();
-            let l = randboardloc(this.playerPieces, this.goal);
+            let l = randboardloc(players, goal);
             p.setLocation(l);
             p.index = i+1;
-            this.playerIndexByLocation[l] = i+1;
-            this.addPlayer(p);
+            players.push(p);
         }
+
+        return players;
     }
 
     createGoal() {
@@ -90,16 +105,12 @@ class GameLogic {
         this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
     }
 
-    addPlayer(player) {
-        this.playerPieces.push(player);
-    }
-
     moveCell(index, direction) {
         let moving = true,
             movementCount = 0,
             movementCountMax = 20,
             currentIndex = index,
-            advancedIndex = null;            
+            advancedIndex = null;
         while (moving && movementCount < movementCountMax) {
             moving = false;
             movementCount++;
@@ -236,7 +247,7 @@ class GameLogic {
                     this.showPossibleMoves(this.clickedPiece);
                 }
             }
-        }        
+        }
     }
 
     onDevDirection(direction) {
@@ -244,7 +255,7 @@ class GameLogic {
             if (this.clickedPiece) {
                 this.movePiece(this.clickedPiece, direction);
             }
-        }        
+        }
     }
 
     onDevSelect(index) {
@@ -309,7 +320,7 @@ class GameLogic {
                 }
                 if (space & Direction.S) {
                     ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r) + cellWidth);
-                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r) + cellWidth);                   
+                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r) + cellWidth);
                 }
                 if (space & Direction.W) {
                     ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r) + cellWidth);
@@ -387,7 +398,7 @@ class GameLogic {
             ctx.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
             ctx.fill();
             ctx.font = cellWidth.toString() + "px sans-serif";
-            ctx.fillStyle = "white";            
+            ctx.fillStyle = "white";
             let text = this.moveCount + " moves!";
             ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth - cellWidth);
             text = this.puzzlesSolved + " puzzles";
