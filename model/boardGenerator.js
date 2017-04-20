@@ -56,14 +56,22 @@ class BoardGenerator {
         return { 'b': boards, 'g': goal};
     }
 
-    generate() {
+    generate(boardKeys) {
         let names = [];
         let section = [];
-        let boardSectionsLength = this.boardSections.length;
-        for(let i = 0; i < 4; i++) {
-            let b = this.boardSections[Math.floor(Math.random() * boardSectionsLength)];
-            section.push(b.rotate(i));
-            names.push(b.name);
+        if(boardKeys) {
+            for(let i = 0; i < 4; i++) {
+                let b = this.boardByKey[boardKeys[i]];
+                section.push(b.rotate(i));
+                names.push(b.name);
+            }
+        } else {
+            let boardSectionsLength = this.boardSections.length;
+            for(let i = 0; i < 4; i++) {
+                let b = this.boardSections[Math.floor(Math.random() * boardSectionsLength)];
+                section.push(b.rotate(i));
+                names.push(b.name);
+            }
         }
 
         let boardTop = [],

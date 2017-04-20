@@ -35,9 +35,7 @@ class DevPlayField extends PlayField {
     }
 
     init() {
-        let that = this;
-        super.init(
-            function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g);});
+        super.init(this.gameNewCallback, this.gameOverCallback);
         this.commands = [];
         this.fps = {
             frames: 60,

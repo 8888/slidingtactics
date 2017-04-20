@@ -30,18 +30,18 @@ class GameLogic {
     seedGenerate() {
         //What we would have from a server
         let seed = this.boardGenerator.seedGenerate();
+        seed.p = this.playersGenerate(seed.g);
         return seed;
     }
 
     newGame() {
         this.state = this.gameStates.playing;
         let seed = this.seedGenerate();
-        console.log(seed);
-        this.board = this.boardGenerator.generate();
-        this.createGoal();
-        this.playerPieces = this.playersGenerate();
-
-        //this.playerPieces = seed.p;
+        this.board = this.boardGenerator.generate(seed.b);
+        this.goal = seed.g;
+        this.goalX = this.x + (this.goal % 16) * this.spaceSize;
+        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
+        this.playerPieces = seed.p;
         this.playerIndexByLocation = {};
         this.player = this.playerPieces[0];
         for (let i = 0; i < this.playerPieces.length; i++) {
@@ -97,12 +97,6 @@ class GameLogic {
         }
 
         return players;
-    }
-
-    createGoal() {
-        this.goal = this.board.goals[Math.floor(Math.random() * this.board.goals.length)];
-        this.goalX = this.x + (this.goal % 16) * this.spaceSize;
-        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
     }
 
     moveCell(index, direction) {
