@@ -65,6 +65,11 @@
                             <tr><td>Panda</td><td>187</td></tr>
                             <tr><td>Lee</td><td>88</td></tr>
                             <tr><td>Matt</td><td>1</td></tr>
+                            <tr>
+                                <td colspan='2'><h2>Last Session<h2></td>
+                            </tr>
+                            <tr><td>Puzzles Solved:</td><td id='solved'></td></tr>
+                            <tr><td>Moves Made:</td><td id='moves'></td></tr>
                         </table>
                     </td>
                     <td>
@@ -108,5 +113,10 @@
         document.getElementById('in').style.display = 'inline';
         document.getElementById('out').style.display = 'none';
     }
+
+    let solved = localStorage.getItem('sessionLast_solved'),
+        moves = localStorage.getItem('sessionLast_moves');
+    document.getElementById('solved').innerHTML = solved;
+    document.getElementById('moves').innerHTML = moves;
 </script>
 </html>
