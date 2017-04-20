@@ -232,7 +232,9 @@ class GameLogic {
         if (this.state == this.gameStates.playing) {
             if (this.clickedPiece) {
                 this.movePiece(this.clickedPiece, direction);
-                this.showPossibleMoves(this.clickedPiece);
+                if (this.clickedPiece) { // prior movePiece() may have won the game and deselected the piece
+                    this.showPossibleMoves(this.clickedPiece);
+                }
             }
         }        
     }
