@@ -11,62 +11,72 @@
         </style>
     </head>
     <body id='myBody'>
-        <table style='border-collapse: collapse;'>
-            <tr style='border-bottom: 1px solid black;'>
-                <td colspan='2'><h1>Sliding Tactics</h1></td>
-            </tr>
-            <tr>
-                <td>
-                    <table>
-                        <tr>
-                            <td>Username:</td>
-                            <td id='txtboxcontainer'><input id="un"/><span id='sun'/></td>
-                            <td><h3 id='playtext' style='display: inline;'>Enter a username to begin!</h3></td>
-                        </tr>
-                        <tr>
-                            <td colspan='2' style='text-align: center;'>
-                                <button id='in' onclick='javascript:login();'>set it!</button>
-                                <button id='out' style='display: none;' onclick='javascript:logout();'>forget it!</button>
-                            </td>
-                            <td><button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button></td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <table style='border: 1px solid black';>
-                        <tr>
-                            <td colspan='2'><h2>Leaderboard<h2></td>
-                        </tr>
-                        <tr>
-                            <td colspan='2' style='text-decoration: underline;'>Most Puzzles Solved</td>
-                        </tr>
-                        <tr><td>Nora</td><td>314</td></tr>
-                        <tr><td>Cat</td><td>212</td></tr>
-                        <tr><td>Panda</td><td>187</td></tr>
-                        <tr><td>Lee</td><td>88</td></tr>
-                        <tr><td>Matt</td><td>1</td></tr>
-                        <tr><td></td></tr>
-                        <tr>
-                            <td colspan='2' style='text-decoration: underline;'>Challenges Completed</td>
-                        </tr>
-                        <tr><td>Nora</td><td>314</td></tr>
-                        <tr><td>Cat</td><td>212</td></tr>
-                        <tr><td>Panda</td><td>187</td></tr>
-                        <tr><td>Lee</td><td>88</td></tr>
-                        <tr><td>Matt</td><td>1</td></tr>
-                    </table>
-                </td>
-                <td>
-                    <table>
-                        <tr>
-                            <td>Insert board here</td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+        <div style='max-width: 960px; margin: auto;'>
+            <table style='border-collapse: collapse;'>
+                <tr style='border-bottom: 1px solid black;'>
+                    <td colspan='2'><h1>Sliding Tactics</h1></td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>Username:</td>
+                                <td id='txtboxcontainer'><input id="un"/><span id='sun'/></td>
+                            </tr>
+                            <tr>
+                                <td colspan='2' style='text-align: center;'>
+                                    <button id='in' onclick='javascript:login();'>set it!</button>
+                                    <button id='out' style='display: none;' onclick='javascript:logout();'>forget it!</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td><h3 id='playtext' style='display: inline;'>Enter a username to begin!</h3></td>
+                            </tr>
+                            <tr>
+                                <td><button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td valign='top'>
+                        <table style='border: 1px solid black;'>
+                            <tr>
+                                <td colspan='2'><h2>Leaderboard<h2></td>
+                            </tr>
+                            <tr>
+                                <td colspan='2' style='text-decoration: underline;'>Most Puzzles Solved</td>
+                            </tr>
+                            <tr><td>Nora</td><td>314</td></tr>
+                            <tr><td>Cat</td><td>212</td></tr>
+                            <tr><td>Panda</td><td>187</td></tr>
+                            <tr><td>Lee</td><td>88</td></tr>
+                            <tr><td>Matt</td><td>1</td></tr>
+                            <tr><td></td></tr>
+                            <tr>
+                                <td colspan='2' style='text-decoration: underline;'>Challenges Completed</td>
+                            </tr>
+                            <tr><td>Nora</td><td>314</td></tr>
+                            <tr><td>Cat</td><td>212</td></tr>
+                            <tr><td>Panda</td><td>187</td></tr>
+                            <tr><td>Lee</td><td>88</td></tr>
+                            <tr><td>Matt</td><td>1</td></tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td><img src='images/slidingtactics.gif'></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </body>
 <script>
     function login() {
