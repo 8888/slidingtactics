@@ -264,8 +264,10 @@ class GameLogic {
             y = this.y,
             cellWidth = this.spaceSize,
             ctx = this.ctxBack;
-        ctx.clearRect(x - this.border/2, y - this.border, cellWidth * 16 + this.border, cellWidth * 16 + this.border + 1);
+        ctx.clearRect(x - this.border/2, y - this.border/2,
+            cellWidth * 16 + this.border/2, cellWidth * 16 + this.border/2);
         // grid
+        ctx.setLineDash([3, 2]);
         ctx.beginPath();
         for (let i = 1; i < boardSize; i++) {
             ctx.lineWidth = 1;
@@ -276,6 +278,7 @@ class GameLogic {
             ctx.lineTo(x + (boardSize * cellWidth), y + (cellWidth * i));
         }
         ctx.stroke();
+        ctx.setLineDash([3, 2]);
         // all goal options
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
@@ -291,8 +294,9 @@ class GameLogic {
             );
             ctx.stroke();
         }
+        ctx.setLineDash([0]);
         // draw the outline
-        ctx.lineWidth = 2;
+        ctx.lineWidth = this.spaceSize < 16*3 ? 1 : 2;
         ctx.strokeStyle = '#000000';
         ctx.beginPath();
         ctx.moveTo(x, y);
@@ -301,6 +305,7 @@ class GameLogic {
         ctx.lineTo(x, y + (boardSize * cellWidth));
         ctx.lineTo(x, y);
         // draw each space
+        ctx.lineCap = 'round';
         for (let r = 0; r < boardSize; r++) {
             for (let s = 0; s < boardSize; s++) {
                 let space = this.board.item(r * boardSize + s);
@@ -323,6 +328,7 @@ class GameLogic {
             }
         }
         ctx.stroke();
+        ctx.lineCap = 'butt';
     }
 
     update(delta) {

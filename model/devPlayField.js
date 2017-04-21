@@ -26,11 +26,11 @@ class DevPlayField extends PlayField {
             [1, 1, '01x01=0001'],
             [3, 1, '03x01=0003'],
             [4, 2, '04x02=0008'],
-            [5, 2, '05x02=0010'],
-            [6, 3, '06x03=0018'],
+            [7, 3, '07x03=0021'],
             [20, 10, '20x10=0200'],
             [28, 15, '28x15=0420'],
-            [50, 25, '50x25=1250']
+            [50, 25, '50x25=1250'],
+            [85, 60, '85x60=5100']
         ];
     }
 
@@ -182,9 +182,9 @@ class DevPlayField extends PlayField {
             if (this.commands.length) {
                 let l = this.commands.length;
                 this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
-                this.ctxDebu.clearRect(this.gameBorder, this.canvasHeight - 48, 48 * this.commandsCountMax, 48);
-                this.ctxDebu.fillRect(this.gameBorder, this.canvasHeight - 48, 48 * this.commandsCountMax, 48);
-                this.ctxDebu.strokeRect(this.gameBorder, this.canvasHeight - 48, 48 * this.commandsCountMax, 48);
+                this.ctxDebu.clearRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.gameBorder, 48);
+                this.ctxDebu.fillRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.gameBorder, 48);
+                this.ctxDebu.strokeRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.gameBorder, 48);
                 this.ctxDebu.font = "48px sans-serif";
                 for(let i = 0; i < l; i++) {
                     let c = this.commands[i];

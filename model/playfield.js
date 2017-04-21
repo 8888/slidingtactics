@@ -69,9 +69,10 @@ class PlayField {
                 window.location = 'index.html';
             }
         });
+        this.gameBorder = this.gameWidth * this.gameHeight > 500 ? 2 : 10;
         let cellSpaceX = (this.canvasFore.width / this.gameWidth - this.gameBorder * 2) / 16,
             cellSpaceY = (this.canvasFore.height / this.gameHeight - this.gameBorder * 2) / 16;
-        this.cellSpace = Math.max(Math.min(cellSpaceX, cellSpaceY), 1);
+        this.cellSpace = Math.floor(Math.max(Math.min(cellSpaceX, cellSpaceY), 1));
         this.gameInstances = [];
         this.ctxFore.clearRect(0, 0, this.canvasFore.width, this.canvasFore.height);
         this.ctxBack.clearRect(0, 0, this.canvasBack.width, this.canvasBack.height);
@@ -151,13 +152,23 @@ class PlayField {
         this.canvasSprite.setAttribute('width', this.cellSpace);
         this.canvasSprite.setAttribute('height', this.cellSpace * 6);
         // red, red selected, blue, blue selected
+        let s = this.cellSpace,
+            r = s*0.9;
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
-            ctx.fillStyle = i < 2 ? '#ff0000' : '#0000ff';
+            let color = i < 2 ? '#ff0000' : '#0000ff';
+            let x = this.cellSpace / 2,
+                y = (this.cellSpace * i) + (this.cellSpace / 2);
+            let gradient = ctx.createRadialGradient(x+this.cellSpace/5,y-this.cellSpace/5,0, x,y, this.cellSpace);
+            gradient.addColorStop(0,"white");
+            gradient.addColorStop(0.8, color);
+            gradient.addColorStop(0.98, color);
+            gradient.addColorStop(1,"white");
+            ctx.fillStyle = gradient;
             ctx.arc(
-                this.cellSpace / 2,
-                (this.cellSpace * i) + (this.cellSpace / 2),
-                this.cellSpace / 2, 0, 2 * Math.PI
+                x,
+                y,
+                this.cellSpace * 0.46, 0, 2 * Math.PI
             );
             ctx.fill();
             if (i == 1 || i == 3) {
@@ -172,6 +183,7 @@ class PlayField {
                 ctx.stroke();
             }
         }
+
         // possible moves
         ctx.beginPath();
         ctx.lineWidth = this.cellSpace * 0.1;
@@ -182,9 +194,24 @@ class PlayField {
             this.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
         );
         ctx.stroke();
+
         // goal
         ctx.fillStyle = '#f442f1';
-        ctx.fillRect(this.cellSpace * 0.1, (this.cellSpace * 0.1) + (this.cellSpace * 5), this.cellSpace * 0.8, this.cellSpace * 0.8);
+        ctx.fillRect(
+            this.cellSpace * 0.1,
+            (this.cellSpace * 0.1) + (this.cellSpace * 5),
+            this.cellSpace * 0.8,
+            this.cellSpace * 0.8
+        );
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        // set transparency value
+        for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.arc(
+                this.cellSpace / 2, this.cellSpace / 2 + this.cellSpace * 5,
+                (this.cellSpace*0.46)/5 * (i+1), 0, Math.PI * 2, true);
+            ctx.fill();
+        }
     }
 }
 
