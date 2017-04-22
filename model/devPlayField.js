@@ -24,13 +24,13 @@ class DevPlayField extends PlayField {
         this.commandDelayTemplate = [[600, 'Slow'], [200, 'Norm'], [30, 'Fast']];
         this.gameInstanceTemplate = [
             [1, 1, '01x01=0001'],
-            [3, 1, '03x01=0003'],
+            [2, 1, '02x01=0002'],
             [4, 2, '04x02=0008'],
             [7, 3, '07x03=0021'],
-            [20, 10, '20x10=0200'],
-            [28, 15, '28x15=0420'],
+            [18, 10, '18x10=0180'],
+            [24, 13, '24x13=0312'],
             [50, 25, '50x25=1250'],
-            [85, 60, '85x60=5100']
+            [70, 39, '70x39=2730']
         ];
     }
 
@@ -78,10 +78,13 @@ class DevPlayField extends PlayField {
         //console.log("new game", gamecore.board.name);
     }
 
-    gameOverCallback(gamecore) {
+    gameOverCallback(g) {
         this.puzzlesSolved++;
-        this.moveCount += gamecore.moveCount;
-        gamecore.newGame();
+        this.moveCount += g.moveCount;
+        this.ctxFore.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
+        this.ctxVFX.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
+        this.ctxBack.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
+        g.newGame();
     }
 
     eventListenersAttach() {
@@ -108,7 +111,7 @@ class DevPlayField extends PlayField {
             }
         });
 
-        this.canvasFore.addEventListener("keydown", function(event) {
+        this.canvasActors.addEventListener("keydown", function(event) {
             let devSelect = null;
             if (event.key === "1") {
                 devSelect = 0;
@@ -132,11 +135,14 @@ class DevPlayField extends PlayField {
                 let s = that.canvasDebu.style.display;
                 that.canvasDebu.style.display = s == 'none' ? 'inline' : 'none';
             } else if (event.key == 'f') {
-                let s = that.canvasFore.style.display;
-                that.canvasFore.style.display = s == 'none' ? 'inline' : 'none';
+                let s = that.canvasActors.style.display;
+                that.canvasActors.style.display = s == 'none' ? 'inline' : 'none';
             } else if (event.key == 'b') {
                 let s = that.canvasBack.style.display;
                 that.canvasBack.style.display = s == 'none' ? 'inline' : 'none';
+            } else if (event.key == 'v') {
+                let s = that.canvasAnimation.style.display;
+                that.canvasAnimation.style.display = s == 'none' ? 'inline' : 'none';
             } else if (event.key == "p") {
                 that.devAutoCommandEnabled = !that.devAutoCommandEnabled;
             }

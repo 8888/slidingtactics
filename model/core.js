@@ -7,8 +7,9 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(ctxBack, spriteSheet, x, y, spaceSize, border, onGameNew, onGameOver) {
+    constructor(ctxBack, ctxVFX, spriteSheet, x, y, spaceSize, border, onGameNew, onGameOver) {
         this.ctxBack = ctxBack;
+        this.ctxVFX = ctxVFX;
         this.spriteSheet = spriteSheet;
         this.x = x;
         this.y = y;
@@ -52,7 +53,8 @@ class GameLogic {
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
         this.moveCount = 0;
-        this.possibleMoves = []; // indexes of possible moves
+        this.possibleMoves = [];
+        this.possibleMovesDirty = [];
         this.playerLastMove = {};
         // Draw once
         this.displayBoard();
@@ -161,18 +163,23 @@ class GameLogic {
     }
 
     showPossibleMoves(piece) {
-        this.possibleMoves = [];
-        let start = piece.location;
-        for (let d = 0; d < Direction.ALL.length; d++) {
-            let end = this.moveCell(start, Direction.ALL[d]);
-            if (this.isMoveLegal(piece, Direction.ALL[d], end)) {
-                this.possibleMoves.push(end);
+        if (this.possibleMoves.length) {
+            this.possibleMovesDirty = this.possibleMoves;
+            this.possibleMoves = [];
+        }
+        if (piece) {
+            let start = piece.location;
+            for (let d = 0; d < Direction.ALL.length; d++) {
+                let end = this.moveCell(start, Direction.ALL[d]);
+                if (this.isMoveLegal(piece, Direction.ALL[d], end)) {
+                    this.possibleMoves.push(end);
+                }
             }
         }
     }
 
     puzzleComplete() {
-        this.possibleMoves = [];
+        this.showPossibleMoves(null);
         this.puzzlesSolved += 1;
         this.state = this.gameStates.levelComplete;
         if(this.onGameOver) {
@@ -212,11 +219,8 @@ class GameLogic {
                     }
                     this.onDirection(direction);
                 } else {
-                    this.possibleMoves = [];
-                    this.clickedPiece = this.playerPieces[this.playerIndexByLocation[cell]];
-                    if (this.clickedPiece) {
-                        this.showPossibleMoves(this.clickedPiece);
-                    }
+                    this.setClickedPiece(this.playerPieces[this.playerIndexByLocation[cell]]);
+                    this.showPossibleMoves(this.clickedPiece);
                 }
             }
         }
@@ -230,6 +234,20 @@ class GameLogic {
     }
 
     onMouse1Up() {
+    }
+
+    setClickedPiece(piece) {
+        if(this.clickedPiece != piece) {
+            if(this.clickedPiece) {
+                this.clickedPiece.isDirty = true;
+            }
+
+            if(piece) {
+                piece.isDirty = true;
+            }
+
+            this.clickedPiece = piece;
+        }
     }
 
     onDirection(direction) {
@@ -253,7 +271,7 @@ class GameLogic {
 
     onDevSelect(index) {
         if (this.state == this.gameStates.playing) {
-            this.clickedPiece = this.playerPieces[index];
+            this.setClickedPiece(this.playerPieces[index]);
         }
     }
 
@@ -324,6 +342,8 @@ class GameLogic {
         ctx.stroke();
         ctx.lineCap = 'butt';
         ctx.lineWidth = 1;
+        // draw the goal
+        ctx.drawImage(this.spriteSheet, 0, cellWidth * 5, cellWidth, cellWidth, this.goalX, this.goalY, cellWidth, cellWidth);
     }
 
     update(delta) {
@@ -344,16 +364,15 @@ class GameLogic {
             x = this.x,
             y = this.y,
             cellWidth = this.spaceSize;
-        ctx.clearRect(x, y, cellWidth * 16, cellWidth * 16);
-        // draw the goal
-        ctx.drawImage(this.spriteSheet, 0, cellWidth * 5, cellWidth, cellWidth, this.goalX, this.goalY, cellWidth, cellWidth);
+
+        this.ctxVFX.clearRect(x, y, cellWidth * boardSize, cellWidth * boardSize);
         // draw the move trail
-        ctx.fillStyle = '#ffff00';
         let xW = 0,
             yW = 0;
-        ctx.beginPath();
+        this.ctxVFX.beginPath();
         for (let i = 0, l = this.moveTrail.length; i < l; i++) {
             let m = this.moveTrail[i];
+            this.ctxVFX.fillStyle = 'rgba(255, 255, 0, '+(m.width*2)/cellWidth+')';
             if (m.startX == m.endX) {
                 xW = m.width;
                 yW = 0;
@@ -361,25 +380,43 @@ class GameLogic {
                 xW = 0;
                 yW = m.width;
             }
-            ctx.fillRect(
+            this.ctxVFX.fillRect(
                 x + (cellWidth * m.startX) + ((cellWidth - xW) / 2), y + (cellWidth * m.startY) + ((cellWidth -yW) / 2),
                 (m.endX - m.startX) * cellWidth + xW, (m.endY - m.startY) * cellWidth + yW
             );
         }
+        if (this.possibleMovesDirty.length) {
+            // remove old possible moves
+            for (let i = 0; i < this.possibleMovesDirty.length; i++) {
+                let p = this.possibleMovesDirty[i],
+                    py = Math.floor(p / boardSize),
+                    px = p % boardSize;
+                ctx.clearRect(x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
+            }
+            this.possibleMovesDirty = [];
+        }
         // draw the pieces
         for (let i = 0; i < this.playerPieces.length; i++) {
-            let p = this.playerPieces[i],
-                py = Math.floor(p.location / 16),
-                px = p.location % 16;
-            let pIndex = (this.clickedPiece == p ? 1 : 0) + (this.player == p ? 0 : 2);
-            ctx.drawImage(this.spriteSheet, 0, cellWidth * pIndex, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
+            let p = this.playerPieces[i];
+            if (p.isDirty) {
+                p.isDirty = false;
+                let pL = p.locationPrevious;
+                if (pL) {
+                    ctx.clearRect(x + pL.x * cellWidth, y + pL.y * cellWidth, cellWidth, cellWidth);
+                    p.locationPrevious = null;
+                }
+                let pIndex = (this.clickedPiece == p ? 1 : 0) + (this.player == p ? 0 : 2);
+                ctx.drawImage(this.spriteSheet,
+                    0, cellWidth * pIndex, cellWidth, cellWidth,
+                    x + (cellWidth * p.x), y + (cellWidth * p.y), cellWidth, cellWidth);
+            }
         }
-        // draw the possible moves
-        if (this.possibleMoves.length > 0) {
+        if (this.possibleMoves.length) {
+            // draw the possible moves
             for (let i = 0; i < this.possibleMoves.length; i++) {
                 let p = this.possibleMoves[i],
-                    py = Math.floor(p / 16),
-                    px = p % 16;
+                    py = Math.floor(p / boardSize),
+                    px = p % boardSize;
                 ctx.drawImage(this.spriteSheet, 0, cellWidth * 4, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
             }
         }

@@ -6,7 +6,7 @@ let SlidingTacticsController = require('../client/index.js'),
 class DevSlidingTacticsController extends SlidingTacticsController {
 
     playfieldAdd(containerElementId) {
-        let pf = new PlayField(containerElementId, 20, 10);
+        let pf = new PlayField(containerElementId, 2, 1);
         this.playfields.push(pf);
     }
 }

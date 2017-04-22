@@ -6,21 +6,24 @@ let GameLogic = require('../model/core.js'),
 class PlayField {
     constructor(containerElementId) {
         let container = document.getElementById(containerElementId);
-        this.canvasFore = this.canvasCreate(containerElementId + '_foreCanvas', 2);
+        this.canvasActors = this.canvasCreate(containerElementId + '_pieceCanvas', 3);
+        this.canvasAnimation = this.canvasCreate(containerElementId + '_effectCanvas', 2);
         this.canvasBack = this.canvasCreate(containerElementId + '_backCanvas', 1);
-        this.canvasSprite = this.canvasCreate(containerElementId + '_spriteCanvas', 3);
-        container.appendChild(this.canvasFore);
+        this.canvasSprite = this.canvasCreate(containerElementId + '_spriteCanvas', 0);
+        container.appendChild(this.canvasActors);
+        container.appendChild(this.canvasAnimation);
         container.appendChild(this.canvasBack);
         container.appendChild(this.canvasSprite);
-        this.canvasFore.tabIndex = 0;
-        this.canvasFore.focus();
+        this.canvasActors.tabIndex = 0;
+        this.canvasActors.focus();
         this.canvasBack.style.background = 'Lavender';
         this.canvasSprite.style.display = 'none';
-        this.ctxFore = this.canvasFore.getContext('2d');
+        this.ctxFore = this.canvasActors.getContext('2d');
+        this.ctxVFX = this.canvasAnimation.getContext('2d');
         this.ctxBack = this.canvasBack.getContext('2d');
         this.ctxSprite = this.canvasSprite.getContext('2d');
-        this.canvasWidth = this.canvasFore.width;
-        this.canvasHeight = this.canvasFore.height;
+        this.canvasWidth = this.canvasActors.width;
+        this.canvasHeight = this.canvasActors.height;
         this.gameInstances = [];
         this.gameWidth = 1;
         this.gameHeight = 1;
@@ -60,7 +63,7 @@ class PlayField {
 
     init(onGameNewCallback, onGameOverCallback) {
         let that = this;
-        onGameOverCallback || ( onGameOverCallback = function(g) {
+        onGameOverCallback || (onGameOverCallback = function(g) {
             that.puzzlesSolved++;
             that.moveCount += g.moveCount;
             if (that.puzzlesSolved == 5) {
@@ -70,17 +73,19 @@ class PlayField {
             }
         });
         this.gameBorder = this.gameWidth * this.gameHeight > 500 ? 2 : 10;
-        let cellSpaceX = (this.canvasFore.width / this.gameWidth - this.gameBorder * 2) / 16,
-            cellSpaceY = (this.canvasFore.height / this.gameHeight - this.gameBorder * 2) / 16;
+        let cellSpaceX = (this.canvasWidth / this.gameWidth - this.gameBorder * 2) / 16,
+            cellSpaceY = (this.canvasHeight / this.gameHeight - this.gameBorder * 2) / 16;
         this.cellSpace = Math.floor(Math.max(Math.min(cellSpaceX, cellSpaceY), 1));
         this.gameInstances = [];
-        this.ctxFore.clearRect(0, 0, this.canvasFore.width, this.canvasFore.height);
-        this.ctxBack.clearRect(0, 0, this.canvasBack.width, this.canvasBack.height);
+        this.ctxFore.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.ctxVFX.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.ctxBack.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.createSprites(this.ctxSprite);
         for(let x = 0; x < this.gameWidth; x++) {
             for(let y = 0; y < this.gameHeight; y++) {
                 let g = new GameLogic(
                     this.ctxBack,
+                    this.ctxVFX,
                     this.canvasSprite,
                     (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
                     this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
@@ -95,7 +100,7 @@ class PlayField {
     eventListenersAttach() {
         let that = this;
         let LEFT_MOUSE_CLICK = 0;
-        this.canvasFore.addEventListener("mousedown", function(event) {
+        this.canvasActors.addEventListener("mousedown", function(event) {
             if (event.button === LEFT_MOUSE_CLICK) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
                     that.gameInstances[i].onMouse1Down(that.mouseX, that.mouseY);
@@ -103,12 +108,12 @@ class PlayField {
             }
         });
 
-        this.canvasFore.addEventListener("mousemove", function(event) {
+        this.canvasActors.addEventListener("mousemove", function(event) {
             that.mouseX = event.layerX;
             that.mouseY = event.layerY;
         });
 
-        this.canvasFore.addEventListener("mouseup", function(event) {
+        this.canvasActors.addEventListener("mouseup", function(event) {
             if (event.button === LEFT_MOUSE_CLICK) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
                     that.gameInstances[i].onMouse1Up(that.mouseX, that.mouseY);
@@ -116,7 +121,7 @@ class PlayField {
             }
         });
 
-        this.canvasFore.addEventListener("keydown", function(event) {
+        this.canvasActors.addEventListener("keydown", function(event) {
             let direction = null;
             if (event.key === "ArrowLeft") {
                 direction = Direction.W;
