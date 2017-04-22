@@ -204,7 +204,6 @@ class PlayField {
             this.cellSpace * 0.8
         );
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        // set transparency value
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             ctx.arc(

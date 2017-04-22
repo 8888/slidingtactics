@@ -53,7 +53,6 @@ class GameLogic {
         this.moveTrail = [];
         this.moveCount = 0;
         this.possibleMoves = []; // indexes of possible moves
-        // Lookup data instead of searching
         this.playerLastMove = {};
         // Draw once
         this.displayBoard();
@@ -264,6 +263,7 @@ class GameLogic {
             y = this.y,
             cellWidth = this.spaceSize,
             ctx = this.ctxBack;
+        ctx.lineWidth = 1;
         ctx.clearRect(x - this.border/2, y - this.border/2,
             cellWidth * 16 + this.border/2, cellWidth * 16 + this.border/2);
         // grid
@@ -278,9 +278,7 @@ class GameLogic {
             ctx.lineTo(x + (boardSize * cellWidth), y + (cellWidth * i));
         }
         ctx.stroke();
-        ctx.setLineDash([3, 2]);
         // all goal options
-        ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
         for(let i = 0; i < this.board.goals.length; i++) {
             let g = this.board.goals[i];
@@ -296,14 +294,10 @@ class GameLogic {
         }
         ctx.setLineDash([0]);
         // draw the outline
+        ctx.beginPath();
         ctx.lineWidth = this.spaceSize < 16*3 ? 1 : 2;
         ctx.strokeStyle = '#000000';
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (boardSize * cellWidth), y);
-        ctx.lineTo(x + (boardSize * cellWidth), y + (boardSize * cellWidth));
-        ctx.lineTo(x, y + (boardSize * cellWidth));
-        ctx.lineTo(x, y);
+        ctx.strokeRect(x, y, (boardSize * cellWidth), (boardSize * cellWidth));
         // draw each space
         ctx.lineCap = 'round';
         for (let r = 0; r < boardSize; r++) {
@@ -329,6 +323,7 @@ class GameLogic {
         }
         ctx.stroke();
         ctx.lineCap = 'butt';
+        ctx.lineWidth = 1;
     }
 
     update(delta) {
@@ -352,16 +347,24 @@ class GameLogic {
         ctx.clearRect(x, y, cellWidth * 16, cellWidth * 16);
         // draw the goal
         ctx.drawImage(this.spriteSheet, 0, cellWidth * 5, cellWidth, cellWidth, this.goalX, this.goalY, cellWidth, cellWidth);
-
         // draw the move trail
-        ctx.strokeStyle = '#ffff00';
-        for (let i = 0; i < this.moveTrail.length; i++) {
+        ctx.fillStyle = '#ffff00';
+        let xW = 0,
+            yW = 0;
+        ctx.beginPath();
+        for (let i = 0, l = this.moveTrail.length; i < l; i++) {
             let m = this.moveTrail[i];
-            ctx.beginPath();
-            ctx.lineWidth = m.width;
-            ctx.moveTo(x + (cellWidth * m.startX) + (cellWidth / 2), y + (cellWidth * m.startY) + (cellWidth / 2));
-            ctx.lineTo(x + (cellWidth * m.endX) + (cellWidth / 2), y + (cellWidth * m.endY) + (cellWidth / 2));
-            ctx.stroke();
+            if (m.startX == m.endX) {
+                xW = m.width;
+                yW = 0;
+            } else {
+                xW = 0;
+                yW = m.width;
+            }
+            ctx.fillRect(
+                x + (cellWidth * m.startX) + ((cellWidth - xW) / 2), y + (cellWidth * m.startY) + ((cellWidth -yW) / 2),
+                (m.endX - m.startX) * cellWidth + xW, (m.endY - m.startY) * cellWidth + yW
+            );
         }
         // draw the pieces
         for (let i = 0; i < this.playerPieces.length; i++) {

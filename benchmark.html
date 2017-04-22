@@ -1,0 +1,181 @@
+<!doctype html>
+    <head>
+        <title>Sliding Tactics</title>
+        <style>
+            canvas.cnvs {
+                outline: none;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+            }
+        </style>
+    </head>
+    <body id='myBody'>
+        <div id="canvasContainer" style='position: relative; width: 90%; margin: 0 auto;'>
+            <canvas id="bnchmrk" class="cnvs" width="1280" height="720" tabindex="0" 
+                style="z-index: 2; display: inline;"></canvas>
+        </div>
+        <script>
+            let ctx = document.getElementById('bnchmrk').getContext('2d');
+            let paths = [];
+            for(let i = 0; i < 100000; i++) {
+                let x1 = Math.floor(Math.random() * 16),
+                    x2 = Math.floor(Math.random() * 16),
+                    y1 = Math.floor(Math.random() * 16),
+                    y2 = Math.floor(Math.random() * 16),
+                    w = Math.floor(Math.random() * 10);
+                paths.push({
+                    x1: x1,
+                    x2: x2,
+                    y1: y1,
+                    y2: y1,
+                    w: w
+                });
+
+                paths.push({
+                    x1: x1,
+                    x2: x1,
+                    y1: y1,
+                    y2: y2,
+                    w: w
+                });
+            }
+
+            let cellWidth = 720 / 16,
+                x = 10,
+                y = 10;
+
+            var xW = 0,
+                yW = 0;
+            var pLength = paths.length;
+            let timeBefore = null,
+                timeAfter = null;
+
+            var one = true, two = true, three = true, four = true, five = true, six = true;
+
+            if (one) {
+                ctx.strokeStyle = '#ffff00';
+                timeBefore = performance.now();
+                for (let i = 0; i < paths.length; i++) {
+                    let m = paths[i];
+                    ctx.beginPath();
+                    ctx.lineWidth = m.w;
+                    ctx.moveTo(x + (cellWidth * m.x1) + (cellWidth / 2), y + (cellWidth * m.y1) + (cellWidth / 2));
+                    ctx.lineTo(x + (cellWidth * m.x2) + (cellWidth / 2), y + (cellWidth * m.y2) + (cellWidth / 2));
+                    ctx.stroke();
+                }
+                timeAfter = performance.now();
+                console.log(parseInt(timeAfter - timeBefore), 'lineWidth');
+            }
+
+            if (two) {
+                ctx.strokeStyle = '#ff0000';
+                timeBefore = performance.now();
+                for (var index = 0; index < pLength; index++) {
+                    let m = paths[index];
+                    ctx.beginPath();
+                    ctx.lineWidth = m.w;
+                    ctx.moveTo(x + (cellWidth * m.x1) + (cellWidth / 2), y + (cellWidth * m.y1) + (cellWidth / 2));
+                    ctx.lineTo(x + (cellWidth * m.x2) + (cellWidth / 2), y + (cellWidth * m.y2) + (cellWidth / 2));
+                    ctx.stroke();
+                }
+                timeAfter = performance.now();
+                console.log(parseInt(timeAfter - timeBefore), 'lineWith_NO_LET');
+            }
+
+            if (three) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#00ff00';
+                timeBefore = performance.now();
+                ctx.beginPath();
+                for (var index = 0; index < pLength; index++) {
+                    let m = paths[index];
+                    if (m.x1 == m.x2) {
+                        xW = m.w;
+                        yW = 0;
+                    } else {
+                        xW = 0;
+                        yW = m.w;
+                    }
+                    ctx.strokeRect(
+                        x + (cellWidth * m.x1) + (cellWidth / 2), y + (cellWidth * m.y1) + (cellWidth / 2),
+                        (m.x2 - m.x1) * cellWidth + xW, (m.y2 - m.y1) * cellWidth + yW
+                    );
+                }
+                timeAfter = performance.now();
+                console.log(parseInt(timeAfter - timeBefore), 'strokeRect');
+            }
+
+            if (four) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#0000ff';
+                timeBefore = performance.now();
+                ctx.beginPath();
+                for (var index = 0; index < pLength; index++) {
+                    let m = paths[index];
+                    if (m.x1 == m.x2) {
+                        xW = m.w;
+                        yW = 0;
+                    } else {
+                        xW = 0;
+                        yW = m.w;
+                    }
+                    ctx.rect(
+                        x + (cellWidth * m.x1) + (cellWidth / 2), y + (cellWidth * m.y1) + (cellWidth / 2),
+                        (m.x2 - m.x1) * cellWidth + xW, (m.y2 - m.y1) * cellWidth + yW
+                    );
+                }
+                ctx.stroke();
+                timeAfter = performance.now();
+                console.log(parseInt(timeAfter - timeBefore), 'rect_1_stroke');
+            }
+
+            if (five) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#0000ff';
+                timeBefore = performance.now();
+                ctx.beginPath();
+                for (var index = 0; index < pLength; index++) {
+                    let m = paths[index];
+                    if (m.x1 == m.x2) {
+                        xW = m.w;
+                        yW = 0;
+                    } else {
+                        xW = 0;
+                        yW = m.w;
+                    }
+                    ctx.fillRect(
+                        x + (cellWidth * m.x1) + (cellWidth / 2), y + (cellWidth * m.y1) + (cellWidth / 2),
+                        (m.x2 - m.x1) * cellWidth + xW, (m.y2 - m.y1) * cellWidth + yW
+                    );
+                }
+                timeAfter = performance.now();
+                console.log(parseInt(timeAfter - timeBefore), 'rect_1_fillRect');
+            }
+
+            if (six) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#0000ff';
+                timeBefore = performance.now();
+                ctx.beginPath();
+                for (var index = 0; index < pLength; index++) {
+                    let m = paths[index];
+                    if (m.x1 == m.x2) {
+                        xW = m.w;
+                        yW = 0;
+                    } else {
+                        xW = 0;
+                        yW = m.w;
+                    }
+                    ctx.rect(
+                        x + (cellWidth * m.x1) + (cellWidth / 2), y + (cellWidth * m.y1) + (cellWidth / 2),
+                        (m.x2 - m.x1) * cellWidth + xW, (m.y2 - m.y1) * cellWidth + yW
+                    );
+                }
+                ctx.fill();
+                timeAfter = performance.now();
+                console.log(parseInt(timeAfter - timeBefore), 'rect_1_fill');
+            }
+        </script>
+    </body>
+</html>

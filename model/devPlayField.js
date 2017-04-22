@@ -75,7 +75,7 @@ class DevPlayField extends PlayField {
     }
 
     gameNewCallback(gamecore) {
-        console.log("new game", gamecore.board.name);
+        //console.log("new game", gamecore.board.name);
     }
 
     gameOverCallback(gamecore) {
