@@ -42,20 +42,6 @@ class BoardGenerator {
         }
     }
 
-    seedGenerate() {
-        let boards = [],
-            goals = [];
-        let boardSectionsLength = this.boardSections.length;
-        for(let i = 0; i < 4; i++) {
-            let b = this.boardSections[Math.floor(Math.random() * boardSectionsLength)];
-            boards.push(b.key);
-            goals.push(b.goals);
-        }
-
-        let goal = this.generateGoals(...goals)[Math.floor(Math.random() * goals.length)];
-        return { 'b': boards, 'g': goal};
-    }
-
     generate(boardKeys) {
         let names = [];
         let section = [];

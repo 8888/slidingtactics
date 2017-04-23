@@ -7,10 +7,14 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(ctxBack, ctxVFX, spriteSheet, x, y, spaceSize, border, onGameNew, onGameOver) {
+    constructor(ctxBack, ctxVFX, spriteSheet, seedGenerator,
+            x, y, spaceSize, border,
+            onGameNew, onGameOver
+    ) {
         this.ctxBack = ctxBack;
         this.ctxVFX = ctxVFX;
         this.spriteSheet = spriteSheet;
+        this.seedGenerator = seedGenerator;
         this.x = x;
         this.y = y;
         this.spaceSize = spaceSize;
@@ -28,27 +32,24 @@ class GameLogic {
         this.newGame();
     }
 
-    seedGenerate() {
-        //What we would have from a server
-        let seed = this.boardGenerator.seedGenerate();
-        seed.p = this.playersGenerate(seed.g);
-        return seed;
-    }
-
     newGame() {
         this.state = this.gameStates.playing;
-        let seed = this.seedGenerate();
+        let seed = this.seedGenerator.generate();
         this.board = this.boardGenerator.generate(seed.b);
         this.goal = seed.g;
         this.goalX = this.x + (this.goal % 16) * this.spaceSize;
         this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
-        this.playerPieces = seed.p;
+        this.playerPieces = [];
         this.playerIndexByLocation = {};
-        this.player = this.playerPieces[0];
-        for (let i = 0; i < this.playerPieces.length; i++) {
-            let p = this.playerPieces[i];
+        for(let i = 0; i < seed.p.length; i++) {
+            let p = new GamePiece();
+            p.setLocation(seed.p[i]);
+            p.index = i;
+            this.playerPieces.push(p);
             this.playerIndexByLocation[p.location] = p.index;
         }
+
+        this.player = this.playerPieces[0];
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
@@ -61,43 +62,6 @@ class GameLogic {
         if(this.onGameNew) {
             this.onGameNew(this);
         }
-    }
-
-    playersGenerate(goal) {
-        let randboardloc = function(players, goal) {
-            let noSpace = players.map(function(p) { return p.location; }).concat(goal).concat([119,120,135,136]);
-            let space = null,
-                attemptCount = 0,
-                attemptCountMax = 20;
-            while (space === null && attemptCount < attemptCountMax) {
-                attemptCount++;
-                let s = Math.floor(Math.random() * 16 * 16);
-                if (noSpace.indexOf(s) === -1) {
-                    space = s;
-                }
-            }
-
-            if (space === null) {
-                throw new Error('Could not place player!');
-            }
-
-            return space;
-        };
-        let players = [];
-        let p = new GamePiece();
-        let l = randboardloc(players, goal);
-        p.setLocation(l);
-        p.index = 0;
-        players.push(p);
-        for (let i = 0; i < 3; i++) {
-            let p = new GamePiece();
-            let l = randboardloc(players, goal);
-            p.setLocation(l);
-            p.index = i+1;
-            players.push(p);
-        }
-
-        return players;
     }
 
     moveCell(index, direction) {

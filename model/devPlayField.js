@@ -17,11 +17,12 @@ class DevPlayField extends PlayField {
         this.devAutoCommandEnabled = true;
         this.fpsTextDelta = null;
         this.fpsTextSum = null;
+        this.commandCountTotal = 0;
         this.commandsCountMax = 20;
         this.commandDetla = 0;
         this.commandDelay = 30;
         this.devSelect2Text = {0: '2673', 1: '2674', 2: '2675', 3: '2676'};
-        this.commandDelayTemplate = [[600, 'Slow'], [200, 'Norm'], [30, 'Fast']];
+        this.commandDelayTemplate = [[200, 'Norm'], [30, 'Fast'], [0, 'MAX']];
         this.gameInstanceTemplate = [
             [1, 1, '01x01=0001'],
             [2, 1, '02x01=0002'],
@@ -32,12 +33,23 @@ class DevPlayField extends PlayField {
             [50, 25, '50x25=1250'],
             [70, 39, '70x39=2730']
         ];
+        let that = this;
+        this.statistics = [
+            ["Time", function() {return parseInt(that.playfieldDeltaTime / 1000); }],
+            ["Game", function() {return that.gamesCountTotal; }],
+            ["Wins", function() {return that.gamesSolvedCountTotal; }],
+            ["Cmds", function() {return that.commandCountTotal; }],
+            ["C/S", function() {return parseInt(that.commandCountTotal/(that.playfieldDeltaTime/1000)); }],
+            ["Move", function() {return that.moveCountTotal; }],
+            ["Move/Win", function() {return parseInt(that.moveCountTotal/that.gamesSolvedCountTotal); }],
+            ["Win/S", function() {return parseInt(that.gamesSolvedCountTotal/(that.playfieldDeltaTime/1000)); }]
+        ];
     }
 
     init() {
         let that = this;
-        super.init(
-            function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g); });
+        super.init(function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g); });
+        this.commandCountTotal = 0;
         this.commands = [];
         this.fps = {
             frames: 60,
@@ -76,11 +88,12 @@ class DevPlayField extends PlayField {
 
     gameNewCallback(gamecore) {
         //console.log("new game", gamecore.board.name);
+        this.gamesCountTotal++;
     }
 
     gameOverCallback(g) {
-        this.puzzlesSolved++;
-        this.moveCount += g.moveCount;
+        this.gamesSolvedCountTotal++;
+        this.moveCountTotal += g.moveCount;
         this.ctxFore.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
         this.ctxVFX.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
         this.ctxBack.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
@@ -154,13 +167,24 @@ class DevPlayField extends PlayField {
         this.commandDetla += delta;
         if (this.commandDetla > this.commandDelay && this.devAutoCommandEnabled) {
             this.commandDetla = 0;
-            let roll = Math.random();
             let c = null;
-            if (roll < 0.85 && this.commands.length) {
+            if (Math.random() < 0.85 && this.commands.length) {
                 c = Direction.ALL[Math.floor(Math.random() * Direction.ALL.length)];
                 this.commands.push(Direction.unicode[c]);
                 for(let i = 0; i < this.gameInstances.length; i++) {
                     this.gameInstances[i].onDevDirection(c);
+                }
+
+                if(this.commandDelay === 0) {
+                    c = Math.floor(Math.random() * 4);
+                    this.commands.push(this.devSelect2Text[c]);
+                    for(let i = 0; i < this.gameInstances.length; i++) {
+                        this.gameInstances[i].onDevSelect(c);
+                    }
+                    this.commandCountTotal += 1;
+                    if (this.commands.length > this.commandsCountMax) {
+                        this.commands.shift();
+                    }
                 }
             } else {
                 c = Math.floor(Math.random() * 4);
@@ -170,6 +194,7 @@ class DevPlayField extends PlayField {
                 }
             }
 
+            this.commandCountTotal += 1;
             if (this.commands.length > this.commandsCountMax) {
                 this.commands.shift();
             }
@@ -199,6 +224,8 @@ class DevPlayField extends PlayField {
                 }
             }
 
+            this.displayStatistics();
+
             let deltaText = this.fps.deltas[0], sumText = this.fps.sum;
             if (deltaText != this.fpsTextDelta || sumText != this.fpsTextSum) {
                 this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
@@ -212,6 +239,23 @@ class DevPlayField extends PlayField {
                 this.ctxDebu.fillStyle = 'red';
                 this.ctxDebu.fillText(fpsText, this.canvasWidth - 195, this.canvasHeight-12);
             }
+        }
+    }
+
+    displayStatistics() {
+        let l = this.statistics.length,
+            h = l * 24,
+            w = 150;
+        this.ctxDebu.lineWidth = 1;
+        this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
+        this.ctxDebu.clearRect(this.canvasWidth - w, 0, w, h);
+        this.ctxDebu.fillRect(this.canvasWidth - w, 0, w, h);
+        this.ctxDebu.font = '14px sans-serif';
+        this.ctxDebu.fillStyle = 'black';
+        for(let i = 0; i < l; i++) {
+            let t = this.statistics[i];
+            this.ctxDebu.fillText(t[0]+': '+t[1]().toString(), this.canvasWidth - w*0.9, 24 * (i + 0.6));
+            this.ctxDebu.strokeRect(this.canvasWidth - w, 24 * i, w, 24);
         }
     }
 }

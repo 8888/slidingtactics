@@ -1,7 +1,8 @@
 'use strict';
 
 let GameLogic = require('../model/core.js'),
-    Direction = require('../model/direction.js');
+    Direction = require('../model/direction.js'),
+    SeedGenerator = require('../model/seedGeneratorLocal.js');
 
 class PlayField {
     constructor(containerElementId) {
@@ -24,6 +25,7 @@ class PlayField {
         this.ctxSprite = this.canvasSprite.getContext('2d');
         this.canvasWidth = this.canvasActors.width;
         this.canvasHeight = this.canvasActors.height;
+        this.seedGenerator = null;
         this.gameInstances = [];
         this.gameWidth = 1;
         this.gameHeight = 1;
@@ -31,8 +33,10 @@ class PlayField {
         this.cellSpace = null;
         this.mouseX = null;
         this.mouseY = null;
-        this.moveCount = 0;
-        this.puzzlesSolved = 0;
+        this.playfieldDeltaTime = 0;
+        this.gamesCountTotal = 0;
+        this.gamesSolvedCountTotal = 0;
+        this.moveCountTotal = 0;
     }
 
     canvasCreate(id, zIndex) {
@@ -64,19 +68,24 @@ class PlayField {
     init(onGameNewCallback, onGameOverCallback) {
         let that = this;
         onGameOverCallback || (onGameOverCallback = function(g) {
-            that.puzzlesSolved++;
-            that.moveCount += g.moveCount;
-            if (that.puzzlesSolved == 5) {
-                localStorage.setItem("sessionLast_solved", that.puzzlesSolved);
-                localStorage.setItem("sessionLast_moves", that.moveCount);
+            that.gamesSolvedCountTotal++;
+            that.moveCountTotal += g.moveCount;
+            if (that.gamesSolvedCountTotal == 5) {
+                localStorage.setItem("sessionLast_solved", that.gamesSolvedCountTotal);
+                localStorage.setItem("sessionLast_moves", that.moveCountTotal);
                 window.location = 'index.html';
             }
         });
+        this.seedGenerator = new SeedGenerator();
         this.gameBorder = this.gameWidth * this.gameHeight > 500 ? 2 : 10;
         let cellSpaceX = (this.canvasWidth / this.gameWidth - this.gameBorder * 2) / 16,
             cellSpaceY = (this.canvasHeight / this.gameHeight - this.gameBorder * 2) / 16;
         this.cellSpace = Math.floor(Math.max(Math.min(cellSpaceX, cellSpaceY), 1));
+        this.playfieldDeltaTime = 0;
         this.gameInstances = [];
+        this.gamesCountTotal = 0;
+        this.gamesSolvedCountTotal = 0;
+        this.moveCountTotal = 0;
         this.ctxFore.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxVFX.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxBack.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -84,13 +93,11 @@ class PlayField {
         for(let x = 0; x < this.gameWidth; x++) {
             for(let y = 0; y < this.gameHeight; y++) {
                 let g = new GameLogic(
-                    this.ctxBack,
-                    this.ctxVFX,
-                    this.canvasSprite,
+                    this.ctxBack, this.ctxVFX,
+                    this.canvasSprite, this.seedGenerator,
                     (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
                     this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
-                    this.cellSpace,
-                    this.gameBorder,
+                    this.cellSpace, this.gameBorder,
                     onGameNewCallback, onGameOverCallback);
                 this.gameInstances.push(g);
             }
@@ -142,6 +149,7 @@ class PlayField {
     }
 
     update(delta) {
+        this.playfieldDeltaTime += delta;
         for(let i = 0; i < this.gameInstances.length; i++) {
             this.gameInstances[i].update(delta);
         }
