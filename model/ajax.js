@@ -24,7 +24,7 @@ ajax.post_request = function(destination, parameters, responseFunction) {
 };
 
 ajax.promise_post = function(destination, parameters) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         xhr.open("POST", destination, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
