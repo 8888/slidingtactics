@@ -27,6 +27,7 @@ class user {
                     $this->user_key = $user_key;
                     $this->is_active = True;
                     $this->is_authenticated = True;
+                    good($user_key);
                 }
             }
         }
@@ -51,6 +52,16 @@ class user {
             }
         }
     }
+}
+
+function good($user_key) {
+    $conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+    if ($stmt = $conn->prepare ("CALL user_update_last_logged (?);")) {
+        $stmt->bind_param("i", $user_key);
+        $stmt->execute();
+    }
+
+    $conn->close();
 }
 
 $action = $_GET["action"];
