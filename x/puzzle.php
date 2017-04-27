@@ -19,6 +19,19 @@ function randBoardLocation($players, $goal) {
     return $space;
 }
 
+function goalsRotate($goals) {
+    $goalsRotated = array();
+    for ($i = 0; $i < count($goals); $i++) {
+        $g = $goals[$i];
+        $goalsRotated[] = array(8-1-$g[1], $g[0]);
+    }
+    return $goalsRotated;
+}
+
+function xy2index($x, $y) {
+    return $x + $y * 16;
+}
+
 function puzzle_add() {
     $boardSections = json_decode('[
 	{
@@ -341,28 +354,36 @@ function puzzle_add() {
     $boardKey4 = rand(1, $boardSectionsLength);
 
     $goals = array();
-    $goals1 = $boardSections[$boardKey1]["goals"];
-    $goals2 = $boardSections[$boardKey2]["goals"];
-    $goals3 = $boardSections[$boardKey3]["goals"];
-    $goals4 = $boardSections[$boardKey4]["goals"];
+    $goals1 = $boardSections[$boardKey1-1]["goals"];
+    $goals2 = $boardSections[$boardKey2-1]["goals"];
+    $goals3 = $boardSections[$boardKey3-1]["goals"];
+    $goals4 = $boardSections[$boardKey4-1]["goals"];
+
+    $thisBoardWidth = 8;
     for ($i = 0; $i < count($goals1); $i++) {
         $g = $goals1[$i];
-        array_push ($goals, ($g[0]) + ($g[1] * 16));
+        array_push ($goals, xy2index($g[0], $g[1]));
     }
 
+    $goals2 = goalsRotate($goals2);
     for ($i = 0; $i < count($goals2); $i++) {
         $g = $goals2[$i];
-        array_push ($goals, ($g[0] + 16) + ($g[1] * 16));
+        array_push ($goals, xy2index($g[0] + $thisBoardWidth, $g[1]));
     }
 
+    $goals3 = goalsRotate($goals3);
+    $goals3 = goalsRotate($goals3);
     for ($i = 0; $i < count($goals3); $i++) {
         $g = $goals3[$i];
-        array_push ($goals, ($g[0] + 16) + ($g[1] + 16) * 16);
+        array_push ($goals, xy2index($g[0] + $thisBoardWidth, $g[1] + $thisBoardWidth));
     }
 
+    $goals4 = goalsRotate($goals4);
+    $goals4 = goalsRotate($goals4);
+    $goals4 = goalsRotate($goals4);
     for ($i = 0; $i < count($goals4); $i++) {
         $g = $goals4[$i];
-        array_push ($goals, ($g[0]) + ($g[1] + 16) * 16);
+        array_push ($goals, xy2index($g[0], $g[1] + $thisBoardWidth));
     }
 
     $g = $goals[rand(0, count($goals)-1)];

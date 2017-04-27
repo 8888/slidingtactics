@@ -1,14 +1,6 @@
 <!doctype html>
     <head>
         <title>Sliding Tactics</title>
-        <style>
-            canvas.cnvs {
-                outline: none;
-                position: absolute;
-                left: 0px;
-                top: 0px;
-            }
-        </style>
     </head>
     <body id='myBody'>
         <div style='max-width: 960px; margin: auto;'>
@@ -19,31 +11,32 @@
                 <tr>
                     <td>
                         <table>
+                            <tr><td colspan="2">MEMBERS:</td></tr>
                             <tr>
-                                <td>Username:</td>
-                                <td id='txtboxcontainer'><input id="un"/><span id='sun'/></td>
+                                <td>Name:</td>
+                                <td id='txtboxcontainer'><input id="un" style="width: 60px;"/><span id='sun'/></td>
+                            </tr>
+                            <tr id="answerRow">
+                                <td>Secret:</td>
+                                <td><input id="an" type="password" style="width: 60px;"/></td>
                             </tr>
                             <tr>
                                 <td colspan='2' style='text-align: center;'>
-                                    <button id='in' onclick='javascript:login();'>set it!</button>
-                                    <button id='out' style='display: none;' onclick='javascript:logout();'>forget it!</button>
+                                    <button id='in' onclick='javascript:login();'>login!</button>
+                                    <button id='out' style='display: none;' onclick='javascript:logout();'>logout!</button>
                                 </td>
                             </tr>
+                            <tr><td colspan="2"><span id='info' style='color: red;'/></td></tr>
+                            <tr id="regRow"><td colspan="2"><a href="register.html">Register to play!</a></td></tr>
+                            <tr><td colspan="2">&nbsp;</td></tr>
+                            <tr id="guestRow1"><td colspan="2">GUESTS:</td></tr>
+                            <tr id="guestRow2"><td colspan="2"><button id='guest' onclick='javascript:guest();'>play as guest!</button></td></tr>
                         </table>
                     </td>
-                    <td>
-                        <table>
-                            <tr>
-                                <td><h3 id='playtext' style='display: inline;'>Enter a username to begin!</h3></td>
-                            </tr>
-                            <tr>
-                                <td><button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button></td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
+                    <td rowspan="2"><img src='images/slidingtactics.gif'></td>
+                </tr><tr>
                     <td valign='top'>
+                        <button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button>
                         <table style='border: 1px solid black;'>
                             <tr>
                                 <td colspan='2'><h2>Leaderboard<h2></td>
@@ -60,10 +53,10 @@
                             <tr>
                                 <td colspan='2' style='text-decoration: underline;'>Challenges Completed</td>
                             </tr>
-                            <tr><td>Nora</td><td>314</td></tr>
-                            <tr><td>Cat</td><td>212</td></tr>
-                            <tr><td>Panda</td><td>187</td></tr>
-                            <tr><td>Lee</td><td>88</td></tr>
+                            <tr><td>Nora</td><td>31</td></tr>
+                            <tr><td>Cat</td><td>21</td></tr>
+                            <tr><td>Panda</td><td>18</td></tr>
+                            <tr><td>Lee</td><td>8</td></tr>
                             <tr><td>Matt</td><td>1</td></tr>
                             <tr>
                                 <td colspan='2'><h2>Last Session<h2></td>
@@ -72,47 +65,102 @@
                             <tr><td>Moves Made:</td><td id='moves'></td></tr>
                         </table>
                     </td>
-                    <td>
-                        <table>
-                            <tr>
-                                <td><img src='images/slidingtactics.gif'></td>
-                            </tr>
-                        </table>
-                    </td>
                 </tr>
             </table>
         </div>
     </body>
 <script>
-    function login() {
-        let un = document.getElementById("un"),
-            uu = localStorage.getItem("username");
-        if (uu) {
-            un = uu;
-        } else if (un) {
-            un = un.value;
-        }
+    let un = localStorage.getItem("user_name"),
+        ig = localStorage.getItem("isGuest");
 
-        if (un) {
-            localStorage.setItem("username", un);
-            document.getElementById('sun').innerHTML = un;
-            document.getElementById('un').style.display = 'none';
-            document.getElementById('playbutton').style.display = 'inline';
-            document.getElementById('playtext').style.display = 'none';
-            document.getElementById('in').style.display = 'none';
-            document.getElementById('out').style.display = 'inline';
-        }
+    if(un) {
+        document.getElementById('un').style.display = 'none';
+        document.getElementById('answerRow').style.display = 'none';
+        document.getElementById('sun').innerHTML = un;
+        document.getElementById('regRow').style.display = 'none';
+        document.getElementById('guestRow1').style.display = 'none';
+        document.getElementById('guestRow2').style.display = 'none';
+        document.getElementById('info').innerHTML = '';
+        document.getElementById('playbutton').style.display = 'inline';
+        document.getElementById('in').style.display = 'none';
+        document.getElementById('out').style.display = 'inline';
     }
-    login();
+
+    function login() {
+        let un = document.getElementById("un").value,
+            an = document.getElementById("an").value;
+
+        let auth = promise_post('https://tactics.prototypeholdings.com/x/login.php?action=authenticate', 'un='+un+'&an='+an)
+            .then((user) => {
+                localStorage.setItem('user_key', user.user_key);
+                localStorage.setItem('user_name', user.username);
+                localStorage.setItem('user_is_guest', false);
+                localStorage.setItem('user_is_authenticated', user.is_authenticated);
+                localStorage.setItem('user_is_first', user.is_first);
+                localStorage.setItem('user_is_active', user.is_active);
+                localStorage.setItem('user_token', user.token);
+                if (user.is_authenticated && user.is_active) {
+                    document.getElementById('un').style.display = 'none';
+                    document.getElementById('answerRow').style.display = 'none';
+                    document.getElementById('sun').innerHTML = user.username;
+                    document.getElementById('regRow').style.display = 'none';
+                    document.getElementById('guestRow1').style.display = 'none';
+                    document.getElementById('guestRow2').style.display = 'none';
+                    document.getElementById('info').innerHTML = '';
+                    document.getElementById('playbutton').style.display = 'inline';
+                    document.getElementById('in').style.display = 'none';
+                    document.getElementById('out').style.display = 'inline';
+                } else {
+                    document.getElementById('info').innerHTML = "wrong un/pw!";
+                }
+            })
+            .catch((r) => {
+                document.getElementById('info').innerHTML = "server issue!";
+            });
+    }
+
     function logout() {
         localStorage.clear();
-        document.getElementById('sun').innerHTML = '';
         document.getElementById('un').style.display = 'inline';
+        document.getElementById('answerRow').style.display = '';
+        document.getElementById('sun').innerHTML = '';
+        document.getElementById('regRow').style.display = '';
+        document.getElementById('guestRow1').style.display = '';
+        document.getElementById('guestRow2').style.display = '';
+        document.getElementById('info').innerHTML = '';
         document.getElementById('playbutton').style.display = 'none';
-        document.getElementById('playtext').style.display = 'inline';
         document.getElementById('in').style.display = 'inline';
         document.getElementById('out').style.display = 'none';
     }
+
+    function guest() {
+        let un = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
+        localStorage.setItem("user_name", un);
+        localStorage.setItem('user_is_guest', false);
+        javascript:window.location="puzzle.html";
+    }
+
+function promise_post(destination, parameters) {
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", destination, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                if (xhr.responseText == "not authorized") {
+                    reject("not authorized");
+                } else {
+                    resolve(JSON.parse(xhr.responseText));
+                }
+            }
+        };
+        xhr.onerror = function() { reject("Network Issue"); };
+        xhr.send(parameters);
+    });
+};
 
     let solved = localStorage.getItem('sessionLast_solved'),
         moves = localStorage.getItem('sessionLast_moves');

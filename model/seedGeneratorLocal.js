@@ -10,7 +10,7 @@ class SeedGeneratorLocal extends SeedGenerator {
         this.seed = null;
     }
 
-    generate() {
+    generate(callback) {
         this.seed = null;
         let boards = [],
             goals = [];
@@ -22,7 +22,7 @@ class SeedGeneratorLocal extends SeedGenerator {
         }
 
         let goal = this.provider.generateGoals(...goals)[Math.floor(Math.random() * goals.length)];
-        this.seed = {'b': boards, 'g': goal, 'p': this.playersGenerate(goal)};
+        callback({'b': boards, 'g': goal, 'p': this.playersGenerate(goal)});
     }
 
     playersGenerate(goal) {

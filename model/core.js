@@ -45,16 +45,20 @@ class GameLogic {
         this.possibleMoves = [];
         this.possibleMovesDirty = [];
         this.playerLastMove = {};
-        this.seedGenerator.generate();
+        let that = this;
+        this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
     }
 
     onSeedGenerated(seed) {
+        this.state = this.gameStates.playing;
+        this.ctxFore.clearRect(this.x, this.y, this.spaceSize * 16, this.spaceSize * 16);
+        // keep drawing to the display only!!
         this.state = this.gameStates.playing;
         this.board = this.boardGenerator.generate(seed.b);
         this.goal = seed.g;
         this.goalX = this.x + (this.goal % 16) * this.spaceSize;
         this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
-        for(let i = 0; i < seed.p.length; i++) {
+        for (let i = 0; i < seed.p.length; i++) {
             let p = new GamePiece();
             p.setLocation(seed.p[i]);
             p.index = i;
@@ -66,7 +70,7 @@ class GameLogic {
         this.player = this.playerPieces[0];
         // Draw once
         this.displayBoard();
-        if(this.onGameNew) {
+        if (this.onGameNew) {
             this.onGameNew(this);
         }
     }
@@ -315,20 +319,11 @@ class GameLogic {
     }
 
     update(delta) {
-        if (this.state == this.gameStates.newGame) {
-            if (this.seedGenerator.seed) {
-                this.onSeedGenerated(this.seedGenerator.seed);
-                this.state = this.gameStates.playing;
-                this.ctxFore.clearRect(this.x, this.y, this.spaceSize * 16, this.spaceSize * 16);
-                // keep drawing to the display only!!
-            }
-        } else {
-            for (let t = 0; t < this.moveTrail.length; t++) {
-                this.moveTrail[t].update(delta);
-                if (!this.moveTrail[t].isActive) {
-                    this.moveTrail.splice(t, 1);
-                    t--;
-                }
+        for (let t = 0; t < this.moveTrail.length; t++) {
+            this.moveTrail[t].update(delta);
+            if (!this.moveTrail[t].isActive) {
+                this.moveTrail.splice(t, 1);
+                t--;
             }
         }
     }

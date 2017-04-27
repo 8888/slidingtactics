@@ -12,12 +12,10 @@ class SeedGeneratorDatabase extends SeedGenerator {
         this.seed = null;
     }
 
-    generate() {
+    generate(callback) {
         let that = this;
         let seedGet = this.provider.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=get', '');
-        seedGet.then((s) => {
-            that.seed = s;
-        })
+        seedGet.then(callback)
         .catch((e) => {
             console.log(e);
             that.fallback.generate();
