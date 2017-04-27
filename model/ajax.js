@@ -21,7 +21,7 @@ ajax.post_request = function(destination, parameters, responseFunction) {
 
     console.log(">Request: '"+destination+"' '"+params+"'");
     xhr.send(params);
-}
+};
 
 ajax.promise_post = function(destination, parameters) {
     return new Promise(function(resolve, reject) {
@@ -40,6 +40,6 @@ ajax.promise_post = function(destination, parameters) {
         xhr.onerror = function() { reject("Network Issue"); };
         xhr.send("token="+localStorage.getItem('user_token')+"&"+parameters);
     });
-}
+};
 
 module.exports = ajax;

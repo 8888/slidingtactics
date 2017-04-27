@@ -7,9 +7,11 @@ class SeedGeneratorLocal extends SeedGenerator {
     constructor() {
         super();
         this.provider = new BoardGenerator();
+        this.seed = null;
     }
 
     generate() {
+        this.seed = null;
         let boards = [],
             goals = [];
         let boardSectionsLength = this.provider.boardSections.length;
@@ -20,7 +22,7 @@ class SeedGeneratorLocal extends SeedGenerator {
         }
 
         let goal = this.provider.generateGoals(...goals)[Math.floor(Math.random() * goals.length)];
-        return {'b': boards, 'g': goal, 'p': this.playersGenerate(goal)};
+        this.seed = {'b': boards, 'g': goal, 'p': this.playersGenerate(goal)};
     }
 
     playersGenerate(goal) {

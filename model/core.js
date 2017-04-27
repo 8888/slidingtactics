@@ -7,11 +7,12 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(ctxBack, ctxVFX, spriteSheet, seedGenerator,
+    constructor(ctxBack, ctxFore, ctxVFX, spriteSheet, seedGenerator,
             x, y, spaceSize, border,
             onGameNew, onGameOver
     ) {
         this.ctxBack = ctxBack;
+        this.ctxFore = ctxFore;
         this.ctxVFX = ctxVFX;
         this.spriteSheet = spriteSheet;
         this.seedGenerator = seedGenerator;
@@ -20,6 +21,7 @@ class GameLogic {
         this.spaceSize = spaceSize;
         this.border = border;
         this.gameStates = {
+            "newGame": "newGame",
             "playing" : "playing",
             "levelComplete" : "levelComplete",
             "gameOver": "gameOver"
@@ -33,23 +35,9 @@ class GameLogic {
     }
 
     newGame() {
-        this.state = this.gameStates.playing;
-        let seed = this.seedGenerator.generate();
-        this.board = this.boardGenerator.generate(seed.b);
-        this.goal = seed.g;
-        this.goalX = this.x + (this.goal % 16) * this.spaceSize;
-        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
+        this.state = this.gameStates.newGame;
         this.playerPieces = [];
         this.playerIndexByLocation = {};
-        for(let i = 0; i < seed.p.length; i++) {
-            let p = new GamePiece();
-            p.setLocation(seed.p[i]);
-            p.index = i;
-            this.playerPieces.push(p);
-            this.playerIndexByLocation[p.location] = p.index;
-        }
-
-        this.player = this.playerPieces[0];
         this.clickedPiece = null;
         this.moveHistory = []; // moves stored as [piece, direction, start, end]
         this.moveTrail = [];
@@ -57,6 +45,25 @@ class GameLogic {
         this.possibleMoves = [];
         this.possibleMovesDirty = [];
         this.playerLastMove = {};
+        this.seedGenerator.generate();
+    }
+
+    onSeedGenerated(seed) {
+        this.state = this.gameStates.playing;
+        this.board = this.boardGenerator.generate(seed.b);
+        this.goal = seed.g;
+        this.goalX = this.x + (this.goal % 16) * this.spaceSize;
+        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
+        for(let i = 0; i < seed.p.length; i++) {
+            let p = new GamePiece();
+            p.setLocation(seed.p[i]);
+            p.index = i;
+            p.isDirty = true;
+            this.playerPieces.push(p);
+            this.playerIndexByLocation[p.location] = p.index;
+        }
+
+        this.player = this.playerPieces[0];
         // Draw once
         this.displayBoard();
         if(this.onGameNew) {
@@ -167,14 +174,12 @@ class GameLogic {
                 if (this.possibleMoves.indexOf(cell) != -1) {
                     let direction = null;
                     if (cell < this.clickedPiece.location) {
-                        // north or west
                         if ((this.clickedPiece.location - cell) % 16 === 0) {
                             direction = Direction.N;
                         } else {
                             direction = Direction.W;
                         }
                     } else {
-                        // east or south
                         if ((cell - this.clickedPiece.location) % 16 === 0) {
                             direction = Direction.S;
                         } else {
@@ -187,8 +192,7 @@ class GameLogic {
                     this.showPossibleMoves(this.clickedPiece);
                 }
             }
-        }
-        else if (this.state == this.gameStates.gameOver) {
+        } else if (this.state == this.gameStates.gameOver) {
             if (this.x + (16 / 4) * this.spaceSize <= x && x <= (this.x + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize &&
                 this.y + (16 / 4) * this.spaceSize <= y && y <= (this.y + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize
             ) {
@@ -311,19 +315,30 @@ class GameLogic {
     }
 
     update(delta) {
-        for (let t = 0; t < this.moveTrail.length; t++) {
-            this.moveTrail[t].update(delta);
-            if (!this.moveTrail[t].isActive) {
-                this.moveTrail.splice(t, 1);
-                t--;
+        if (this.state == this.gameStates.newGame) {
+            if (this.seedGenerator.seed) {
+                this.onSeedGenerated(this.seedGenerator.seed);
+                this.state = this.gameStates.playing;
+                this.ctxFore.clearRect(this.x, this.y, this.spaceSize * 16, this.spaceSize * 16);
+                // keep drawing to the display only!!
+            }
+        } else {
+            for (let t = 0; t < this.moveTrail.length; t++) {
+                this.moveTrail[t].update(delta);
+                if (!this.moveTrail[t].isActive) {
+                    this.moveTrail.splice(t, 1);
+                    t--;
+                }
             }
         }
     }
 
-    display(ctx) {
+    display() {
         if (this.state == this.gameStates.gameOver) {
             return;
         }
+
+        let ctx = this.ctxFore;
         let boardSize = 16,
             x = this.x,
             y = this.y,
@@ -386,18 +401,18 @@ class GameLogic {
         }
         // draw the level complete menu
         if (this.state == this.gameStates.levelComplete) {
-            ctx.beginPath();
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
-            ctx.fill();
-            ctx.font = cellWidth.toString() + "px sans-serif";
-            ctx.fillStyle = "white";
+            this.ctxVFX.beginPath();
+            this.ctxVFX.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            this.ctxVFX.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
+            this.ctxVFX.fill();
+            this.ctxVFX.font = cellWidth.toString() + "px sans-serif";
+            this.ctxVFX.fillStyle = "white";
             let text = this.moveCount + " moves!";
-            ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth - cellWidth);
+            this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth - cellWidth);
             text = this.puzzlesSolved + " puzzles";
-            ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + cellWidth);
+            this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + cellWidth);
             text = this.totalMoves + " moves!";
-            ctx.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + (cellWidth * 2));
+            this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + (cellWidth * 2));
             this.state = this.gameStates.gameOver;
         }
     }

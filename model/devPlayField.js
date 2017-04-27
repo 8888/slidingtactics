@@ -1,12 +1,14 @@
 'use strict';
 
 let PlayField = require('../model/playfield.js'),
-    Direction = require('../model/direction.js');
+    Direction = require('../model/direction.js'),
+    SeedGenerator = require('../model/seedGeneratorLocal.js');
 
 class DevPlayField extends PlayField {
 
     constructor(containerElementId, x, y) {
         super(containerElementId);
+        this.seedGenerator = new SeedGenerator();
         this.gameWidth = x;
         this.gameHeight = y;
         let container = document.getElementById(containerElementId);

@@ -2,7 +2,7 @@
 
 let GameLogic = require('../model/core.js'),
     Direction = require('../model/direction.js'),
-    SeedGenerator = require('../model/seedGeneratorLocal.js');
+    SeedGenerator = require('../model/seedGeneratorDatabase.js');
 
 class PlayField {
     constructor(containerElementId) {
@@ -37,6 +37,7 @@ class PlayField {
         this.gamesCountTotal = 0;
         this.gamesSolvedCountTotal = 0;
         this.moveCountTotal = 0;
+        this.seedGenerator = new SeedGenerator();
     }
 
     canvasCreate(id, zIndex) {
@@ -76,7 +77,6 @@ class PlayField {
                 window.location = 'index.html';
             }
         });
-        this.seedGenerator = new SeedGenerator();
         this.gameBorder = this.gameWidth * this.gameHeight > 500 ? 2 : 10;
         let cellSpaceX = (this.canvasWidth / this.gameWidth - this.gameBorder * 2) / 16,
             cellSpaceY = (this.canvasHeight / this.gameHeight - this.gameBorder * 2) / 16;
@@ -93,7 +93,7 @@ class PlayField {
         for(let x = 0; x < this.gameWidth; x++) {
             for(let y = 0; y < this.gameHeight; y++) {
                 let g = new GameLogic(
-                    this.ctxBack, this.ctxVFX,
+                    this.ctxBack, this.ctxFore, this.ctxVFX,
                     this.canvasSprite, this.seedGenerator,
                     (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
                     this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
@@ -157,7 +157,7 @@ class PlayField {
 
     display() {
         for(let i = 0; i < this.gameInstances.length; i++) {
-            this.gameInstances[i].display(this.ctxFore);
+            this.gameInstances[i].display();
         }
     }
 
