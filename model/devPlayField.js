@@ -2,23 +2,22 @@
 
 let PlayField = require('../model/playfield.js'),
     Direction = require('../model/direction.js'),
-    SeedGenerator = require('../model/seedGeneratorLocal.js');
+    SeedGenerator = require('../model/seedGeneratorLocal.js'),
+    FPS = require('../model/devFPS.js');
 
 class DevPlayField extends PlayField {
 
     constructor(containerElementId, x, y) {
         super(containerElementId);
         this.seedGenerator = new SeedGenerator();
-        this.gameWidth = x;
-        this.gameHeight = y;
-        let container = document.getElementById(containerElementId);
-        this.canvasDebu = super.canvasCreate(containerElementId+'_debuCavnas', 3);
-        this.canvasDebu.style.display = 'none';
+        this.fps = new FPS(this.canvasWidth - 200, this.canvasHeight - 48);
+        this.games.width = x;
+        this.games.height = y;
+
+        this.canvasDebu = super.canvasCreate('debuCavnas', 3, true);
         this.ctxDebu = this.canvasDebu.getContext('2d');
-        container.appendChild(this.canvasDebu);
+
         this.devAutoCommandEnabled = true;
-        this.fpsTextDelta = null;
-        this.fpsTextSum = null;
         this.commandCountTotal = 0;
         this.commandsCountMax = 20;
         this.commandDetla = 0;
@@ -38,26 +37,22 @@ class DevPlayField extends PlayField {
         let that = this;
         this.statistics = [
             ["Time", function() {return parseInt(that.playfieldDeltaTime / 1000); }],
-            ["Game", function() {return that.gamesCountTotal; }],
-            ["Wins", function() {return that.gamesSolvedCountTotal; }],
+            ["Game", function() {return that.games.countTotal; }],
+            ["Wins", function() {return that.games.countSolved; }],
             ["Cmds", function() {return that.commandCountTotal; }],
             ["C/S", function() {return parseInt(that.commandCountTotal/(that.playfieldDeltaTime/1000)); }],
-            ["Move", function() {return that.moveCountTotal; }],
-            ["Move/Win", function() {return parseInt(that.moveCountTotal/that.gamesSolvedCountTotal); }],
-            ["Win/S", function() {return parseInt(that.gamesSolvedCountTotal/(that.playfieldDeltaTime/1000)); }]
+            ["Move", function() {return that.games.countMoves; }],
+            ["Move/Win", function() {return parseInt(that.games.countMoves/that.games.countSolved); }],
+            ["Win/S", function() {return parseInt(that.games.countSolved/(that.playfieldDeltaTime/1000)); }]
         ];
     }
 
     init() {
         let that = this;
         super.init(function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g); });
+        this.fps.init();
         this.commandCountTotal = 0;
         this.commands = [];
-        this.fps = {
-            frames: 60,
-            deltas: [],
-            sum: 0
-        };
         let l = this.gameInstanceTemplate.length,
             cl = this.commandDelayTemplate.length,
             h = 24 * (l+cl);
@@ -90,12 +85,12 @@ class DevPlayField extends PlayField {
 
     gameNewCallback(gamecore) {
         //console.log("new game", gamecore.board.name);
-        this.gamesCountTotal++;
+        this.games.countTotal++;
     }
 
     gameOverCallback(g) {
-        this.gamesSolvedCountTotal++;
-        this.moveCountTotal += g.moveCount;
+        this.games.countSolved++;
+        this.games.countMoves += g.moveCount;
         this.ctxFore.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
         this.ctxVFX.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
         this.ctxBack.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
@@ -106,10 +101,10 @@ class DevPlayField extends PlayField {
         super.eventListenersAttach();
         let that = this;
         let LEFT_MOUSE_CLICK = 0;
-        this.canvasDebu.addEventListener("mousedown", function(event) {
+        window.addEventListener("mousedown", function(event) {
             if (event.button === LEFT_MOUSE_CLICK) {
                 let l = that.gameInstanceTemplate.length + that.commandDelayTemplate.length;
-                let y = Math.floor((event.layerY - (that.canvasDebu.height - 48 - 24 * l)) / 24),
+                let y = Math.floor((event.layerY - (that.canvasHeight - 48 - 24 * l)) / 24),
                     x = event.layerX;
                 if (x > that.canvasWidth - 100 && x < that.canvasWidth) {
                     if (y < 0) {
@@ -117,8 +112,8 @@ class DevPlayField extends PlayField {
                         that.commandDelay = that.commandDelayTemplate[y][0];
                     } else if (y < l) {
                         let gi = that.gameInstanceTemplate[y-that.commandDelayTemplate.length];
-                        that.gameWidth = gi[0];
-                        that.gameHeight = gi[1];
+                        that.games.width = gi[0];
+                        that.games.height = gi[1];
                         that.init();
                     }
                 }
@@ -126,7 +121,7 @@ class DevPlayField extends PlayField {
             }
         });
 
-        this.canvasActors.addEventListener("keydown", function(event) {
+        window.addEventListener("keydown", function(event) {
             let devSelect = null;
             if (event.key === "1") {
                 devSelect = 0;
@@ -201,12 +196,7 @@ class DevPlayField extends PlayField {
                 this.commands.shift();
             }
         }
-
-        this.fps.deltas.unshift(delta);
-        if (this.fps.deltas.length > this.fps.frames) {
-            this.fps.deltas.pop();
-        }
-        this.fps.sum = this.fps.deltas.reduce(function(a, b) { return a + b; });
+        this.fps.update(delta);
     }
 
     display() {
@@ -215,32 +205,19 @@ class DevPlayField extends PlayField {
             if (this.commands.length) {
                 let l = this.commands.length;
                 this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
-                this.ctxDebu.clearRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.gameBorder, 48);
-                this.ctxDebu.fillRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.gameBorder, 48);
-                this.ctxDebu.strokeRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.gameBorder, 48);
+                this.ctxDebu.clearRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.games.border, 48);
+                this.ctxDebu.fillRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.games.border, 48);
+                this.ctxDebu.strokeRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.games.border, 48);
                 this.ctxDebu.font = "48px sans-serif";
                 for(let i = 0; i < l; i++) {
                     let c = this.commands[i];
                     this.ctxDebu.fillStyle = i == l - 1 ? 'red' : 'black';
-                    this.ctxDebu.fillText(String.fromCharCode(parseInt(c, 16)), this.gameBorder + 48 * (l - i -1), this.canvasHeight-8);
+                    this.ctxDebu.fillText(String.fromCharCode(parseInt(c, 16)), this.games.border + 48 * (l - i -1), this.canvasHeight-8);
                 }
             }
 
             this.displayStatistics();
-
-            let deltaText = this.fps.deltas[0], sumText = this.fps.sum;
-            if (deltaText != this.fpsTextDelta || sumText != this.fpsTextSum) {
-                this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
-                this.ctxDebu.clearRect(this.canvasWidth - 200, this.canvasHeight - 48, 200, 48);
-                this.ctxDebu.fillRect(this.canvasWidth - 200, this.canvasHeight - 48, 200, 48);
-                this.ctxDebu.strokeRect(this.canvasWidth - 200, this.canvasHeight - 48, 200, 48);
-                this.fpsTextDelta = deltaText;
-                this.fpsTextSum = sumText;
-                let fpsText = this.fpsTextDelta.toFixed(2).toString() + "ms " + (1000/(this.fpsTextSum/this.fps.frames)).toFixed(0) + "fps";
-                this.ctxDebu.font = "24px sans-serif";
-                this.ctxDebu.fillStyle = 'red';
-                this.ctxDebu.fillText(fpsText, this.canvasWidth - 195, this.canvasHeight-12);
-            }
+            this.fps.display(this.ctxDebu);
         }
     }
 

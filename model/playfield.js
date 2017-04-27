@@ -6,48 +6,45 @@ let GameLogic = require('../model/core.js'),
 
 class PlayField {
     constructor(containerElementId) {
-        let container = document.getElementById(containerElementId);
-        this.canvasActors = this.canvasCreate(containerElementId + '_pieceCanvas', 3);
-        this.canvasAnimation = this.canvasCreate(containerElementId + '_effectCanvas', 2);
-        this.canvasBack = this.canvasCreate(containerElementId + '_backCanvas', 1);
-        this.canvasSprite = this.canvasCreate(containerElementId + '_spriteCanvas', 0);
-        container.appendChild(this.canvasActors);
-        container.appendChild(this.canvasAnimation);
-        container.appendChild(this.canvasBack);
-        container.appendChild(this.canvasSprite);
-        this.canvasActors.tabIndex = 0;
-        this.canvasActors.focus();
-        this.canvasBack.style.background = 'Lavender';
-        this.canvasSprite.style.display = 'none';
-        this.ctxFore = this.canvasActors.getContext('2d');
-        this.ctxVFX = this.canvasAnimation.getContext('2d');
-        this.ctxBack = this.canvasBack.getContext('2d');
-        this.ctxSprite = this.canvasSprite.getContext('2d');
-        this.canvasWidth = this.canvasActors.width;
-        this.canvasHeight = this.canvasActors.height;
-        this.seedGenerator = null;
+        this.container = document.getElementById(containerElementId);
+        this.canvasWidth = 1280;
+        this.canvasHeight = 720;
+        this.canvasSprite = this.canvasCreate('spriteCanvas', 0, true);
+        this.ctxBack = this.canvasCreate('backCanvas', 1, false, 'Lavender').getContext('2d');;
+        this.ctxVFX = this.canvasCreate('effectCanvas', 2).getContext('2d');
+        this.ctxFore = this.canvasCreate('pieceCanvas', 3).getContext('2d');
         this.gameInstances = [];
-        this.gameWidth = 1;
-        this.gameHeight = 1;
-        this.gameBorder = 10;
+        this.games = {
+            width: 1,
+            height: 1,
+            border: 10,
+            countTotal: 0,
+            countSolved: 0,
+            countMoves: 0
+        };
+
+        this.seedGenerator = null;
         this.cellSpace = null;
-        this.mouseX = null;
-        this.mouseY = null;
         this.playfieldDeltaTime = 0;
-        this.gamesCountTotal = 0;
-        this.gamesSolvedCountTotal = 0;
-        this.moveCountTotal = 0;
         this.seedGenerator = new SeedGenerator();
     }
 
-    canvasCreate(id, zIndex) {
+    canvasCreate(id, zIndex, isHidden, backgroundColor) {
         let canvas = document.createElement('CANVAS');
-        canvas.id = id;
+        canvas.id = this.container.id + '_' + id;
         canvas.style = 'z-index: '+zIndex+';';
         canvas.setAttribute('class', 'cnvs');
-        canvas.setAttribute('width', 1280);
-        canvas.setAttribute('height', 720);
+        canvas.setAttribute('width', this.canvasWidth);
+        canvas.setAttribute('height', this.canvasHeight);
         canvas.oncontextmenu = 'return false;';
+        if (isHidden) {
+            canvas.style.display = 'none';
+        }
+        if (backgroundColor) {
+            canvas.style.background = backgroundColor;
+        }
+        
+        this.container.appendChild(canvas);
         return canvas;
     }
 
@@ -69,35 +66,35 @@ class PlayField {
     init(onGameNewCallback, onGameOverCallback) {
         let that = this;
         onGameOverCallback || (onGameOverCallback = function(g) {
-            that.gamesSolvedCountTotal++;
-            that.moveCountTotal += g.moveCount;
-            if (that.gamesSolvedCountTotal == 5) {
-                localStorage.setItem("sessionLast_solved", that.gamesSolvedCountTotal);
-                localStorage.setItem("sessionLast_moves", that.moveCountTotal);
+            that.games.countSolved++;
+            that.games.countMoves += g.moveCount;
+            if (that.games.countSolved == 5) {
+                localStorage.setItem("sessionLast_solved", that.games.countSolved);
+                localStorage.setItem("sessionLast_moves", that.games.countMoves);
                 window.location = 'index.html';
             }
         });
-        this.gameBorder = this.gameWidth * this.gameHeight > 500 ? 2 : 10;
-        let cellSpaceX = (this.canvasWidth / this.gameWidth - this.gameBorder * 2) / 16,
-            cellSpaceY = (this.canvasHeight / this.gameHeight - this.gameBorder * 2) / 16;
+        this.games.border = this.games.width * this.games.height > 500 ? 2 : 10;
+        let cellSpaceX = (this.canvasWidth / this.games.width - this.games.border * 2) / 16,
+            cellSpaceY = (this.canvasHeight / this.games.height - this.games.border * 2) / 16;
         this.cellSpace = Math.floor(Math.max(Math.min(cellSpaceX, cellSpaceY), 1));
         this.playfieldDeltaTime = 0;
         this.gameInstances = [];
-        this.gamesCountTotal = 0;
-        this.gamesSolvedCountTotal = 0;
-        this.moveCountTotal = 0;
+        this.games.countTotal = 0;
+        this.games.countSolved = 0;
+        this.games.countMoves = 0;
         this.ctxFore.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxVFX.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxBack.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        this.createSprites(this.ctxSprite);
-        for(let x = 0; x < this.gameWidth; x++) {
-            for(let y = 0; y < this.gameHeight; y++) {
+        this.createSprites(this.canvasSprite.getContext('2d'));
+        for(let x = 0; x < this.games.width; x++) {
+            for(let y = 0; y < this.games.height; y++) {
                 let g = new GameLogic(
                     this.ctxBack, this.ctxFore, this.ctxVFX,
                     this.canvasSprite, this.seedGenerator,
-                    (this.gameBorder + this.cellSpace * 16) * x + this.gameBorder,
-                    this.gameBorder + (this.gameBorder + this.cellSpace * 16) * y,
-                    this.cellSpace, this.gameBorder,
+                    (this.games.border + this.cellSpace * 16) * x + this.games.border,
+                    this.games.border + (this.games.border + this.cellSpace * 16) * y,
+                    this.cellSpace, this.games.border,
                     onGameNewCallback, onGameOverCallback);
                 this.gameInstances.push(g);
             }
@@ -107,28 +104,23 @@ class PlayField {
     eventListenersAttach() {
         let that = this;
         let LEFT_MOUSE_CLICK = 0;
-        this.canvasActors.addEventListener("mousedown", function(event) {
+        window.addEventListener("mousedown", function(event) {
             if (event.button === LEFT_MOUSE_CLICK) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
-                    that.gameInstances[i].onMouse1Down(that.mouseX, that.mouseY);
+                    that.gameInstances[i].onMouse1Down(event.layerX, event.layerY);
                 }
             }
         });
 
-        this.canvasActors.addEventListener("mousemove", function(event) {
-            that.mouseX = event.layerX;
-            that.mouseY = event.layerY;
-        });
-
-        this.canvasActors.addEventListener("mouseup", function(event) {
+        window.addEventListener("mouseup", function(event) {
             if (event.button === LEFT_MOUSE_CLICK) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
-                    that.gameInstances[i].onMouse1Up(that.mouseX, that.mouseY);
+                    that.gameInstances[i].onMouse1Up(event.layerX, event.layerY);
                 }
             }
         });
 
-        this.canvasActors.addEventListener("keydown", function(event) {
+        window.addEventListener("keydown", function(event) {
             let direction = null;
             if (event.key === "ArrowLeft") {
                 direction = Direction.W;
@@ -162,9 +154,6 @@ class PlayField {
     }
 
     createSprites(ctx) {
-        this.canvasSprite.setAttribute('width', this.cellSpace);
-        this.canvasSprite.setAttribute('height', this.cellSpace * 6);
-        // red, red selected, blue, blue selected
         let s = this.cellSpace,
             r = s*0.9;
         for (let i = 0; i < 4; i++) {
@@ -178,11 +167,7 @@ class PlayField {
             gradient.addColorStop(0.98, color);
             gradient.addColorStop(1,"white");
             ctx.fillStyle = gradient;
-            ctx.arc(
-                x,
-                y,
-                this.cellSpace * 0.46, 0, 2 * Math.PI
-            );
+            ctx.arc(x, y, this.cellSpace * 0.46, 0, 2 * Math.PI);
             ctx.fill();
             if (i == 1 || i == 3) {
                 ctx.beginPath();
