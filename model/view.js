@@ -151,22 +151,23 @@ class View {
 
     displayLevelCompleteMenu(moveCount, puzzlesSolved, totalMoves) {
         let boardSize = 16,
-            x = this.x,
+            cellWidth = this.spaceSize,
+            x = this.x + (boardSize / 4) * cellWidth,
             y = this.y,
-            cellWidth = this.spaceSize;
+            w = (boardSize / 2) * cellWidth;
 
         this.ctxVFX.beginPath();
         this.ctxVFX.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        this.ctxVFX.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
+        this.ctxVFX.rect(x, y + (boardSize / 4) * cellWidth, w, w);
         this.ctxVFX.fill();
         this.ctxVFX.font = cellWidth.toString() + "px sans-serif";
         this.ctxVFX.fillStyle = "white";
         let text = moveCount + " moves!";
-        this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth - cellWidth);
+        this.ctxVFX.fillText(text, x + cellWidth, y + w - cellWidth);
         text = puzzlesSolved + " puzzles";
-        this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + cellWidth);
+        this.ctxVFX.fillText(text, x + cellWidth, y + w + cellWidth);
         text = totalMoves + " moves!";
-        this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + (cellWidth * 2));
+        this.ctxVFX.fillText(text, x + cellWidth, y + w + (cellWidth * 2));
     }
 
     tempClearFore() {

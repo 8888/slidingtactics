@@ -91,9 +91,9 @@ class DevPlayField extends PlayField {
     gameOverCallback(g) {
         this.games.countSolved++;
         this.games.countMoves += g.moveCount;
-        this.ctxFore.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
-        this.ctxVFX.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
-        this.ctxBack.clearRect(g.x, g.y, this.cellSpace * 16, this.cellSpace * 16);
+        this.ctxFore.clearRect(g.x, g.y, this.games.cellSpace * 16, this.games.cellSpace * 16);
+        this.ctxVFX.clearRect(g.x, g.y, this.games.cellSpace * 16, this.games.cellSpace * 16);
+        this.ctxBack.clearRect(g.x, g.y, this.games.cellSpace * 16, this.games.cellSpace * 16);
         g.newGame();
     }
 
@@ -121,41 +121,22 @@ class DevPlayField extends PlayField {
             }
         });
 
+        let keyDownToSelect = { "1": 0, "2": 1, "3": 2, "4": 3 };
         window.addEventListener("keydown", function(event) {
-            let devSelect = null;
-            if (event.key === "1") {
-                devSelect = 0;
-            } else if (event.key === "2") {
-                devSelect = 1;
-            } else if (event.key === "3") {
-                devSelect = 2;
-            } else if (event.key === "4") {
-                devSelect = 3;
-            }
-
-            if (devSelect !== null) {
+            let devSelect = keyDownToSelect[event.key];
+            if (devSelect !== undefined) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
                     that.gameInstances[i].onDevSelect(devSelect);
                 }
             }
         });
 
+        let keyDownToHide = { '`': that.canvasDebu, 'f': that.canvasActors, 'b': that.canvasBack, 'v': that.canvasAnimation };
+        let displayToggle = function(e) { let s = e.style.display; e.style.display = s == 'none' ? 'inline' : 'none'; };
         window.addEventListener("keydown", function(event) {
-            if (event.key == '`') {
-                let s = that.canvasDebu.style.display;
-                that.canvasDebu.style.display = s == 'none' ? 'inline' : 'none';
-            } else if (event.key == 'f') {
-                let s = that.canvasActors.style.display;
-                that.canvasActors.style.display = s == 'none' ? 'inline' : 'none';
-            } else if (event.key == 'b') {
-                let s = that.canvasBack.style.display;
-                that.canvasBack.style.display = s == 'none' ? 'inline' : 'none';
-            } else if (event.key == 'v') {
-                let s = that.canvasAnimation.style.display;
-                that.canvasAnimation.style.display = s == 'none' ? 'inline' : 'none';
-            } else if (event.key == "p") {
-                that.devAutoCommandEnabled = !that.devAutoCommandEnabled;
-            }
+            let element = keyDownToHide[event.key];
+            if (element) displayToggle(element);
+            if (event.key == "p") that.devAutoCommandEnabled = !that.devAutoCommandEnabled;
         });
     }
 

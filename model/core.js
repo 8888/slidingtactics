@@ -53,9 +53,11 @@ class GameLogic {
         // keep drawing to the display only!!
         this.state = this.gameStates.playing;
         this.board = this.boardGenerator.generate(seed.b);
-        this.goal = seed.g;
-        this.goalX = this.x + (this.goal % 16) * this.spaceSize;
-        this.goalY = this.y + Math.floor(this.goal / 16) * this.spaceSize;
+        this.goal = {
+            index: seed.g,
+            x: this.x + (seed.g % 16) * this.spaceSize,
+            y: this.y + Math.floor(seed.g / 16) * this.spaceSize
+        };
         for (let i = 0; i < seed.p.length; i++) {
             let p = new GamePiece();
             p.setLocation(seed.p[i]);
@@ -67,7 +69,7 @@ class GameLogic {
 
         this.player = this.playerPieces[0];
         // Draw once
-        this.view.displayBoard(this.board, this.goalX, this.goalY, this.border);
+        this.view.displayBoard(this.board, this.goal.x, this.goal.y, this.border);
         if (this.onGameNew) {
             this.onGameNew(this);
         }
@@ -114,7 +116,7 @@ class GameLogic {
             if (this.moveHistory.length > 25) {
                 this.moveHistory.shift();
             }
-            if (this.player.location == this.goal) {
+            if (this.player.location == this.goal.index) {
                 this.puzzleComplete();
             }
         }
@@ -127,7 +129,7 @@ class GameLogic {
         } else if (this.playerLastMove[piece.index] == Direction.reverse[direction]) {
             // can not move back the way you last came
             return false;
-        } else if (piece == this.player && this.playerLastMove[piece.index] === undefined && end == this.goal) {
+        } else if (piece == this.player && this.playerLastMove[piece.index] === undefined && end == this.goal.index) {
             // The main player piece must move once before moving onto the goal
             return false;
         } else {

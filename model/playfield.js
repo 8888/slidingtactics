@@ -10,22 +10,24 @@ class PlayField {
         this.canvasWidth = 1280;
         this.canvasHeight = 720;
         this.canvasSprite = this.canvasCreate('spriteCanvas', 0, true);
-        this.ctxBack = this.canvasCreate('backCanvas', 1, false, 'Lavender').getContext('2d');;
-        this.ctxVFX = this.canvasCreate('effectCanvas', 2).getContext('2d');
-        this.ctxFore = this.canvasCreate('pieceCanvas', 3).getContext('2d');
+        this.canvasBack = this.canvasCreate('backCanvas', 1, false, 'Lavender');
+        this.ctxBack = this.canvasBack.getContext('2d');
+        this.canvasAnimation = this.canvasCreate('effectCanvas', 2);
+        this.ctxVFX = this.canvasAnimation.getContext('2d');
+        this.canvasActors = this.canvasCreate('pieceCanvas', 3);
+        this.ctxFore = this.canvasActors.getContext('2d');
         this.gameInstances = [];
         this.games = {
             width: 1,
             height: 1,
             border: 10,
+            cellSpace: null,
+            deltaTotal: 0,
             countTotal: 0,
             countSolved: 0,
             countMoves: 0
         };
 
-        this.seedGenerator = null;
-        this.cellSpace = null;
-        this.playfieldDeltaTime = 0;
         this.seedGenerator = new SeedGenerator();
     }
 
@@ -74,12 +76,12 @@ class PlayField {
                 window.location = 'index.html';
             }
         });
+        this.gameInstances = [];
         this.games.border = this.games.width * this.games.height > 500 ? 2 : 10;
         let cellSpaceX = (this.canvasWidth / this.games.width - this.games.border * 2) / 16,
             cellSpaceY = (this.canvasHeight / this.games.height - this.games.border * 2) / 16;
-        this.cellSpace = Math.floor(Math.max(Math.min(cellSpaceX, cellSpaceY), 1));
-        this.playfieldDeltaTime = 0;
-        this.gameInstances = [];
+        this.games.cellSpace = Math.floor(Math.max(Math.min(cellSpaceX, cellSpaceY), 1));
+        this.games.deltaTotal = 0;
         this.games.countTotal = 0;
         this.games.countSolved = 0;
         this.games.countMoves = 0;
@@ -92,9 +94,9 @@ class PlayField {
                 let g = new GameLogic(
                     this.ctxBack, this.ctxFore, this.ctxVFX,
                     this.canvasSprite, this.seedGenerator,
-                    (this.games.border + this.cellSpace * 16) * x + this.games.border,
-                    this.games.border + (this.games.border + this.cellSpace * 16) * y,
-                    this.cellSpace, this.games.border,
+                    (this.games.border + this.games.cellSpace * 16) * x + this.games.border,
+                    this.games.border + (this.games.border + this.games.cellSpace * 16) * y,
+                    this.games.cellSpace, this.games.border,
                     onGameNewCallback, onGameOverCallback);
                 this.gameInstances.push(g);
             }
@@ -121,17 +123,7 @@ class PlayField {
         });
 
         window.addEventListener("keydown", function(event) {
-            let direction = null;
-            if (event.key === "ArrowLeft") {
-                direction = Direction.W;
-            } else if (event.key === "ArrowUp") {
-                direction = Direction.N;
-            } else if (event.key === "ArrowRight") {
-                direction = Direction.E;
-            } else if (event.key === "ArrowDown") {
-                direction = Direction.S;
-            }
-
+            let direction = Direction.byEventKey[event.key];
             if (direction) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
                     that.gameInstances[i].onDirection(direction);
@@ -141,7 +133,7 @@ class PlayField {
     }
 
     update(delta) {
-        this.playfieldDeltaTime += delta;
+        this.games.deltaTotal += delta;
         for(let i = 0; i < this.gameInstances.length; i++) {
             this.gameInstances[i].update(delta);
         }
@@ -154,29 +146,29 @@ class PlayField {
     }
 
     createSprites(ctx) {
-        let s = this.cellSpace,
+        let s = this.games.cellSpace,
             r = s*0.9;
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             let color = i < 2 ? '#ff0000' : '#0000ff';
-            let x = this.cellSpace / 2,
-                y = (this.cellSpace * i) + (this.cellSpace / 2);
-            let gradient = ctx.createRadialGradient(x+this.cellSpace/5,y-this.cellSpace/5,0, x,y, this.cellSpace);
+            let x = s / 2,
+                y = (s * i) + (s / 2);
+            let gradient = ctx.createRadialGradient(x+s/5,y-s/5,0, x,y, this.games.cellSpace);
             gradient.addColorStop(0,"white");
             gradient.addColorStop(0.8, color);
             gradient.addColorStop(0.98, color);
             gradient.addColorStop(1,"white");
             ctx.fillStyle = gradient;
-            ctx.arc(x, y, this.cellSpace * 0.46, 0, 2 * Math.PI);
+            ctx.arc(x, y, s * 0.46, 0, 2 * Math.PI);
             ctx.fill();
             if (i == 1 || i == 3) {
                 ctx.beginPath();
-                ctx.lineWidth = this.cellSpace * 0.1;
+                ctx.lineWidth = s * 0.1;
                 ctx.strokeStyle = '#ffff00';
                 ctx.arc(
-                    this.cellSpace / 2,
-                    (this.cellSpace * i) + (this.cellSpace / 2),
-                    this.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
+                    s / 2,
+                    (s * i) + (s / 2),
+                    s / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
                 );
                 ctx.stroke();
             }
@@ -184,29 +176,29 @@ class PlayField {
 
         // possible moves
         ctx.beginPath();
-        ctx.lineWidth = this.cellSpace * 0.1;
+        ctx.lineWidth = s * 0.1;
         ctx.strokeStyle = '#ffff00';
         ctx.arc(
-            this.cellSpace / 2,
-            (this.cellSpace * 4) + (this.cellSpace / 2),
-            this.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
+            s / 2,
+            (s * 4) + (s / 2),
+            this.games.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
         );
         ctx.stroke();
 
         // goal
         ctx.fillStyle = '#f442f1';
         ctx.fillRect(
-            this.cellSpace * 0.1,
-            (this.cellSpace * 0.1) + (this.cellSpace * 5),
-            this.cellSpace * 0.8,
-            this.cellSpace * 0.8
+            s * 0.1,
+            (s * 0.1) + (s * 5),
+            s * 0.8,
+            s * 0.8
         );
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             ctx.arc(
-                this.cellSpace / 2, this.cellSpace / 2 + this.cellSpace * 5,
-                (this.cellSpace*0.46)/5 * (i+1), 0, Math.PI * 2, true);
+                s / 2, s / 2 + s * 5,
+                (s*0.46)/5 * (i+1), 0, Math.PI * 2, true);
             ctx.fill();
         }
     }
