@@ -4,17 +4,15 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     GamePiece = require('../model/gamePiece.js'),
     Direction = require('../model/direction.js'),
     Goal = require('../model/goal.js'),
-    Trail = require('../model/trail.js');
+    Trail = require('../model/trail.js'),
+    View = require('../model/view.js');
 
 class GameLogic {
     constructor(ctxBack, ctxFore, ctxVFX, spriteSheet, seedGenerator,
             x, y, spaceSize, border,
             onGameNew, onGameOver
     ) {
-        this.ctxBack = ctxBack;
-        this.ctxFore = ctxFore;
-        this.ctxVFX = ctxVFX;
-        this.spriteSheet = spriteSheet;
+        this.view = new View(ctxBack, ctxFore, ctxVFX, spriteSheet, x, y, spaceSize);
         this.seedGenerator = seedGenerator;
         this.x = x;
         this.y = y;
@@ -51,7 +49,7 @@ class GameLogic {
 
     onSeedGenerated(seed) {
         this.state = this.gameStates.playing;
-        this.ctxFore.clearRect(this.x, this.y, this.spaceSize * 16, this.spaceSize * 16);
+        this.view.tempClearFore();
         // keep drawing to the display only!!
         this.state = this.gameStates.playing;
         this.board = this.boardGenerator.generate(seed.b);
@@ -69,7 +67,7 @@ class GameLogic {
 
         this.player = this.playerPieces[0];
         // Draw once
-        this.displayBoard();
+        this.view.displayBoard(this.board, this.goalX, this.goalY, this.border);
         if (this.onGameNew) {
             this.onGameNew(this);
         }
@@ -247,77 +245,6 @@ class GameLogic {
         }
     }
 
-    displayBoard() {
-        let boardSize = 16,
-            x = this.x,
-            y = this.y,
-            cellWidth = this.spaceSize,
-            ctx = this.ctxBack;
-        ctx.lineWidth = 1;
-        ctx.clearRect(x - this.border/2, y - this.border/2,
-            cellWidth * 16 + this.border/2, cellWidth * 16 + this.border/2);
-        // grid
-        ctx.setLineDash([3, 2]);
-        ctx.beginPath();
-        for (let i = 1; i < boardSize; i++) {
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(136, 136, 136, 0.4)';
-            ctx.moveTo(x + (cellWidth * i), y);
-            ctx.lineTo(x + (cellWidth * i), y + (boardSize * cellWidth));
-            ctx.moveTo(x, y + (cellWidth * i));
-            ctx.lineTo(x + (boardSize * cellWidth), y + (cellWidth * i));
-        }
-        ctx.stroke();
-        // all goal options
-        ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
-        for(let i = 0; i < this.board.goals.length; i++) {
-            let g = this.board.goals[i];
-            let gX = g % 16,
-                gY = Math.floor(g / 16);
-            ctx.beginPath();
-            ctx.arc(
-                x + (cellWidth * gX) + (cellWidth / 2),
-                y + (cellWidth * gY) + (cellWidth / 2),
-                cellWidth / 4, 0, 2 * Math.PI
-            );
-            ctx.stroke();
-        }
-        ctx.setLineDash([0]);
-        // draw the outline
-        ctx.beginPath();
-        ctx.lineWidth = this.spaceSize < 16*3 ? 1 : 2;
-        ctx.strokeStyle = '#000000';
-        ctx.strokeRect(x, y, (boardSize * cellWidth), (boardSize * cellWidth));
-        // draw each space
-        ctx.lineCap = 'round';
-        for (let r = 0; r < boardSize; r++) {
-            for (let s = 0; s < boardSize; s++) {
-                let space = this.board.item(r * boardSize + s);
-                if (space & Direction.N) {
-                    ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r));
-                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r));
-                }
-                if (space & Direction.E) {
-                    ctx.moveTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r));
-                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r) + cellWidth);
-                }
-                if (space & Direction.S) {
-                    ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r) + cellWidth);
-                    ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r) + cellWidth);
-                }
-                if (space & Direction.W) {
-                    ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r) + cellWidth);
-                    ctx.lineTo(x + (cellWidth * s), y + (cellWidth * r));
-                }
-            }
-        }
-        ctx.stroke();
-        ctx.lineCap = 'butt';
-        ctx.lineWidth = 1;
-        // draw the goal
-        ctx.drawImage(this.spriteSheet, 0, cellWidth * 5, cellWidth, cellWidth, this.goalX, this.goalY, cellWidth, cellWidth);
-    }
-
     update(delta) {
         for (let t = 0; t < this.moveTrail.length; t++) {
             this.moveTrail[t].update(delta);
@@ -329,85 +256,11 @@ class GameLogic {
     }
 
     display() {
-        if (this.state == this.gameStates.gameOver) {
-            return;
+        if (this.state != this.gameStates.gameOver) {
+            this.view.display(this.moveTrail, this.possibleMovesDirty, this.playerPieces, this.possibleMoves, this.clickedPiece, this.player);
         }
-
-        let ctx = this.ctxFore;
-        let boardSize = 16,
-            x = this.x,
-            y = this.y,
-            cellWidth = this.spaceSize;
-
-        this.ctxVFX.clearRect(x, y, cellWidth * boardSize, cellWidth * boardSize);
-        // draw the move trail
-        let xW = 0,
-            yW = 0;
-        this.ctxVFX.beginPath();
-        for (let i = 0, l = this.moveTrail.length; i < l; i++) {
-            let m = this.moveTrail[i];
-            this.ctxVFX.fillStyle = 'rgba(255, 255, 0, '+(m.width*2)/cellWidth+')';
-            if (m.startX == m.endX) {
-                xW = m.width;
-                yW = 0;
-            } else {
-                xW = 0;
-                yW = m.width;
-            }
-            this.ctxVFX.fillRect(
-                x + (cellWidth * m.startX) + ((cellWidth - xW) / 2), y + (cellWidth * m.startY) + ((cellWidth -yW) / 2),
-                (m.endX - m.startX) * cellWidth + xW, (m.endY - m.startY) * cellWidth + yW
-            );
-        }
-        if (this.possibleMovesDirty.length) {
-            // remove old possible moves
-            for (let i = 0; i < this.possibleMovesDirty.length; i++) {
-                let p = this.possibleMovesDirty[i],
-                    py = Math.floor(p / boardSize),
-                    px = p % boardSize;
-                ctx.clearRect(x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
-            }
-            this.possibleMovesDirty = [];
-        }
-        // draw the pieces
-        for (let i = 0; i < this.playerPieces.length; i++) {
-            let p = this.playerPieces[i];
-            if (p.isDirty) {
-                p.isDirty = false;
-                let pL = p.locationPrevious;
-                if (pL) {
-                    ctx.clearRect(x + pL.x * cellWidth, y + pL.y * cellWidth, cellWidth, cellWidth);
-                    p.locationPrevious = null;
-                }
-                let pIndex = (this.clickedPiece == p ? 1 : 0) + (this.player == p ? 0 : 2);
-                ctx.drawImage(this.spriteSheet,
-                    0, cellWidth * pIndex, cellWidth, cellWidth,
-                    x + (cellWidth * p.x), y + (cellWidth * p.y), cellWidth, cellWidth);
-            }
-        }
-        if (this.possibleMoves.length) {
-            // draw the possible moves
-            for (let i = 0; i < this.possibleMoves.length; i++) {
-                let p = this.possibleMoves[i],
-                    py = Math.floor(p / boardSize),
-                    px = p % boardSize;
-                ctx.drawImage(this.spriteSheet, 0, cellWidth * 4, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
-            }
-        }
-        // draw the level complete menu
         if (this.state == this.gameStates.levelComplete) {
-            this.ctxVFX.beginPath();
-            this.ctxVFX.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            this.ctxVFX.rect(x + (boardSize / 4) * cellWidth, y + (boardSize / 4) * cellWidth, (boardSize / 2) * cellWidth, (boardSize / 2) * cellWidth);
-            this.ctxVFX.fill();
-            this.ctxVFX.font = cellWidth.toString() + "px sans-serif";
-            this.ctxVFX.fillStyle = "white";
-            let text = this.moveCount + " moves!";
-            this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth - cellWidth);
-            text = this.puzzlesSolved + " puzzles";
-            this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + cellWidth);
-            text = this.totalMoves + " moves!";
-            this.ctxVFX.fillText(text, x + (boardSize / 4) * cellWidth + cellWidth, y + (boardSize / 2) * cellWidth + (cellWidth * 2));
+            this.view.displayLevelCompleteMenu(this.moveCount, this.puzzlesSolved, this.totalMoves);
             this.state = this.gameStates.gameOver;
         }
     }
