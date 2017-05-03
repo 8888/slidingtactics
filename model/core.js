@@ -4,25 +4,23 @@ let BoardGenerator = require('../model/boardGenerator.js'),
     GamePiece = require('../model/gamePiece.js'),
     Direction = require('../model/direction.js'),
     Goal = require('../model/goal.js'),
-    Trail = require('../model/trail.js'),
-    View = require('../model/view.js');
+    Trail = require('../model/trail.js');
 
 class GameLogic {
-    constructor(ctxBack, ctxFore, ctxVFX, spriteSheet, seedGenerator,
-            x, y, spaceSize, border,
+    constructor(view, seedGenerator,
+            x, y, spaceSize, boardSize,
             onGameNew, onGameOver
     ) {
-        this.view = new View(ctxBack, ctxFore, ctxVFX, spriteSheet, x, y, spaceSize);
+        this.view = view
         this.seedGenerator = seedGenerator;
         this.x = x;
         this.y = y;
         this.spaceSize = spaceSize;
-        this.border = border;
+        this.boardSize = boardSize;
         this.gameStates = {
             "newGame": "newGame",
             "playing" : "playing",
-            "levelComplete" : "levelComplete",
-            "gameOver": "gameOver"
+            "levelComplete" : "levelComplete"
         };
         this.totalMoves = 0;
         this.puzzlesSolved = 0;
@@ -37,7 +35,7 @@ class GameLogic {
         this.playerPieces = [];
         this.playerIndexByLocation = {};
         this.clickedPiece = null;
-        this.moveHistory = []; // moves stored as [piece, direction, start, end]
+        this.moveHistory = []; // moves stored as {piece, direction, start, end}
         this.moveTrail = [];
         this.moveCount = 0;
         this.possibleMoves = [];
@@ -45,18 +43,16 @@ class GameLogic {
         this.playerLastMove = {};
         let that = this;
         this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
+        this.boardNeedsToBeDrawn = true;
     }
 
     onSeedGenerated(seed) {
         this.state = this.gameStates.playing;
-        this.view.tempClearFore();
-        // keep drawing to the display only!!
-        this.state = this.gameStates.playing;
         this.board = this.boardGenerator.generate(seed.b);
         this.goal = {
             index: seed.g,
-            x: this.x + (seed.g % 16) * this.spaceSize,
-            y: this.y + Math.floor(seed.g / 16) * this.spaceSize
+            x: this.x + (seed.g % this.boardSize) * this.spaceSize,
+            y: this.y + Math.floor(seed.g / this.boardSize) * this.spaceSize
         };
         for (let i = 0; i < seed.p.length; i++) {
             let p = new GamePiece();
@@ -68,8 +64,6 @@ class GameLogic {
         }
 
         this.player = this.playerPieces[0];
-        // Draw once
-        this.view.displayBoard(this.board, this.goal.x, this.goal.y, this.border);
         if (this.onGameNew) {
             this.onGameNew(this);
         }
@@ -109,7 +103,12 @@ class GameLogic {
             delete this.playerIndexByLocation[start];
             this.playerIndexByLocation[piece.location] = pIndex;
             this.playerLastMove[piece.index] = direction;
-            this.moveHistory.push([piece, direction, start, piece.location]);
+            this.moveHistory.push({
+                'piece' : piece,
+                'direction' : direction,
+                'start' : start,
+                'end' : piece.location
+            });
             this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
             this.moveCount += 1;
             this.totalMoves += 1;
@@ -153,6 +152,26 @@ class GameLogic {
         }
     }
 
+    undoLastMove() {
+        if (this.moveHistory.length) {
+            let move = this.moveHistory.pop(),
+                p = move.piece;
+            p.setLocation(move.start);
+            let pIndex = this.playerIndexByLocation[move.end];
+            delete this.playerIndexByLocation[move.end];
+            this.playerIndexByLocation[p.location] = pIndex;
+            this.moveCount -= 1;
+            this.totalMoves -= 1;
+            for (let m = this.moveHistory.length - 1; m >= 0; m--) {
+                if (this.moveHistory[m].piece == p) {
+                    this.playerLastMove[pIndex] = this.moveHistory[m].direction;
+                    return;
+                }
+            }
+            delete this.playerLastMove[pIndex]; // covers cases if this was pieces only move
+        }
+    }
+
     puzzleComplete() {
         this.showPossibleMoves(null);
         this.puzzlesSolved += 1;
@@ -166,8 +185,8 @@ class GameLogic {
         // returns what cell was clicked
         let cellX = Math.floor((x - this.x) / this.spaceSize),
             cellY = Math.floor((y - this.y) / this.spaceSize);
-        if (cellX >= 0 && cellX < 16 && cellY >=0 && cellY < 16) {
-            return cellX + cellY*16;
+        if (cellX >= 0 && cellX < this.boardSize && cellY >=0 && cellY < this.boardSize) {
+            return cellX + cellY*this.boardSize;
         }
     }
 
@@ -178,13 +197,13 @@ class GameLogic {
                 if (this.possibleMoves.indexOf(cell) != -1) {
                     let direction = null;
                     if (cell < this.clickedPiece.location) {
-                        if ((this.clickedPiece.location - cell) % 16 === 0) {
+                        if ((this.clickedPiece.location - cell) % this.boardSize === 0) {
                             direction = Direction.N;
                         } else {
                             direction = Direction.W;
                         }
                     } else {
-                        if ((cell - this.clickedPiece.location) % 16 === 0) {
+                        if ((cell - this.clickedPiece.location) % this.boardSize === 0) {
                             direction = Direction.S;
                         } else {
                             direction = Direction.E;
@@ -196,9 +215,9 @@ class GameLogic {
                     this.showPossibleMoves(this.clickedPiece);
                 }
             }
-        } else if (this.state == this.gameStates.gameOver) {
-            if (this.x + (16 / 4) * this.spaceSize <= x && x <= (this.x + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize &&
-                this.y + (16 / 4) * this.spaceSize <= y && y <= (this.y + (16 / 4) * this.spaceSize) + (16 / 2) * this.spaceSize
+        } else if (this.state == this.gameStates.levelComplete) {
+            if (this.x + (this.boardSize / 4) * this.spaceSize <= x && x <= (this.x + (this.boardSize / 4) * this.spaceSize) + (this.boardSize / 2) * this.spaceSize &&
+                this.y + (this.boardSize / 4) * this.spaceSize <= y && y <= (this.y + (this.boardSize / 4) * this.spaceSize) + (this.boardSize / 2) * this.spaceSize
             ) {
                 this.newGame();
             }
@@ -247,6 +266,12 @@ class GameLogic {
         }
     }
 
+    onKeyDown(key) {
+        if (key == 'u') {
+            this.undoLastMove();
+        }
+    }
+
     update(delta) {
         for (let t = 0; t < this.moveTrail.length; t++) {
             this.moveTrail[t].update(delta);
@@ -258,12 +283,17 @@ class GameLogic {
     }
 
     display() {
-        if (this.state != this.gameStates.gameOver) {
-            this.view.display(this.moveTrail, this.possibleMovesDirty, this.playerPieces, this.possibleMoves, this.clickedPiece, this.player);
-        }
-        if (this.state == this.gameStates.levelComplete) {
-            this.view.displayLevelCompleteMenu(this.moveCount, this.puzzlesSolved, this.totalMoves);
-            this.state = this.gameStates.gameOver;
+        if (this.view && this.board) {
+            if (this.boardNeedsToBeDrawn) {
+                // only draw the board once
+                this.view.displayBoard(this.board, this.goal.x, this.goal.y);
+                this.boardNeedsToBeDrawn = false;
+            }
+            if (this.state == this.gameStates.playing) {
+                this.view.display(this.moveTrail, this.possibleMovesDirty, this.playerPieces, this.possibleMoves, this.clickedPiece, this.player);
+            } else if (this.state == this.gameStates.levelComplete && !this.view.levelComplete) {
+                this.view.displayLevelCompleteMenu(this.moveCount, this.puzzlesSolved, this.totalMoves);
+            }
         }
     }
 }

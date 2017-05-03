@@ -3,7 +3,7 @@
 let Direction = require('../model/direction.js');
 
 class View {
-    constructor(ctxBack, ctxFore, ctxVFX, spriteSheet, x, y, spaceSize) {
+    constructor(ctxBack, ctxFore, ctxVFX, spriteSheet, x, y, spaceSize, border, boardSize) {
         this.ctxBack = ctxBack;
         this.ctxFore = ctxFore;
         this.ctxVFX = ctxVFX;
@@ -11,36 +11,38 @@ class View {
         this.x = x;
         this.y = y;
         this.spaceSize = spaceSize;
+        this.border = border;
+        this.boardSize = boardSize;
     }
 
-    displayBoard(board, goalX, goalY, border) {
-        this.board = board;
-        let boardSize = 16,
-            x = this.x,
+    displayBoard(board, goalX, goalY) {
+        this.levelComplete = false;
+        let x = this.x,
             y = this.y,
             cellWidth = this.spaceSize,
             ctx = this.ctxBack;
         ctx.lineWidth = 1;
-        ctx.clearRect(x - border/2, y - border/2,
-            cellWidth * 16 + border/2, cellWidth * 16 + border/2);
+        ctx.clearRect(x - this.border/2, y - this.border/2,
+            cellWidth * this.boardSize + this.border/2, cellWidth * this.boardSize + this.border/2);
+        this.ctxFore.clearRect(this.x, this.y, this.spaceSize * this.boardSize, this.spaceSize * this.boardSize);
         // grid
         ctx.setLineDash([3, 2]);
         ctx.beginPath();
-        for (let i = 1; i < boardSize; i++) {
+        for (let i = 1; i < this.boardSize; i++) {
             ctx.lineWidth = 1;
             ctx.strokeStyle = 'rgba(136, 136, 136, 0.4)';
             ctx.moveTo(x + (cellWidth * i), y);
-            ctx.lineTo(x + (cellWidth * i), y + (boardSize * cellWidth));
+            ctx.lineTo(x + (cellWidth * i), y + (this.boardSize * cellWidth));
             ctx.moveTo(x, y + (cellWidth * i));
-            ctx.lineTo(x + (boardSize * cellWidth), y + (cellWidth * i));
+            ctx.lineTo(x + (this.boardSize * cellWidth), y + (cellWidth * i));
         }
         ctx.stroke();
         // all goal options
         ctx.strokeStyle = 'rgba(244, 66, 241, 0.5)';
-        for(let i = 0; i < this.board.goals.length; i++) {
-            let g = this.board.goals[i];
-            let gX = g % 16,
-                gY = Math.floor(g / 16);
+        for(let i = 0; i < board.goals.length; i++) {
+            let g = board.goals[i];
+            let gX = g % this.boardSize,
+                gY = Math.floor(g / this.boardSize);
             ctx.beginPath();
             ctx.arc(
                 x + (cellWidth * gX) + (cellWidth / 2),
@@ -52,14 +54,14 @@ class View {
         ctx.setLineDash([0]);
         // draw the outline
         ctx.beginPath();
-        ctx.lineWidth = this.spaceSize < 16*3 ? 1 : 2;
+        ctx.lineWidth = this.spaceSize < this.boardSize*3 ? 1 : 2;
         ctx.strokeStyle = '#000000';
-        ctx.strokeRect(x, y, (boardSize * cellWidth), (boardSize * cellWidth));
+        ctx.strokeRect(x, y, (this.boardSize * cellWidth), (this.boardSize * cellWidth));
         // draw each space
         ctx.lineCap = 'round';
-        for (let r = 0; r < boardSize; r++) {
-            for (let s = 0; s < boardSize; s++) {
-                let space = this.board.item(r * boardSize + s);
+        for (let r = 0; r < this.boardSize; r++) {
+            for (let s = 0; s < this.boardSize; s++) {
+                let space = board.item(r * this.boardSize + s);
                 if (space & Direction.N) {
                     ctx.moveTo(x + (cellWidth * s), y + (cellWidth * r));
                     ctx.lineTo(x + (cellWidth * s) + cellWidth, y + (cellWidth * r));
@@ -86,13 +88,12 @@ class View {
     }
 
     display(moveTrail, possibleMovesDirty, playerPieces, possibleMoves, clickedPiece, player) {
-        let ctx = this.ctxFore;
-        let boardSize = 16,
+        let ctx = this.ctxFore,
             x = this.x,
             y = this.y,
             cellWidth = this.spaceSize;
 
-        this.ctxVFX.clearRect(x, y, cellWidth * boardSize, cellWidth * boardSize);
+        this.ctxVFX.clearRect(x, y, cellWidth * this.boardSize, cellWidth * this.boardSize);
         // draw the move trail
         let xW = 0,
             yW = 0;
@@ -116,8 +117,8 @@ class View {
             // remove old possible moves
             for (let i = 0; i < possibleMovesDirty.length; i++) {
                 let p = possibleMovesDirty[i],
-                    py = Math.floor(p / boardSize),
-                    px = p % boardSize;
+                    py = Math.floor(p / this.boardSize),
+                    px = p % this.boardSize;
                 ctx.clearRect(x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
             }
             possibleMovesDirty = [];
@@ -142,23 +143,23 @@ class View {
             // draw the possible moves
             for (let i = 0; i < possibleMoves.length; i++) {
                 let p = possibleMoves[i],
-                    py = Math.floor(p / boardSize),
-                    px = p % boardSize;
+                    py = Math.floor(p / this.boardSize),
+                    px = p % this.boardSize;
                 ctx.drawImage(this.spriteSheet, 0, cellWidth * 4, cellWidth, cellWidth, x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
             }
         }
     }
 
     displayLevelCompleteMenu(moveCount, puzzlesSolved, totalMoves) {
-        let boardSize = 16,
-            cellWidth = this.spaceSize,
-            x = this.x + (boardSize / 4) * cellWidth,
+        this.levelComplete = true;
+        let cellWidth = this.spaceSize,
+            x = this.x + (this.boardSize / 4) * cellWidth,
             y = this.y,
-            w = (boardSize / 2) * cellWidth;
+            w = (this.boardSize / 2) * cellWidth;
 
         this.ctxVFX.beginPath();
         this.ctxVFX.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        this.ctxVFX.rect(x, y + (boardSize / 4) * cellWidth, w, w);
+        this.ctxVFX.rect(x, y + (this.boardSize / 4) * cellWidth, w, w);
         this.ctxVFX.fill();
         this.ctxVFX.font = cellWidth.toString() + "px sans-serif";
         this.ctxVFX.fillStyle = "white";
@@ -168,10 +169,6 @@ class View {
         this.ctxVFX.fillText(text, x + cellWidth, y + w + cellWidth);
         text = totalMoves + " moves!";
         this.ctxVFX.fillText(text, x + cellWidth, y + w + (cellWidth * 2));
-    }
-
-    tempClearFore() {
-        this.ctxFore.clearRect(this.x, this.y, this.spaceSize * 16, this.spaceSize * 16);
     }
 }
 

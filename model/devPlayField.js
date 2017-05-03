@@ -45,6 +45,7 @@ class DevPlayField extends PlayField {
             ["Move/Win", function() {return parseInt(that.games.countMoves/that.games.countSolved); }],
             ["Win/S", function() {return parseInt(that.games.countSolved/(that.playfieldDeltaTime/1000)); }]
         ];
+        this.disableView = false;
     }
 
     init() {
