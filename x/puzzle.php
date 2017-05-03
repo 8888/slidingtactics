@@ -32,319 +32,119 @@ function xy2index($x, $y) {
     return $x + $y * 16;
 }
 
-function puzzle_add() {
+function puzzle_add($user_key) {
     $boardSections = json_decode('[
 	{
 		"key": 1,
 		"id": "A1",
 		"type": "classic",
-		"walls":[
-			[1, 0, "E"],
-			[4, 1, "NW"],
-			[1, 2, "NE"],
-			[6, 3, "SE"],
-			[0, 5, "S"],
-			[3, 6, "SW"]
-		],
-		"goals":[
-			[4, 1, "R"],
-			[1, 2, "G"],
-			[6, 3, "Y"],
-			[3, 6, "B"]
-		]
+		"walls":[[1, 0, "E"],[4, 1, "NW"],[1, 2, "NE"],[6, 3, "SE"],[0, 5, "S"],[3, 6, "SW"]],
+		"goals":[[4, 1, "R"],[1, 2, "G"],[6, 3, "Y"],[3, 6, "B"]]
 	},
 	{
 		"key": 2,
 		"id": "A2",
 		"type": "classic",
-		"walls":[
-			[3, 0, "E"],
-			[5, 1, "SE"],
-			[1, 2, "SW"],
-			[0, 3, "S"],
-			[6, 4, "NW"],
-			[2, 6, "NE"]
-		],
-		"goals":[
-			[5, 1, "G"],
-			[1, 2, "R"],
-			[6, 4, "Y"],
-			[2, 6, "B"]
-		]
+		"walls":[[3, 0, "E"],[5, 1, "SE"],[1, 2, "SW"],[0, 3, "S"],[6, 4, "NW"],[2, 6, "NE"]],
+		"goals":[[5, 1, "G"],[1, 2, "R"],[6, 4, "Y"],[2, 6, "B"]]
 	},
 	{
 		"key": 3,
 		"id": "A3",
 		"type": "classic",
-		"walls":[
-			[3, 0, "E"],
-			[5, 2, "SE"],
-			[0, 4, "S"],
-			[2, 4, "NE"],
-			[7, 5, "SW"],
-			[1, 6, "NW"]
-		],
-		"goals":[
-			[5, 2, "B"],
-			[2, 4, "G"],
-			[7, 5, "R"],
-			[1, 6, "Y"]
-		]
+		"walls":[[3, 0, "E"],[5, 2, "SE"],[0, 4, "S"],[2, 4, "NE"],[7, 5, "SW"],[1, 6, "NW"]],
+		"goals":[[5, 2, "B"],[2, 4, "G"],[7, 5, "R"],[1, 6, "Y"]]
 	},
 	{
 		"key": 4,
 		"id": "A4",
 		"type": "classic",
-		"walls":[
-			[3, 0, "E"],
-			[6, 1, "SW"],
-			[1, 3, "NE"],
-			[5, 4, "NW"],
-			[2, 5, "SE"],
-			[7, 5, "SE"],
-			[0, 6, "S"]
-		],
-		"goals":[
-			[6, 1, "B"],
-			[1, 3, "Y"],
-			[5, 4, "G"],
-			[2, 5, "R"],
-			[7, 5, "BYGR"]
-		]
+		"walls":[[3, 0, "E"],[6, 1, "SW"],[1, 3, "NE"],[5, 4, "NW"],[2, 5, "SE"],[7, 5, "SE"],[0, 6, "S"]],
+		"goals":[[6, 1, "B"],[1, 3, "Y"],[5, 4, "G"],[2, 5, "R"],[7, 5, "BYGR"]]
 	},
 	{
 		"key": 5,
 		"id": "B1",
 		"type": "classic",
-		"walls":[
-            [4, 0, "E"],
-            [6, 1, "SE"],
-            [1, 2, "NW"],
-            [0, 5, "S"],
-            [6, 5, "NE"],
-            [3, 6, "SW"]
-		],
-		"goals":[
-			[6, 1, "Y"],
-			[1, 2, "G"],
-			[6, 5, "B"],
-			[3, 6, "R"]
-		]
+		"walls":[[4, 0, "E"],[6, 1, "SE"],[1, 2, "NW"],[0, 5, "S"],[6, 5, "NE"],[3, 6, "SW"]],
+		"goals":[[6, 1, "Y"],[1, 2, "G"],[6, 5, "B"],[3, 6, "R"]]
 	},
 	{
 		"key": 6,
 		"id": "B2",
 		"type": "classic",
-		"walls":[
-			[4, 0, "E"],
-			[2, 1, "NW"],
-			[6, 3, "SW"],
-			[0, 4, "S"],
-			[4, 5, "NE"],
-			[1, 6, "SE"]
-		],
-		"goals":[
-			[2, 1, "Y"],
-			[6, 3, "B"],
-			[4, 5, "R"],
-			[1, 6, "G"]
-		]
+		"walls":[[4, 0, "E"],[2, 1, "NW"],[6, 3, "SW"],[0, 4, "S"],[4, 5, "NE"],[1, 6, "SE"]],
+		"goals":[[2, 1, "Y"],[6, 3, "B"],[4, 5, "R"],[1, 6, "G"]]
 	},
 	{
 		"key": 7,
 		"id": "B3",
 		"type": "classic",
-		"walls":[
-            [3, 0, "E"],
-            [1, 1, "SW"],
-            [6, 2, "NE"],
-            [2, 4, "SE"],
-            [0, 5, "S"],
-            [7, 5, "NW"]
-		],
-		"goals":[
-			[1, 1, "R"],
-			[6, 2, "G"],
-			[2, 4, "B"],
-			[7, 5, "Y"]
-		]
+		"walls":[[3, 0, "E"],[1, 1, "SW"],[6, 2, "NE"],[2, 4, "SE"],[0, 5, "S"],[7, 5, "NW"]],
+		"goals":[[1, 1, "R"],[6, 2, "G"],[2, 4, "B"],[7, 5, "Y"]]
 	},
 	{
 		"key": 8,
 		"id": "B4",
 		"type": "classic",
-		"walls":[
-            [4, 0, "E"],
-            [2, 1, "SE"],
-            [1, 3, "SW"],
-            [0, 4, "S"],
-            [6, 4, "NW"],
-            [5, 6, "NE"],
-            [3, 7, "SE"]
-		],
-		"goals":[
-			[2, 1, "R"],
-			[1, 3, "G"],
-			[6, 4, "Y"],
-			[5, 6, "B"],
-			[3, 7, "RGYB"]
-		]
+		"walls":[[4, 0, "E"],[2, 1, "SE"],[1, 3, "SW"],[0, 4, "S"],[6, 4, "NW"],[5, 6, "NE"],[3, 7, "SE"]],
+		"goals":[[2, 1, "R"],[1, 3, "G"],[6, 4, "Y"],[5, 6, "B"],[3, 7, "RGYB"]]
 	},
 	{
 		"key": 9,
 		"id": "C1",
 		"type": "classic",
-		"walls":[
-            [1, 0, "E"],
-            [3, 1, "NW"],
-            [6, 3, "SE"],
-            [1, 4, "SW"],
-            [0, 6, "S"],
-            [4, 6, "NE"]
-		],
-		"goals":[
-			[3, 1, "G"],
-			[6, 3, "Y"],
-			[1, 4, "R"],
-			[4, 6, "B"]
-		]
+		"walls":[[1, 0, "E"],[3, 1, "NW"],[6, 3, "SE"],[1, 4, "SW"],[0, 6, "S"],[4, 6, "NE"]],
+		"goals":[[3, 1, "G"],[6, 3, "Y"],[1, 4, "R"],[4, 6, "B"]]
 	},
 	{
 		"key": 10,
 		"id": "C2",
 		"type": "classic",
-		"walls":[
-            [5, 0, "E"],
-            [3, 2, "NW"],
-            [0, 3, "S"],
-            [5, 3, "SW"],
-            [2, 4, "NE"],
-            [4, 5, "SE"]
-		],
-		"goals":[
-			[3, 2, "Y"],
-			[5, 3, "B"],
-			[2, 4, "R"],
-			[4, 5, "G"]
-		]
+		"walls":[[5, 0, "E"],[3, 2, "NW"],[0, 3, "S"],[5, 3, "SW"],[2, 4, "NE"],[4, 5, "SE"]],
+		"goals":[[3, 2, "Y"],[5, 3, "B"],[2, 4, "R"],[4, 5, "G"]]
 	},
 	{
 		"key": 11,
 		"id": "C3",
 		"type": "classic",
-		"walls":[
-            [1, 0, "E"],
-            [4, 1, "NE"],
-            [1, 3, "SW"],
-            [0, 5, "S"],
-            [5, 5, "NW"],
-            [3, 6, "SE"]
-		],
-		"goals":[
-			[4, 1, "G"],
-			[1, 3, "R"],
-			[5, 5, "Y"],
-			[3, 6, "B"]
-		]
+		"walls":[[1, 0, "E"],[4, 1, "NE"],[1, 3, "SW"],[0, 5, "S"],[5, 5, "NW"],[3, 6, "SE"]],
+		"goals":[[4, 1, "G"],[1, 3, "R"],[5, 5, "Y"],[3, 6, "B"]]
 	},
 	{
 		"key": 12,
 		"id": "C4",
 		"type": "classic",
-		"walls":[
-            [2, 0, "E"],
-            [5, 1, "SW"],
-            [7, 2, "SE"],
-            [0, 3, "S"],
-            [3, 4, "SE"],
-            [6, 5, "NW"],
-            [1, 6, "NE"]
-		],
-		"goals":[
-			[5, 1, "B"],
-			[7, 2, "BRGY"],
-			[3, 4, "R"],
-			[6, 5, "G"],
-			[1, 6, "Y"]
-		]
+		"walls":[[2, 0, "E"],[5, 1, "SW"],[7, 2, "SE"],[0, 3, "S"],[3, 4, "SE"],[6, 5, "NW"],[1, 6, "NE"]],
+		"goals":[[5, 1, "B"],[7, 2, "BRGY"],[3, 4, "R"],[6, 5, "G"],[1, 6, "Y"]]
 	},
 	{
 		"key": 13,
 		"id": "D1",
 		"type": "classic",
-		"walls":[
-            [5, 0, "E"],
-            [1, 3, "NW"],
-            [6, 4, "SE"],
-            [0, 5, "S"],
-            [2, 6, "NE"],
-            [3, 6, "SW"]
-		],
-		"goals":[
-			[1, 3, "R"],
-			[6, 4, "Y"],
-			[2, 6, "G"],
-			[3, 6, "B"]
-		]
+		"walls":[[5, 0, "E"],[1, 3, "NW"],[6, 4, "SE"],[0, 5, "S"],[2, 6, "NE"],[3, 6, "SW"]],
+		"goals":[[1, 3, "R"],[6, 4, "Y"],[2, 6, "G"],[3, 6, "B"]]
 	},
 	{
 		"key": 14,
 		"id": "D2",
 		"type": "classic",
-		"walls":[
-            [2, 0, "E"],
-            [5, 2, "SE"],
-            [6, 2, "NW"],
-            [1, 5, "SW"],
-            [0, 6, "S"],
-            [4, 7, "NE"]
-		],
-		"goals":[
-			[5, 2, "G"],
-			[6, 2, "Y"],
-			[1, 5, "R"],
-			[4, 7, "B"]
-		]
+		"walls":[[2, 0, "E"],[5, 2, "SE"],[6, 2, "NW"],[1, 5, "SW"],[0, 6, "S"],[4, 7, "NE"]],
+		"goals":[[5, 2, "G"],[6, 2, "Y"],[1, 5, "R"],[4, 7, "B"]]
 	},
 	{
 		"key": 15,
 		"id": "D3",
 		"type": "classic",
-		"walls":[
-            [4, 0, "E"],
-            [0, 2, "S"],
-            [6, 2, "SE"],
-            [2, 4, "NE"],
-            [3, 4, "SW"],
-            [5, 6, "NW"]
-		],
-		"goals":[
-			[6, 2, "B"],
-			[2, 4, "G"],
-			[3, 4, "R"],
-			[5, 6, "Y"]
-		]
+		"walls":[[4, 0, "E"],[0, 2, "S"],[6, 2, "SE"],[2, 4, "NE"],[3, 4, "SW"],[5, 6, "NW"]],
+		"goals":[[6, 2, "B"],[2, 4, "G"],[3, 4, "R"],[5, 6, "Y"]]
 	},
 	{
 		"key": 16,
 		"id": "D4",
 		"type": "classic",
-		"walls":[
-            [4, 0, "E"],
-            [6, 2, "NW"],
-            [2, 3, "NE"],
-            [3, 3, "SW"],
-            [1, 5, "SE"],
-            [0, 6, "S"],
-            [5, 7, "SE"]
-		],
-		"goals":[
-			[6, 2, "Y"],
-			[2, 3, "B"],
-			[3, 3, "G"],
-			[1, 5, "R"],
-			[5, 7, "YBGR"]
-		]
+		"walls":[[4, 0, "E"],[6, 2, "NW"],[2, 3, "NE"],[3, 3, "SW"],[1, 5, "SE"],[0, 6, "S"],[5, 7, "SE"]],
+		"goals":[[6, 2, "Y"],[2, 3, "B"],[3, 3, "G"],[1, 5, "R"],[5, 7, "YBGR"]]
 	}
 ]', true);
     $boardSectionsLength = count($boardSections);
@@ -387,45 +187,59 @@ function puzzle_add() {
     }
 
     $g = $goals[rand(0, count($goals)-1)];
-    $p = array();
+	$p = array();
     array_push($p, randBoardLocation($p, $g));
     array_push($p, randBoardLocation($p, $g));
     array_push($p, randBoardLocation($p, $g));
     array_push($p, randBoardLocation($p, $g));
+	$goal_player = array_shift($p);
+	sort($p);
+	array_unshift($p, $goal_player);
 
     $seed = array(
         "b" => array($boardKey1, $boardKey2, $boardKey3, $boardKey4),
         "g" => $g,
         "p" => $p
     );
+
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn->prepare ("CALL puzzle_create (?,?,?,?,?,?,?,?,?);")) {
+		$stmt->bind_param("iiiiiiiii",
+			$seed["b"][0], $seed["b"][1], $seed["b"][2], $seed["b"][3], 
+			$seed["g"],
+			$seed["p"][0], $seed["p"][1], $seed["p"][2], $seed["p"][3]);
+		$stmt->execute();
+		$stmt->bind_result($puzzle_key);
+		if($stmt->fetch()){
+			$seed["puzzle"] = $puzzle_key;
+		}
+	}
+
+	$conn->close();
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn->prepare ("CALL puzzle_user_create (?,?);")) {
+		$stmt->bind_param("ii", $seed["puzzle"], $user_key);
+		$stmt->execute();
+		$stmt->bind_result($puzzle_user_key);
+		if($stmt->fetch()){
+			$seed["instance"] = $puzzle_user_key;
+		}
+	}
+
+	$conn->close();
     return $seed;
-
-/*
-    $conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::RealEstate);
-    if ($stmt = $conn->prepare ("CALL puzzle_add (?,?,?,?,?,?,?,?,?,?,?);")) {
-        $stmt->bind_param("sssiissssss",
-                $thread_id,
-                $message_id,
-                $message_date,
-                $price,
-                $mls,
-                $status,
-                $line_1,
-                $line_2,
-                $city,
-                $state,
-                $zipcode);
-        $stmt->execute();
-        $stmt->bind_result($listing_key);
-        $stmt->fetch();
-    }
-
-    $conn->close();
-    return $listing_key;*/
 }
 
-echo json_encode(puzzle_add());
-/*
+function puzzle_user_update($puzzle_user_key, $is_solved, $move_count) {
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn->prepare ("CALL puzzle_user_update (?,?,?);")) {
+		$stmt->bind_param("iii", $puzzle_user_key, $is_solved, $move_count);
+		$stmt->execute();
+	}
+
+	$conn->close();
+}
+
 $token = $_POST["token"];
 $user_key = user_authenticate_by_token($token);
 
@@ -434,15 +248,21 @@ if (isset($token) && $user_key > 0) {
     switch ($action) {
         case "get":
             $puzzle_key = $_POST["key"];
-            if (isset($puzzle_key)) {
+            if (isset($puzzle_key) && $puzzle_key > 0) {
                 echo json_encode(puzzle_get());
             } else {
-                echo json_encode(puzzle_add());
+                echo json_encode(puzzle_add($user_key));
             }
             break;
+		case "update":
+			$puzzle_user_key = $_POST["key"];
+			$is_solved = $_POST["s"];
+			$move_count = $_POST["m"];
+            puzzle_user_update($puzzle_user_key, $is_solved, $move_count);
+			break;
     }
 } else {
     echo "not authorized";
     return;
-}*/
+}
 ?>

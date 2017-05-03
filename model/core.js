@@ -43,6 +43,8 @@ class GameLogic {
         this.possibleMoves = [];
         this.possibleMovesDirty = [];
         this.playerLastMove = {};
+        this.puzzle_key = null;
+        this.puzzle_instance_key = null;
         let that = this;
         this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
     }
@@ -52,6 +54,8 @@ class GameLogic {
         this.view.tempClearFore();
         // keep drawing to the display only!!
         this.state = this.gameStates.playing;
+        this.puzzle_key = seed.puzzle;
+        this.puzzle_instance_key = seed.instance;
         this.board = this.boardGenerator.generate(seed.b);
         this.goal = {
             index: seed.g,

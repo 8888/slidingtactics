@@ -70,8 +70,7 @@
         </div>
     </body>
 <script>
-    let un = localStorage.getItem("user_name"),
-        ig = localStorage.getItem("isGuest");
+    let un = localStorage.getItem("user_name");
 
     if(un) {
         document.getElementById('un').style.display = 'none';
@@ -92,6 +91,7 @@
 
         let auth = promise_post('https://tactics.prototypeholdings.com/x/login.php?action=authenticate', 'un='+un+'&an='+an)
             .then((user) => {
+                localStorage.clear();
                 localStorage.setItem('user_key', user.user_key);
                 localStorage.setItem('user_name', user.username);
                 localStorage.setItem('user_is_guest', false);
@@ -138,6 +138,7 @@
             var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
             return v.toString(16);
         });
+        localStorage.clear();
         localStorage.setItem("user_name", un);
         localStorage.setItem('user_is_guest', false);
         javascript:window.location="puzzle.html";

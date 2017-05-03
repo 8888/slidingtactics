@@ -2,10 +2,12 @@
 
 let GameLogic = require('../model/core.js'),
     Direction = require('../model/direction.js'),
-    SeedGenerator = require('../model/seedGeneratorDatabase.js');
+    SeedGenerator = require('../model/seedGeneratorDatabase.js'),
+    SeedGeneratorGuest = require('../model/seedGeneratorLocal.js'),
+    AJAX = require('../model/ajax.js');
 
 class PlayField {
-    constructor(containerElementId) {
+    constructor(containerElementId, is_guest) {
         this.container = document.getElementById(containerElementId);
         this.canvasWidth = 1280;
         this.canvasHeight = 720;
@@ -28,7 +30,8 @@ class PlayField {
             countMoves: 0
         };
 
-        this.seedGenerator = new SeedGenerator();
+        this.is_guest = is_guest;
+        this.seedGenerator = is_guest ? new SeedGeneratorGuest() : new SeedGenerator();
     }
 
     canvasCreate(id, zIndex, isHidden, backgroundColor) {
@@ -70,6 +73,10 @@ class PlayField {
         onGameOverCallback || (onGameOverCallback = function(g) {
             that.games.countSolved++;
             that.games.countMoves += g.moveCount;
+            if(!this.is_guest) {
+                let puzzleUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=update',
+                    'key='+g.puzzle_instance_key+'&s=1&m='+g.moveCount);
+            }
             if (that.games.countSolved == 5) {
                 localStorage.setItem("sessionLast_solved", that.games.countSolved);
                 localStorage.setItem("sessionLast_moves", that.games.countMoves);
