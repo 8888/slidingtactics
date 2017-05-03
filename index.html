@@ -143,24 +143,24 @@
         javascript:window.location="puzzle.html";
     }
 
-function promise_post(destination, parameters) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", destination, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onload = function() {
-            if (xhr.status == 200) {
-                if (xhr.responseText == "not authorized") {
-                    reject("not authorized");
-                } else {
-                    resolve(JSON.parse(xhr.responseText));
+    function promise_post(destination, parameters) {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", destination, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onload = function() {
+                if (xhr.status == 200) {
+                    if (xhr.responseText == "not authorized") {
+                        reject("not authorized");
+                    } else {
+                        resolve(JSON.parse(xhr.responseText));
+                    }
                 }
-            }
-        };
-        xhr.onerror = function() { reject("Network Issue"); };
-        xhr.send(parameters);
-    });
-};
+            };
+            xhr.onerror = function() { reject("Network Issue"); };
+            xhr.send(parameters);
+        });
+    };
 
     let solved = localStorage.getItem('sessionLast_solved'),
         moves = localStorage.getItem('sessionLast_moves');

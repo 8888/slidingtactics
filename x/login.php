@@ -12,6 +12,23 @@ class user {
     public $login_token_key = null;
     public $token = null;
 
+    function register ($username, $password, $email) {
+        $this->is_authenticated = False;
+        $conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+        if ($stmt = $conn->prepare ("CALL user_create (?,?,?);")) {
+            $pash = password_hash($password, PASSWORD_BCRYPT);
+            $stmt->bind_param("sss", $username, $pash, $email);
+            $stmt->execute();
+            $stmt->bind_result($user_key);
+            if($stmt->fetch()){
+                $this->user_key = $user_key;
+                $this->username = $username;
+            }
+        }
+
+        $conn->close();
+    }
+
     function authenticate ($username, $password) {
         $this->is_authenticated = False;
         $conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
@@ -72,6 +89,16 @@ switch ($action) {
         if (isset($un) && isset($pw)) {
             $user = new User();
             $user->authenticate($un, $pw);
+            echo json_encode(get_object_vars($user));
+        }
+        break;
+    case "register":
+        $un = $_POST["un"];
+        $pw = $_POST["an"];
+        $em = $_POST["em"];
+        if (isset($un) && isset($pw)) {
+            $user = new User();
+            $user->register($un, $pw, $em);
             echo json_encode(get_object_vars($user));
         }
         break;
