@@ -32,8 +32,12 @@ ajax.promise_post = function(destination, parameters) {
             if (xhr.status == 200) {
                 if (xhr.responseText == "not authorized") {
                     reject("not authorized");
-                } else {
-                    resolve(JSON.parse(xhr.responseText));
+                } else if (resolve) {
+                    if (xhr.responseText !== "") {
+                        resolve(JSON.parse(xhr.responseText));
+                    } else {
+                        resolve();
+                    }
                 }
             }
         };

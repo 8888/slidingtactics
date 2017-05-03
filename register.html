@@ -3,6 +3,73 @@
         <title>Sliding Tactics</title>
     </head>
     <body id='myBody'>
-        <h1>we will get to it</h1>
+        <h1>register</h1>
+        <table>
+            <tr><td colspan="2">New Member:</td></tr>
+            <tr>
+                <td>Name: (How people will know you around the site)</td>
+                <td><input id="un" style="width: 100px;"/></td>
+            </tr>
+            <tr>
+                <td>Secret: (What you will use to login to your account)</td>
+                <td><input id="an1" type="password" style="width: 100px;"/></td>
+            </tr>
+            <tr>
+                <td>Secret: (Confirm your secret)</td>
+                <td><input id="an2" type="password" style="width: 100px;"/></td>
+            </tr>
+            <tr>
+                <td>EMail Address: (To recover your account if you forget the secret)</td>
+                <td><input id="em1" style="width: 200px;"/></td>
+            </tr>
+            <tr>
+                <td>EMail Address: (Confirm your address)</td>
+                <td><input id="em2" style="width: 200px;"/></td>
+            </tr>
+            <tr>
+                <td colspan="2"><span id='info'/></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button onclick='javascript:register();'>register!</button></td>
+            </tr>
+        </table>
     </body>
+<script>
+    function register() {
+        let un = document.getElementById('un').value,
+            an = document.getElementById('an1').value,
+            em = document.getElementById('em1').value;
+        let auth = promise_post('https://tactics.prototypeholdings.com/x/login.php?action=register',
+        'un='+un+'&an='+an+'&em='+em)
+            .then((user) => {
+                if (+user.user_key > 0) {
+                    document.getElementById('info').innerHTML = "user created!";
+                } else {
+                    document.getElementById('info').innerHTML = "username already exists";
+                }
+            })
+            .catch((r) => {
+                document.getElementById('info').innerHTML = "server issue!";
+            });
+    }
+
+    function promise_post(destination, parameters) {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", destination, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onload = function() {
+                if (xhr.status == 200) {
+                    if (xhr.responseText == "not authorized") {
+                        reject("not authorized");
+                    } else {
+                        resolve(JSON.parse(xhr.responseText));
+                    }
+                }
+            };
+            xhr.onerror = function() { reject("Network Issue"); };
+            xhr.send(parameters);
+        });
+    };
+    </script>
 </html>

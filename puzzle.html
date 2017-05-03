@@ -16,7 +16,7 @@
         <script type="text/javascript" src="bundle.js"></script>
         <script>
             let game = new SlidingTacticsController();
-            game.playfieldAdd('canvasContainer');
+            game.playfieldAdd('canvasContainer', localStorage.getItem('user_token'));
             game.play();
         </script>
     </body>

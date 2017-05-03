@@ -36,14 +36,14 @@ class DevPlayField extends PlayField {
         ];
         let that = this;
         this.statistics = [
-            ["Time", function() {return parseInt(that.playfieldDeltaTime / 1000); }],
+            ["Time", function() {return parseInt(that.games.deltaTotal / 1000); }],
             ["Game", function() {return that.games.countTotal; }],
             ["Wins", function() {return that.games.countSolved; }],
             ["Cmds", function() {return that.commandCountTotal; }],
-            ["C/S", function() {return parseInt(that.commandCountTotal/(that.playfieldDeltaTime/1000)); }],
+            ["C/S", function() {return parseInt(that.commandCountTotal/(that.games.deltaTotal/1000)); }],
             ["Move", function() {return that.games.countMoves; }],
             ["Move/Win", function() {return parseInt(that.games.countMoves/that.games.countSolved); }],
-            ["Win/S", function() {return parseInt(that.games.countSolved/(that.playfieldDeltaTime/1000)); }]
+            ["Win/S", function() {return parseInt(that.games.countSolved/(that.games.deltaTotal/1000)); }]
         ];
         this.disableView = false;
     }
