@@ -8,7 +8,7 @@ class SlidingTacticsController {
     }
 
     playfieldAdd(containerElementId) {
-        let pf = new PlayField(containerElementId);
+        let pf = new PlayField(containerElementId, localStorage.getItem('user_is_guest'));
         this.playfields.push(pf);
     }
 

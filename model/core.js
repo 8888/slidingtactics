@@ -11,7 +11,7 @@ class GameLogic {
             x, y, spaceSize, boardSize,
             onGameNew, onGameOver
     ) {
-        this.view = view
+        this.view = view;
         this.seedGenerator = seedGenerator;
         this.x = x;
         this.y = y;

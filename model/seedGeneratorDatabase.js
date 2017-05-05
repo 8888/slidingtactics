@@ -18,7 +18,7 @@ class SeedGeneratorDatabase extends SeedGenerator {
         seedGet.then(callback)
         .catch((e) => {
             console.log(e);
-            that.fallback.generate();
+            that.fallback.generate(() => {});
             that.seed = that.fallback.seed;
         });
     }

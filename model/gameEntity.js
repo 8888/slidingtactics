@@ -6,18 +6,13 @@ class GameEntity {
         this.y = y;
     }
 
-    init() {
+    init() { }
 
-    }
+    eventListenersAttach() { }
 
-    update(delta) {
+    update(delta) { }
 
-    }
-
-    display(ctx) {
-        
-    }
-
+    display(ctx) { }
 }
 
 module.exports = GameEntity;

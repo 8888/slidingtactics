@@ -31,7 +31,6 @@ class PlayField {
             countMoves: 0
         };
         this.boardSize = 16;
-
         this.is_guest = is_guest;
         this.seedGenerator = is_guest ? new SeedGeneratorGuest() : new SeedGenerator();
     }
@@ -75,7 +74,7 @@ class PlayField {
         onGameOverCallback || (onGameOverCallback = function(g) {
             that.games.countSolved++;
             that.games.countMoves += g.moveCount;
-            if(!this.is_guest) {
+            if(!that.is_guest) {
                 let puzzleUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=update',
                     'key='+g.puzzle_instance_key+'&s=1&m='+g.moveCount);
             }

@@ -1,9 +1,10 @@
 'use strict';
 
-let PlayField = require('../model/playfield.js'),
+let CommandController = require('../model/commandController.js'),
     Direction = require('../model/direction.js'),
-    SeedGenerator = require('../model/seedGeneratorLocal.js'),
-    FPS = require('../model/devFPS.js');
+    FPS = require('../model/devFPS.js'),
+    PlayField = require('../model/playfield.js'),
+    SeedGenerator = require('../model/seedGeneratorLocal.js');
 
 class DevPlayField extends PlayField {
 
@@ -11,19 +12,14 @@ class DevPlayField extends PlayField {
         super(containerElementId);
         this.seedGenerator = new SeedGenerator();
         this.fps = new FPS(this.canvasWidth - 200, this.canvasHeight - 48);
+        this.commandController = new CommandController(0, this.canvasHeight - 48, this);
         this.games.width = x;
         this.games.height = y;
 
+        this.disableView = false;
         this.canvasDebu = super.canvasCreate('debuCavnas', 3, true);
         this.ctxDebu = this.canvasDebu.getContext('2d');
 
-        this.devAutoCommandEnabled = true;
-        this.commandCountTotal = 0;
-        this.commandsCountMax = 20;
-        this.commandDetla = 0;
-        this.commandDelay = 30;
-        this.devSelect2Text = {0: '2673', 1: '2674', 2: '2675', 3: '2676'};
-        this.commandDelayTemplate = [[200, 'Norm'], [30, 'Fast'], [0, 'MAX']];
         this.gameInstanceTemplate = [
             [1, 1, '01x01=0001'],
             [2, 1, '02x01=0002'],
@@ -39,24 +35,22 @@ class DevPlayField extends PlayField {
             ["Time", function() {return parseInt(that.games.deltaTotal / 1000); }],
             ["Game", function() {return that.games.countTotal; }],
             ["Wins", function() {return that.games.countSolved; }],
-            ["Cmds", function() {return that.commandCountTotal; }],
-            ["C/S", function() {return parseInt(that.commandCountTotal/(that.games.deltaTotal/1000)); }],
+            ["Cmds", function() {return that.commandController.commandCountTotal; }],
+            ["C/S", function() {return parseInt(that.commandController.commandCountTotal/(that.games.deltaTotal/1000)); }],
             ["Move", function() {return that.games.countMoves; }],
             ["Move/Win", function() {return parseInt(that.games.countMoves/that.games.countSolved); }],
             ["Win/S", function() {return parseInt(that.games.countSolved/(that.games.deltaTotal/1000)); }]
         ];
-        this.disableView = false;
     }
 
     init() {
         let that = this;
         super.init(function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g); });
         this.fps.init();
-        this.commandCountTotal = 0;
-        this.commands = [];
+        this.commandController.init();
+
         let l = this.gameInstanceTemplate.length,
-            cl = this.commandDelayTemplate.length,
-            h = 24 * (l+cl);
+            h = 24 * l;
         this.ctxDebu.lineWidth = 1;
         this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
         this.ctxDebu.clearRect(this.canvasWidth - 100, this.canvasHeight - 48 - h, 100, h);
@@ -68,13 +62,7 @@ class DevPlayField extends PlayField {
             this.ctxDebu.fillText(t[2], this.canvasWidth - 90, this.canvasHeight - 48 - 24 * (i + 0.4));
             this.ctxDebu.strokeRect(this.canvasWidth - 100, this.canvasHeight - 48 - 24 * (i+1), 100, 24);
         }
-
-        for(let i = 0; i < cl; i++) {
-            let t = this.commandDelayTemplate[cl-i-1];
-            this.ctxDebu.fillText(t[1], this.canvasWidth - 65, this.canvasHeight - 48 - 24 * (l+i + 0.4));
-            this.ctxDebu.strokeRect(this.canvasWidth - 100, this.canvasHeight - 48 - 24 * (l+i+1), 100, 24);
-        }
-
+        this.commandController.displayOnce(this.ctxDebu);
         /* Board Names
         this.ctxDebu.fillStyle = 'red';
         this.ctxDebu.font = this.gameBorder + "px sans-serif";
@@ -85,7 +73,6 @@ class DevPlayField extends PlayField {
     }
 
     gameNewCallback(gamecore) {
-        //console.log("new game", gamecore.board.name);
         this.games.countTotal++;
     }
 
@@ -100,19 +87,17 @@ class DevPlayField extends PlayField {
 
     eventListenersAttach() {
         super.eventListenersAttach();
+        this.commandController.eventListenersAttach();
         let that = this;
         let LEFT_MOUSE_CLICK = 0;
         window.addEventListener("mousedown", function(event) {
             if (event.button === LEFT_MOUSE_CLICK) {
-                let l = that.gameInstanceTemplate.length + that.commandDelayTemplate.length;
+                let l = that.gameInstanceTemplate.length;
                 let y = Math.floor((event.layerY - (that.canvasHeight - 48 - 24 * l)) / 24),
                     x = event.layerX;
                 if (x > that.canvasWidth - 100 && x < that.canvasWidth) {
-                    if (y < 0) {
-                    } else if (y < that.commandDelayTemplate.length) {
-                        that.commandDelay = that.commandDelayTemplate[y][0];
-                    } else if (y < l) {
-                        let gi = that.gameInstanceTemplate[y-that.commandDelayTemplate.length];
+                    if (y > 0 && y < l) {
+                        let gi = that.gameInstanceTemplate[y];
                         that.games.width = gi[0];
                         that.games.height = gi[1];
                         that.init();
@@ -137,67 +122,20 @@ class DevPlayField extends PlayField {
         window.addEventListener("keydown", function(event) {
             let element = keyDownToHide[event.key];
             if (element) displayToggle(element);
-            if (event.key == "p") that.devAutoCommandEnabled = !that.devAutoCommandEnabled;
+            if (event.key == "p") that.commandController.enabled = !that.commandController.enabled;
         });
     }
 
     update(delta) {
         super.update(delta);
-        this.commandDetla += delta;
-        if (this.commandDetla > this.commandDelay && this.devAutoCommandEnabled) {
-            this.commandDetla = 0;
-            let c = null;
-            if (Math.random() < 0.85 && this.commands.length) {
-                c = Direction.ALL[Math.floor(Math.random() * Direction.ALL.length)];
-                this.commands.push(Direction.unicode[c]);
-                for(let i = 0; i < this.gameInstances.length; i++) {
-                    this.gameInstances[i].onDevDirection(c);
-                }
-
-                if(this.commandDelay === 0) {
-                    c = Math.floor(Math.random() * 4);
-                    this.commands.push(this.devSelect2Text[c]);
-                    for(let i = 0; i < this.gameInstances.length; i++) {
-                        this.gameInstances[i].onDevSelect(c);
-                    }
-                    this.commandCountTotal += 1;
-                    if (this.commands.length > this.commandsCountMax) {
-                        this.commands.shift();
-                    }
-                }
-            } else {
-                c = Math.floor(Math.random() * 4);
-                this.commands.push(this.devSelect2Text[c]);
-                for(let i = 0; i < this.gameInstances.length; i++) {
-                    this.gameInstances[i].onDevSelect(c);
-                }
-            }
-
-            this.commandCountTotal += 1;
-            if (this.commands.length > this.commandsCountMax) {
-                this.commands.shift();
-            }
-        }
         this.fps.update(delta);
+        this.commandController.update(delta);
     }
 
     display() {
         super.display();
         if (this.canvasDebu.style.display !== 'none') {
-            if (this.commands.length) {
-                let l = this.commands.length;
-                this.ctxDebu.fillStyle = 'rgba(112,128,144,0.4)';
-                this.ctxDebu.clearRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.games.border, 48);
-                this.ctxDebu.fillRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.games.border, 48);
-                this.ctxDebu.strokeRect(0, this.canvasHeight - 48, 48 * this.commandsCountMax + this.games.border, 48);
-                this.ctxDebu.font = "48px sans-serif";
-                for(let i = 0; i < l; i++) {
-                    let c = this.commands[i];
-                    this.ctxDebu.fillStyle = i == l - 1 ? 'red' : 'black';
-                    this.ctxDebu.fillText(String.fromCharCode(parseInt(c, 16)), this.games.border + 48 * (l - i -1), this.canvasHeight-8);
-                }
-            }
-
+            this.commandController.display(this.ctxDebu);
             this.displayStatistics();
             this.fps.display(this.ctxDebu);
         }
