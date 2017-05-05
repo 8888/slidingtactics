@@ -96,7 +96,9 @@ class PlayField {
         this.ctxFore.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxVFX.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxBack.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        this.createSprites(this.canvasSprite.getContext('2d'));
+        let ctxSprite = this.canvasSprite.getContext('2d');
+        ctxSprite.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.createSprites(ctxSprite);
         for(let w = 0; w < this.games.width; w++) {
             for(let h = 0; h < this.games.height; h++) {
                 let x = (this.games.border + this.games.cellSpace * this.boardSize) * w + this.games.border,

@@ -157,18 +157,18 @@ class View {
             y = this.y,
             w = (this.boardSize / 2) * cellWidth;
 
-        this.ctxVFX.beginPath();
-        this.ctxVFX.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        this.ctxVFX.rect(x, y + (this.boardSize / 4) * cellWidth, w, w);
-        this.ctxVFX.fill();
-        this.ctxVFX.font = cellWidth.toString() + "px sans-serif";
-        this.ctxVFX.fillStyle = "white";
+        this.ctxFore.beginPath();
+        this.ctxFore.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctxFore.rect(x, y + (this.boardSize / 4) * cellWidth, w, w);
+        this.ctxFore.fill();
+        this.ctxFore.font = cellWidth.toString() + "px sans-serif";
+        this.ctxFore.fillStyle = "white";
         let text = moveCount + " moves!";
-        this.ctxVFX.fillText(text, x + cellWidth, y + w - cellWidth);
+        this.ctxFore.fillText(text, x + cellWidth, y + w - cellWidth);
         text = puzzlesSolved + " puzzles";
-        this.ctxVFX.fillText(text, x + cellWidth, y + w + cellWidth);
+        this.ctxFore.fillText(text, x + cellWidth, y + w + cellWidth);
         text = totalMoves + " moves!";
-        this.ctxVFX.fillText(text, x + cellWidth, y + w + (cellWidth * 2));
+        this.ctxFore.fillText(text, x + cellWidth, y + w + (cellWidth * 2));
     }
 }
 

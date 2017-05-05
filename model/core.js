@@ -120,6 +120,7 @@ class GameLogic {
                 this.moveHistory.shift();
             }
             if (this.player.location == this.goal.index) {
+                this.display();
                 this.puzzleComplete();
             }
         }

@@ -21,14 +21,9 @@ class DevPlayField extends PlayField {
         this.ctxDebu = this.canvasDebu.getContext('2d');
 
         this.gameInstanceTemplate = [
-            [1, 1, '01x01=0001'],
-            [2, 1, '02x01=0002'],
-            [4, 2, '04x02=0008'],
-            [7, 3, '07x03=0021'],
-            [18, 10, '18x10=0180'],
-            [24, 13, '24x13=0312'],
-            [50, 25, '50x25=1250'],
-            [70, 39, '70x39=2730']
+            [1, 1, '01x01=0001'], [2, 1, '02x01=0002'], [4, 2, '04x02=0008'],
+            [7, 3, '07x03=0021'], [18, 10, '18x10=0180'],[24, 13, '24x13=0312'],
+            [50, 25, '50x25=1250'], [70, 39, '70x39=2730'], [99, 99, '99x99=9801']
         ];
         let that = this;
         this.statistics = [
@@ -95,13 +90,11 @@ class DevPlayField extends PlayField {
                 let l = that.gameInstanceTemplate.length;
                 let y = Math.floor((event.layerY - (that.canvasHeight - 48 - 24 * l)) / 24),
                     x = event.layerX;
-                if (x > that.canvasWidth - 100 && x < that.canvasWidth) {
-                    if (y > 0 && y < l) {
-                        let gi = that.gameInstanceTemplate[y];
-                        that.games.width = gi[0];
-                        that.games.height = gi[1];
-                        that.init();
-                    }
+                if (x > that.canvasWidth - 100 && x < that.canvasWidth && y >= 0 && y < l) {
+                    let gi = that.gameInstanceTemplate[y];
+                    that.games.width = gi[0];
+                    that.games.height = gi[1];
+                    that.init();
                 }
                 
             }
