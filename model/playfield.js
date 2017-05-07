@@ -33,6 +33,7 @@ class PlayField {
         this.boardSize = 16;
         this.is_guest = is_guest;
         this.seedGenerator = is_guest ? new SeedGeneratorGuest() : new SeedGenerator();
+        this.view = View;
     }
 
     canvasCreate(id, zIndex, isHidden, backgroundColor) {
@@ -103,9 +104,10 @@ class PlayField {
             for(let h = 0; h < this.games.height; h++) {
                 let x = (this.games.border + this.games.cellSpace * this.boardSize) * w + this.games.border,
                     y = this.games.border + (this.games.border + this.games.cellSpace * this.boardSize) * h;
-                let v = this.disableView ? null : new View(
+                let v = this.view ? new this.view(
                     this.ctxBack, this.ctxFore, this.ctxVFX, this.canvasSprite,
-                    x, y, this.games.cellSpace, this.games.border, this.boardSize);
+                    x, y, this.games.cellSpace, this.games.border, this.boardSize)
+                    : null;
                 let g = new GameLogic(
                     v, this.seedGenerator,
                     x, y, this.games.cellSpace, this.boardSize,

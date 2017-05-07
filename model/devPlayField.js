@@ -40,6 +40,9 @@ class DevPlayField extends PlayField {
 
     init() {
         let that = this;
+        if (this.disableView) {
+            this.view = null;
+        }
         super.init(function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g); });
         this.fps.init();
         this.commandController.init();
