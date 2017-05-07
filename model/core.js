@@ -9,7 +9,7 @@ let BoardGenerator = require('../model/boardGenerator.js'),
 class GameLogic {
     constructor(view, seedGenerator,
             x, y, spaceSize, boardSize,
-            onGameNew, onGameOver
+            onGameNew, onGameOver, onMove
     ) {
         this.view = view;
         this.seedGenerator = seedGenerator;
@@ -26,6 +26,7 @@ class GameLogic {
         this.puzzlesSolved = 0;
         this.onGameNew = onGameNew;
         this.onGameOver = onGameOver;
+        this.onMove = onMove;
         this.boardGenerator = new BoardGenerator();
         this.newGame();
     }
@@ -116,6 +117,9 @@ class GameLogic {
             this.moveTrail.push(new Trail(start, piece.location, this.spaceSize));
             this.moveCount += 1;
             this.totalMoves += 1;
+            if(this.onMove) {
+                this.onMove(this.puzzle_instance_key, this.moveCount, piece.index, direction, start, end);
+            }
             if (this.moveHistory.length > 25) {
                 this.moveHistory.shift();
             }

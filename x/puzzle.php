@@ -240,6 +240,16 @@ function puzzle_user_update($puzzle_user_key, $is_solved, $move_count) {
 	$conn->close();
 }
 
+function puzzle_move_add($puzzle_user_key, $move_number, $piece, $direction, $start, $end) {
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn->prepare ("CALL puzzle_move_history_add (?,?,?,?,?,?);")) {
+		$stmt->bind_param("iiiiii", $puzzle_user_key, $move_number, $piece, $direction, $start, $end);
+		$stmt->execute();
+	}
+
+	$conn->close();
+}
+
 $token = $_POST["token"];
 $user_key = user_authenticate_by_token($token);
 
@@ -259,6 +269,15 @@ if (isset($token) && $user_key > 0) {
 			$is_solved = $_POST["s"];
 			$move_count = $_POST["m"];
             puzzle_user_update($puzzle_user_key, $is_solved, $move_count);
+			break;
+		case "addMove":
+			$puzzle_user_key = $_POST["key"];
+			$move_number = $_POST["m"];
+			$piece = $_POST["p"];
+			$direction = $_POST["d"];
+			$start = $_POST["s"];
+			$end = $_POST["e"];
+			puzzle_move_add($puzzle_user_key, $move_number, $piece, $direction, $start, $end);
 			break;
     }
 } else {

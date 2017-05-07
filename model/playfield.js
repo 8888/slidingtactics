@@ -70,7 +70,7 @@ class PlayField {
         };
     }
 
-    init(onGameNewCallback, onGameOverCallback) {
+    init(onGameNewCallback, onGameOverCallback, onMoveCallback) {
         let that = this;
         onGameOverCallback || (onGameOverCallback = function(g) {
             that.games.countSolved++;
@@ -83,6 +83,12 @@ class PlayField {
                 localStorage.setItem("sessionLast_solved", that.games.countSolved);
                 localStorage.setItem("sessionLast_moves", that.games.countMoves);
                 window.location = 'index.html';
+            }
+        });
+        onMoveCallback || (onMoveCallback = function(key, move, piece, direction, start, end) {
+            if (!that.is_guest) {
+                let moveUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=addMove',
+                    'key='+key+'m='+move+'&p='+piece+'&d='+direction+'&s='+start+'&e='+end);
             }
         });
         this.gameInstances = [];
@@ -111,7 +117,7 @@ class PlayField {
                 let g = new GameLogic(
                     v, this.seedGenerator,
                     x, y, this.games.cellSpace, this.boardSize,
-                    onGameNewCallback, onGameOverCallback);
+                    onGameNewCallback, onGameOverCallback, onMoveCallback);
                 this.gameInstances.push(g);
             }
         }

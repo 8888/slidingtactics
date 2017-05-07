@@ -43,7 +43,11 @@ class DevPlayField extends PlayField {
         if (this.disableView) {
             this.view = null;
         }
-        super.init(function(g) { that.gameNewCallback(g); }, function(g) { that.gameOverCallback(g); });
+        super.init(
+            function(g) { that.gameNewCallback(g); },
+            function(g) { that.gameOverCallback(g); },
+            function(g) { that.moveCallback(g); }
+        );
         this.fps.init();
         this.commandController.init();
 
@@ -81,6 +85,10 @@ class DevPlayField extends PlayField {
         this.ctxVFX.clearRect(g.x, g.y, this.games.cellSpace * 16, this.games.cellSpace * 16);
         this.ctxBack.clearRect(g.x, g.y, this.games.cellSpace * 16, this.games.cellSpace * 16);
         g.newGame();
+    }
+
+    moveCallback() {
+
     }
 
     eventListenersAttach() {
