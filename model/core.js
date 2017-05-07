@@ -167,6 +167,7 @@ class GameLogic {
             this.playerIndexByLocation[p.location] = pIndex;
             this.moveCount -= 1;
             this.totalMoves -= 1;
+            this.showPossibleMoves(this.clickedPiece);                
             for (let m = this.moveHistory.length - 1; m >= 0; m--) {
                 if (this.moveHistory[m].piece == p) {
                     this.playerLastMove[pIndex] = this.moveHistory[m].direction;
