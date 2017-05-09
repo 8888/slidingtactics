@@ -31,7 +31,7 @@ class PlayField {
             countMoves: 0
         };
         this.boardSize = 16;
-        this.is_guest = is_guest;
+        this.is_guest = parseInt(is_guest);
         this.seedGenerator = is_guest ? new SeedGeneratorGuest() : new SeedGenerator();
         this.view = View;
     }

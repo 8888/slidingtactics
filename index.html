@@ -94,7 +94,7 @@
                 localStorage.clear();
                 localStorage.setItem('user_key', user.user_key);
                 localStorage.setItem('user_name', user.username);
-                localStorage.setItem('user_is_guest', false);
+                localStorage.setItem('user_is_guest', '0');
                 localStorage.setItem('user_is_authenticated', user.is_authenticated);
                 localStorage.setItem('user_is_first', user.is_first);
                 localStorage.setItem('user_is_active', user.is_active);
@@ -140,7 +140,7 @@
         });
         localStorage.clear();
         localStorage.setItem("user_name", un);
-        localStorage.setItem('user_is_guest', true);
+        localStorage.setItem('user_is_guest', '1');
         javascript:window.location="puzzle.html";
     }
 
