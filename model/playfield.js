@@ -88,7 +88,7 @@ class PlayField {
         onMoveCallback || (onMoveCallback = function(key, move, piece, direction, start, end) {
             if (!that.is_guest) {
                 let moveUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=addMove',
-                    'key='+key+'m='+move+'&p='+piece+'&d='+direction+'&s='+start+'&e='+end);
+                    'key='+key+'&m='+move+'&p='+piece+'&d='+direction+'&s='+start+'&e='+end);
             }
         });
         this.gameInstances = [];
