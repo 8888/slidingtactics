@@ -127,7 +127,7 @@ class View {
         for (let i = 0; i < playerPieces.length; i++) {
             let p = playerPieces[i];
             if (p.isDirty) {
-                //p.isDirty = false;
+                p.isDirty = false;
                 let pL = p.locationPrevious;
                 if (pL) {
                     ctx.clearRect(x + pL.x * cellWidth, y + pL.y * cellWidth, cellWidth, cellWidth);

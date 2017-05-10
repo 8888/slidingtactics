@@ -46,7 +46,9 @@ class GameLogic {
         this.puzzle_instance_key = null;
         let that = this;
         this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
-        this.boardNeedsToBeDrawn = true;
+        if (this.view) {
+            this.view.displayBoard(this.board, this.goal.x, this.goal.y);
+        }
     }
 
     onSeedGenerated(seed) {
@@ -238,12 +240,16 @@ class GameLogic {
     }
 
     setClickedPiece(piece) {
-        if(this.clickedPiece != piece) {
-            if(this.clickedPiece) {
+        if (this.clickedPiece != piece) {
+            if (this.clickedPiece) {
                 this.clickedPiece.isDirty = true;
+                this.clickedPiece.locationPrevious = {
+                    x: this.clickedPiece.x,
+                    y: this.clickedPiece.y
+                };
             }
 
-            if(piece) {
+            if (piece) {
                 piece.isDirty = true;
             }
 
@@ -293,12 +299,7 @@ class GameLogic {
     }
 
     display() {
-        if (this.view && this.board) {
-            if (this.boardNeedsToBeDrawn) {
-                // only draw the board once
-                this.view.displayBoard(this.board, this.goal.x, this.goal.y);
-                this.boardNeedsToBeDrawn = false;
-            }
+        if (this.view) {
             if (this.state == this.gameStates.playing) {
                 this.view.display(this.moveTrail, this.possibleMovesDirty, this.playerPieces, this.possibleMoves, this.clickedPiece, this.player);
             } else if (this.state == this.gameStates.levelComplete && !this.view.levelComplete) {
