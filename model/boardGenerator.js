@@ -71,6 +71,7 @@ class BoardGenerator {
 
         let board = new Board(17, names.join(), "classic");
         board.area = boardTop.concat(boardBot);
+        board.area = this.normalize(board.area);
         board.goals = this.generateGoals(
             section[0][1],section[1][1],
             section[2][1],section[3][1]);
@@ -85,6 +86,26 @@ class BoardGenerator {
             g3.map(function(g){ return xy2index([g[0] + thisBoardWidth, g[1] + thisBoardWidth]); }),
             g4.map(function(g){ return xy2index([g[0], g[1] + thisBoardWidth]); })
         );
+    }
+
+    normalize(area) {
+        /* when possible, match every 1 sided wall with its pair
+        example a W wall should have a matching E wall next door */
+        let length = area.length,
+            width = Math.sqrt(length);
+        for (let c = 0; c < length; c++) {
+            if (area[c]) {
+                for (let d = 0; d < Shared.power; d++) {
+                    if (area[c] & Shared.ALL[d] &&
+                        c + Shared.delta[Shared.ALL[d]] >= 0 &&
+                        c + Shared.delta[Shared.ALL[d]] < length
+                    ) {
+                        area[c + Shared.delta[Shared.ALL[d]]] |= Shared.reverse[Shared.ALL[d]];
+                    }
+                }
+            }
+        }
+        return area;
     }
 }
 

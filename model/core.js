@@ -86,10 +86,8 @@ class GameLogic {
             moving = false;
             movementCount++;
             advancedIndex = currentIndex + Direction.delta[direction];
-            if ( (0 <= advancedIndex && advancedIndex <= 255) &&
-                !(this.board.item(advancedIndex) & Direction.reverse[direction]) &&
-                !(this.board.item(currentIndex) & direction) &&
-                (this.playerIndexByLocation[advancedIndex] === undefined)
+            if (!(this.board.item(currentIndex) & direction) &&
+                this.playerIndexByLocation[advancedIndex] === undefined
             ) {
                 currentIndex = advancedIndex;
                 moving = true;
