@@ -245,6 +245,21 @@ function puzzle_move_add($puzzle_user_key, $move_number, $piece, $direction, $st
 	if ($stmt = $conn->prepare ("CALL puzzle_move_history_add (?,?,?,?,?,?);")) {
 		$stmt->bind_param("iiiiii", $puzzle_user_key, $move_number, $piece, $direction, $start, $end);
 		$stmt->execute();
+		$stmt->bind_result($puzzle_user_move_key);
+		if($stmt->fetch()){
+			$move["puzzle_user_move_key"] = $puzzle_user_move_key;
+		}
+	}
+
+	$conn->close();
+	return $move;
+}
+
+function puzzle_undo_move($move_key) {
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn-> prepare ("CALL puzzle_move_undo (?);")) {
+		$stmt->bind_param("i", $move_key);
+		$stmt->execute();
 	}
 
 	$conn->close();
@@ -277,7 +292,11 @@ if (isset($token) && $user_key > 0) {
 			$direction = $_POST["d"];
 			$start = $_POST["s"];
 			$end = $_POST["e"];
-			puzzle_move_add($puzzle_user_key, $move_number, $piece, $direction, $start, $end);
+			echo json_encode(puzzle_move_add($puzzle_user_key, $move_number, $piece, $direction, $start, $end));
+			break;
+		case "undoMove":
+			$move_key = $_POST["key"];
+			puzzle_undo_move($move_key);
 			break;
     }
 } else {

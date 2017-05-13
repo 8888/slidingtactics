@@ -9,7 +9,7 @@ let BoardGenerator = require('../model/boardGenerator.js'),
 class GameLogic {
     constructor(view, seedGenerator,
             x, y, spaceSize, boardSize,
-            onGameNew, onGameOver, onMove
+            onGameNew, onGameOver, onMove, onUndo
     ) {
         this.view = view;
         this.seedGenerator = seedGenerator;
@@ -27,6 +27,7 @@ class GameLogic {
         this.onGameNew = onGameNew;
         this.onGameOver = onGameOver;
         this.onMove = onMove;
+        this.onUndo = onUndo;
         this.boardGenerator = new BoardGenerator();
         this.newGame();
     }
@@ -46,9 +47,6 @@ class GameLogic {
         this.puzzle_instance_key = null;
         let that = this;
         this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
-        if (this.view) {
-            this.view.displayBoard(this.board, this.goal.x, this.goal.y);
-        }
     }
 
     onSeedGenerated(seed) {
@@ -73,6 +71,9 @@ class GameLogic {
         this.player = this.playerPieces[0];
         if (this.onGameNew) {
             this.onGameNew(this);
+        }
+        if (this.view) {
+            this.view.displayBoard(this.board, this.goal.x, this.goal.y);
         }
     }
 
@@ -170,7 +171,10 @@ class GameLogic {
             delete this.playerIndexByLocation[move.end];
             this.playerIndexByLocation[p.location] = pIndex;
             this.moveCount -= 1;
-            this.totalMoves -= 1;
+            this.totalMoves += 1;
+            if(this.onUndo) {
+                this.onUndo(move.key);
+            }
             this.showPossibleMoves(this.clickedPiece);                
             for (let m = this.moveHistory.length - 1; m >= 0; m--) {
                 if (this.moveHistory[m].piece == p) {

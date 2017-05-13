@@ -46,7 +46,8 @@ class DevPlayField extends PlayField {
         super.init(
             function(g) { that.gameNewCallback(g); },
             function(g) { that.gameOverCallback(g); },
-            function(g) { that.moveCallback(g); }
+            function(g) { that.moveCallback(g); },
+            function(g) { that.undoCallback(g); }
         );
         this.fps.init();
         this.commandController.init();
@@ -87,9 +88,8 @@ class DevPlayField extends PlayField {
         g.newGame();
     }
 
-    moveCallback() {
-
-    }
+    moveCallback() {}
+    undoCallback() {}
 
     eventListenersAttach() {
         super.eventListenersAttach();

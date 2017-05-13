@@ -70,7 +70,7 @@ class PlayField {
         };
     }
 
-    init(onGameNewCallback, onGameOverCallback, onMoveCallback) {
+    init(onGameNewCallback, onGameOverCallback, onMoveCallback, onUndoCallback) {
         let that = this;
         onGameOverCallback || (onGameOverCallback = function(g) {
             that.games.countSolved++;
@@ -89,6 +89,15 @@ class PlayField {
             if (!that.is_guest) {
                 let moveUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=addMove',
                     'key='+key+'&m='+move+'&p='+piece+'&d='+direction+'&s='+start+'&e='+end);
+                moveUpdate.then((d) => {
+                    this.moveHistory[this.moveHistory.length-1].key = d.puzzle_user_move_key;
+                });
+            }
+        });
+        onUndoCallback || (onUndoCallback = function(key) {
+            if (!that.is_guest) {
+                let undoUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=undoMove',
+                    'key='+key);
             }
         });
         this.gameInstances = [];
@@ -117,7 +126,7 @@ class PlayField {
                 let g = new GameLogic(
                     v, this.seedGenerator,
                     x, y, this.games.cellSpace, this.boardSize,
-                    onGameNewCallback, onGameOverCallback, onMoveCallback);
+                    onGameNewCallback, onGameOverCallback, onMoveCallback, onUndoCallback);
                 this.gameInstances.push(g);
             }
         }
