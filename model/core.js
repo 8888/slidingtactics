@@ -182,14 +182,18 @@ class GameLogic {
             if(this.onUndo) {
                 this.onUndo(move.key);
             }
-            this.showPossibleMoves(this.clickedPiece);                
+            let moveNotFound = true;
             for (let m = this.moveHistory.length - 1; m >= 0; m--) {
                 if (this.moveHistory[m].piece == p) {
                     this.playerLastMove[pIndex] = this.moveHistory[m].direction;
-                    return;
+                    moveNotFound = false;
+                    break;
                 }
             }
-            delete this.playerLastMove[pIndex]; // covers cases if this was pieces only move
+            if (moveNotFound) { // covers cases if this was the piece's only move
+                delete this.playerLastMove[pIndex];
+            }
+            this.showPossibleMoves(this.clickedPiece);
         }
     }
 
