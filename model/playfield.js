@@ -79,7 +79,7 @@ class PlayField {
                 let puzzleUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=update',
                     'key='+g.puzzle_instance_key+'&s=1&m='+g.moveCount);
             }
-            if (that.games.countSolved == 5) {
+            if (g.isFinalPuzzle) {
                 localStorage.setItem("sessionLast_solved", that.games.countSolved);
                 localStorage.setItem("sessionLast_moves", that.games.countMoves);
                 window.location = 'index.html';

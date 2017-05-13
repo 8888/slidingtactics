@@ -24,6 +24,7 @@ class GameLogic {
         };
         this.totalMoves = 0;
         this.puzzlesSolved = 0;
+        this.isFinalPuzzle = false;
         this.onGameNew = onGameNew;
         this.onGameOver = onGameOver;
         this.onMove = onMove;
@@ -32,7 +33,7 @@ class GameLogic {
         this.newGame();
     }
 
-    newGame() {
+    newGame(seed) {
         this.state = this.gameStates.newGame;
         this.playerPieces = [];
         this.playerIndexByLocation = {};
@@ -46,10 +47,15 @@ class GameLogic {
         this.puzzle_key = null;
         this.puzzle_instance_key = null;
         let that = this;
-        this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
+        if (seed) {
+            this.onSeedGenerated(seed);
+        } else {
+            this.seedGenerator.generate((s) => { that.onSeedGenerated(s); });
+        }
     }
 
     onSeedGenerated(seed) {
+        this.seed = seed;
         this.state = this.gameStates.playing;
         this.puzzle_key = seed.puzzle;
         this.puzzle_instance_key = seed.instance;
@@ -195,6 +201,14 @@ class GameLogic {
         }
     }
 
+    toggleFinalPuzzle() {
+        if (this.isFinalPuzzle) {
+            this.isFinalPuzzle = false;
+        } else {
+            this.isFinalPuzzle = true;
+        }
+    }
+
     cellFromClick(x, y) {
         // returns what cell was clicked
         let cellX = Math.floor((x - this.x) / this.spaceSize),
@@ -287,6 +301,12 @@ class GameLogic {
     onKeyDown(key) {
         if (key == 'u') {
             this.undoLastMove();
+        } else if (key == 'n') {
+            this.newGame();
+        } else if (key == 'r') {
+            this.newGame(this.seed);
+        } else if (key == 'f') {
+            this.toggleFinalPuzzle();
         }
     }
 
