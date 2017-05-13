@@ -19,6 +19,8 @@ class PlayField {
         this.ctxVFX = this.canvasAnimation.getContext('2d');
         this.canvasActors = this.canvasCreate('pieceCanvas', 3);
         this.ctxFore = this.canvasActors.getContext('2d');
+        this.canvasControls = this.canvasCreate('controlsCanvas', 4);
+        this.ctxControls = this.canvasControls.getContext('2d');
         this.gameInstances = [];
         this.games = {
             width: 1,
@@ -34,6 +36,7 @@ class PlayField {
         this.is_guest = parseInt(is_guest);
         this.seedGenerator = this.is_guest ? new SeedGeneratorGuest() : new SeedGenerator();
         this.view = View;
+        this.buttons = [];
     }
 
     canvasCreate(id, zIndex, isHidden, backgroundColor) {
@@ -115,6 +118,8 @@ class PlayField {
         let ctxSprite = this.canvasSprite.getContext('2d');
         ctxSprite.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.createSprites(ctxSprite);
+        this.ctxControls.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.createButtons(this.ctxControls);
         for(let w = 0; w < this.games.width; w++) {
             for(let h = 0; h < this.games.height; h++) {
                 let x = (this.games.border + this.games.cellSpace * this.boardSize) * w + this.games.border,
@@ -139,6 +144,20 @@ class PlayField {
             if (event.button === LEFT_MOUSE_CLICK) {
                 for(let i = 0; i < that.gameInstances.length; i++) {
                     that.gameInstances[i].onMouse1Down(event.layerX, event.layerY);
+                }
+                // TODO: remove 0 index, buttons only for mouse over selected puzzle
+                if (that.buttons.length) {
+                    for (let b = 0; b < that.buttons.length; b++) {
+                        let button = that.buttons[b];
+                        if (button.x < event.layerX && event.layerX <= button.x + button.width &&
+                            button.y < event.layerY && event.layerY <= button.y + button.height
+                        ) {
+                            that.gameInstances[0].onKeyDown(button.key);
+                            if (button.key == "f") {
+                                that.toggleFinalPuzzle(that.gameInstances[0], that.ctxControls, button);
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -233,6 +252,54 @@ class PlayField {
                 s / 2, s / 2 + s * 5,
                 (s*0.46)/5 * (i+1), 0, Math.PI * 2, true);
             ctx.fill();
+        }
+    }
+
+    createButtons(ctx) {
+        let s = this.games.cellSpace,
+            x = this.games.border * 2 + s * this.boardSize,
+            y = this.games.border,
+            gap = 1.5 * s,
+            names = ['undo', 'new game', 'restart', 'final puzzle'],
+            keys = ['u', 'n', 'r', 'f'];
+        for (let i = 0; i < 4; i++) {
+            let button = {
+                "name": names[i],
+                "key": keys[i],
+                "x" : x,
+                "y" : y + (gap * i),
+                "width" : s * 4,
+                "height" : s
+            };
+            this.buttons.push(button);
+            this.drawButton(ctx, button, "black");
+        }
+    }
+
+    drawButton(ctx, button, textColor) {
+        ctx.beginPath();
+        let gradient = ctx.createLinearGradient(button.x, button.y, button.x, button.y + button.height);
+        gradient.addColorStop(0,"sandybrown");
+        gradient.addColorStop(0.2, "sandybrown");
+        gradient.addColorStop(1,"silver");
+        ctx.fillStyle = gradient;
+        ctx.rect(button.x, button.y, button.width, button.height);
+        ctx.fill();
+        ctx.fillStyle = textColor;
+        let fontSize = button.height * 0.6;
+        ctx.font = fontSize + "px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        let text = button.name;
+        ctx.fillText(text, button.x + button.width / 2, button.y + button.height / 2);
+    }
+
+    toggleFinalPuzzle(game, ctx, button) {
+        ctx.clearRect(button.x, button.y, button.width, button.height);
+        if (game.isFinalPuzzle) {
+            this.drawButton(ctx, button, "green");
+        } else {
+            this.drawButton(ctx, button, "black");
         }
     }
 }

@@ -90,6 +90,7 @@ class DevPlayField extends PlayField {
 
     moveCallback() {}
     undoCallback() {}
+    createButtons(ctx) {}
 
     eventListenersAttach() {
         super.eventListenersAttach();
