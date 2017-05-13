@@ -121,7 +121,6 @@ class View {
                     px = p % this.boardSize;
                 ctx.clearRect(x + (cellWidth * px), y + (cellWidth * py), cellWidth, cellWidth);
             }
-            possibleMovesDirty = [];
         }
         // draw the pieces
         for (let i = 0; i < playerPieces.length; i++) {

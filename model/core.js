@@ -300,6 +300,7 @@ class GameLogic {
         if (this.view) {
             if (this.state == this.gameStates.playing) {
                 this.view.display(this.moveTrail, this.possibleMovesDirty, this.playerPieces, this.possibleMoves, this.clickedPiece, this.player);
+                this.possibleMovesDirty = [];
             } else if (this.state == this.gameStates.levelComplete && !this.view.levelComplete) {
                 this.view.displayLevelCompleteMenu(this.moveCount, this.puzzlesSolved, this.totalMoves);
             }
