@@ -47,7 +47,8 @@ class DevPlayField extends PlayField {
             function(g) { that.gameNewCallback(g); },
             function(g) { that.gameOverCallback(g); },
             function(g) { that.moveCallback(g); },
-            function(g) { that.undoCallback(g); }
+            function(g) { that.undoCallback(g); },
+            function(g) { that.restartCallback(g); }
         );
         this.fps.init();
         this.commandController.init();
@@ -90,6 +91,7 @@ class DevPlayField extends PlayField {
 
     moveCallback() {}
     undoCallback() {}
+    restartCallback() {}
     createButtons(ctx) {}
 
     eventListenersAttach() {

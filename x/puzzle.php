@@ -265,6 +265,16 @@ function puzzle_undo_move($move_key) {
 	$conn->close();
 }
 
+function puzzle_restart($puzzle_user_key) {
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn-> prepare ("CALL puzzle_restart (?);")) {
+		$stmt->bind_param("i", $puzzle_user_key);
+		$stmt->execute();
+	}
+
+	$conn->close();
+}
+
 $token = $_POST["token"];
 $user_key = user_authenticate_by_token($token);
 
@@ -297,6 +307,10 @@ if (isset($token) && $user_key > 0) {
 		case "undoMove":
 			$move_key = $_POST["key"];
 			puzzle_undo_move($move_key);
+			break;
+		case "restartPuzzle":
+			$puzzle_user_key = $_POST["key"];
+			puzzle_restart($puzzle_user_key);
 			break;
     }
 } else {

@@ -9,7 +9,7 @@ let BoardGenerator = require('../model/boardGenerator.js'),
 class GameLogic {
     constructor(view, seedGenerator,
             x, y, spaceSize, boardSize,
-            onGameNew, onGameOver, onMove, onUndo
+            onGameNew, onGameOver, onMove, onUndo, onRestart
     ) {
         this.view = view;
         this.seedGenerator = seedGenerator;
@@ -29,6 +29,7 @@ class GameLogic {
         this.onGameOver = onGameOver;
         this.onMove = onMove;
         this.onUndo = onUndo;
+        this.onRestart = onRestart;
         this.boardGenerator = new BoardGenerator();
         this.newGame();
     }
@@ -218,6 +219,13 @@ class GameLogic {
         }
     }
 
+    restartPuzzle() {
+        if (this.onRestart) {
+            this.onRestart(this.puzzle_instance_key);
+        }
+        this.newGame(this.seed);
+    }
+
     onMouse1Down(x, y) {
         if (this.state == this.gameStates.playing) {
             let cell = this.cellFromClick(x, y);
@@ -304,7 +312,7 @@ class GameLogic {
         } else if (key == 'n') {
             this.newGame();
         } else if (key == 'r') {
-            this.newGame(this.seed);
+            this.restartPuzzle();
         } else if (key == 'f') {
             this.toggleFinalPuzzle();
         }

@@ -73,7 +73,7 @@ class PlayField {
         };
     }
 
-    init(onGameNewCallback, onGameOverCallback, onMoveCallback, onUndoCallback) {
+    init(onGameNewCallback, onGameOverCallback, onMoveCallback, onUndoCallback, onRestartCallback) {
         let that = this;
         onGameOverCallback || (onGameOverCallback = function(g) {
             that.games.countSolved++;
@@ -100,6 +100,12 @@ class PlayField {
         onUndoCallback || (onUndoCallback = function(key) {
             if (!that.is_guest) {
                 let undoUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=undoMove',
+                    'key='+key);
+            }
+        });
+        onRestartCallback || (onRestartCallback = function(key) {
+            if (!that.is_guest) {
+                let restartUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=restartPuzzle',
                     'key='+key);
             }
         });
@@ -131,7 +137,7 @@ class PlayField {
                 let g = new GameLogic(
                     v, this.seedGenerator,
                     x, y, this.games.cellSpace, this.boardSize,
-                    onGameNewCallback, onGameOverCallback, onMoveCallback, onUndoCallback);
+                    onGameNewCallback, onGameOverCallback, onMoveCallback, onUndoCallback, onRestartCallback);
                 this.gameInstances.push(g);
             }
         }
