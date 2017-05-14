@@ -7,11 +7,9 @@ class SeedGeneratorLocal extends SeedGenerator {
     constructor() {
         super();
         this.provider = new BoardGenerator();
-        this.seed = null;
     }
 
     generate(callback) {
-        this.seed = null;
         let boards = [],
             goals = [];
         let boardSectionsLength = this.provider.boardSections.length;
