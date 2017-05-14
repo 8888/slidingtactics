@@ -121,11 +121,12 @@ class PlayField {
         this.ctxFore.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxVFX.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.ctxBack.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.ctxControls.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         let ctxSprite = this.canvasSprite.getContext('2d');
         ctxSprite.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.createButtons();
         this.createSprites(ctxSprite);
-        this.ctxControls.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        this.createButtons(this.ctxControls);
+        this.displayButtons(this.ctxControls, this.canvasSprite);
         for(let w = 0; w < this.games.width; w++) {
             for(let h = 0; h < this.games.height; h++) {
                 let x = (this.games.border + this.games.cellSpace * this.boardSize) * w + this.games.border,
@@ -160,7 +161,7 @@ class PlayField {
                         ) {
                             that.gameInstances[0].onKeyDown(button.key);
                             if (button.key == "f") {
-                                that.toggleFinalPuzzle(that.gameInstances[0], that.ctxControls, button);
+                                that.toggleFinalPuzzle(that.gameInstances[0], that.ctxControls, button, that.canvasSprite);
                             }
                         }
                     }
@@ -205,12 +206,14 @@ class PlayField {
 
     createSprites(ctx) {
         let s = this.games.cellSpace,
-            r = s*0.9;
+            r = s*0.9,
+            origin = 0;
+        // player pieces
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             let color = i < 2 ? '#ff0000' : '#0000ff';
             let x = s / 2,
-                y = (s * i) + (s / 2);
+                y = origin + (s / 2);
             let gradient = ctx.createRadialGradient(x+s/5,y-s/5,0, x,y, this.games.cellSpace);
             gradient.addColorStop(0,"white");
             gradient.addColorStop(0.8, color);
@@ -224,12 +227,13 @@ class PlayField {
                 ctx.lineWidth = s * 0.1;
                 ctx.strokeStyle = '#ffff00';
                 ctx.arc(
-                    s / 2,
-                    (s * i) + (s / 2),
+                    x,
+                    y,
                     s / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
                 );
                 ctx.stroke();
             }
+            origin += s;
         }
 
         // possible moves
@@ -238,16 +242,17 @@ class PlayField {
         ctx.strokeStyle = '#ffff00';
         ctx.arc(
             s / 2,
-            (s * 4) + (s / 2),
+            origin + (s / 2),
             this.games.cellSpace / 2 - ctx.lineWidth / 2, 0, 2 * Math.PI
         );
         ctx.stroke();
+        origin += s;
 
         // goal
         ctx.fillStyle = '#f442f1';
         ctx.fillRect(
             s * 0.1,
-            (s * 0.1) + (s * 5),
+            (s * 0.1) + origin,
             s * 0.8,
             s * 0.8
         );
@@ -255,19 +260,31 @@ class PlayField {
         for (let i = 0; i < 4; i++) {
             ctx.beginPath();
             ctx.arc(
-                s / 2, s / 2 + s * 5,
+                s / 2, s / 2 + origin,
                 (s*0.46)/5 * (i+1), 0, Math.PI * 2, true);
             ctx.fill();
         }
+        origin += s;
+
+        // buttons
+        for (let b = 0; b < this.buttons.length; b++) {
+            let button = this.buttons[b];
+            this.drawButton(ctx, button, 0, origin, "black");
+            if (button.name == 'final puzzle') {
+                this.drawButton(ctx, button, button.width, origin, "green");
+            }
+            origin += button.height;
+        }
     }
 
-    createButtons(ctx) {
+    createButtons() {
         let s = this.games.cellSpace,
             x = this.games.border * 2 + s * this.boardSize,
             y = this.games.border,
             gap = 1.5 * s,
             names = ['undo', 'new game', 'restart', 'final puzzle'],
             keys = ['u', 'n', 'r', 'f'];
+        this.buttons = [];
         for (let i = 0; i < 4; i++) {
             let button = {
                 "name": names[i],
@@ -278,18 +295,17 @@ class PlayField {
                 "height" : s
             };
             this.buttons.push(button);
-            this.drawButton(ctx, button, "black");
         }
     }
 
-    drawButton(ctx, button, textColor) {
+    drawButton(ctx, button, x, y, textColor) {
         ctx.beginPath();
-        let gradient = ctx.createLinearGradient(button.x, button.y, button.x, button.y + button.height);
+        let gradient = ctx.createLinearGradient(x, y, x, y + button.height);
         gradient.addColorStop(0,"sandybrown");
         gradient.addColorStop(0.2, "sandybrown");
         gradient.addColorStop(1,"silver");
         ctx.fillStyle = gradient;
-        ctx.rect(button.x, button.y, button.width, button.height);
+        ctx.rect(x, y, button.width, button.height);
         ctx.fill();
         ctx.fillStyle = textColor;
         let fontSize = button.height * 0.6;
@@ -297,17 +313,28 @@ class PlayField {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         let text = button.name;
-        ctx.fillText(text, button.x + button.width / 2, button.y + button.height / 2);
+        ctx.fillText(text, x + button.width / 2, y + button.height / 2);
     }
 
-    toggleFinalPuzzle(game, ctx, button) {
-        ctx.clearRect(button.x, button.y, button.width, button.height);
-        if (game.isFinalPuzzle) {
-            this.drawButton(ctx, button, "green");
-        } else {
-            this.drawButton(ctx, button, "black");
-        }
+    displayButtons(ctx, spriteSheet) {
+        for (let b = 0; b < this.buttons.length; b++) {
+            let button = this.buttons[b];
+            ctx.drawImage(spriteSheet,
+                0, button.height * (6 + b), button.width, button.height,
+                button.x, button.y, button.width, button.height);
+        } // (6 + b) is the x based off how many sprites on the sheet, this shouldn't be hardcoded
     }
+
+    toggleFinalPuzzle(game, ctx, button, spriteSheet) {
+        ctx.clearRect(button.x, button.y, button.width, button.height);
+        let x = 0;
+        if (game.isFinalPuzzle) {
+            x = button.width;
+        }
+        ctx.drawImage(spriteSheet,
+            x, button.height * 9, button.width, button.height,
+            button.x, button.y, button.width, button.height);
+    } // hardcoded 9 is order on spritesheet
 }
 
 module.exports = PlayField;
