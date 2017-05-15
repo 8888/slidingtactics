@@ -38,8 +38,7 @@
                     <td valign='top'>
                         <button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button>
                         <table>
-                            <tr><td align="center">Leaderboard
-                            </td></tr>
+                            <tr><td align="center">Leaderboard</td></tr>
                             <tr><td>
                                 <table id="puzzle_by_user" style='border: 1px solid black; width: 100%;'>
                                     <tr>
@@ -55,7 +54,7 @@
                                 </table>
                             </td></tr>
                             <tr><td>
-                                <table style='border: 1px solid black; width: 100%;'>
+                                <table id="session_summary" style='border: 1px solid black; width: 100%; display: none;'>
                                     <tr>
                                         <td colspan='2' style='text-decoration: underline;'>Last Session</td>
                                     </tr>
@@ -75,7 +74,12 @@
     if(un) {
         document.getElementById('un').style.display = 'none';
         document.getElementById('answerRow').style.display = 'none';
-        document.getElementById('sun').innerHTML = un;
+        let uk = localStorage.getItem("user_key");
+        if (uk) {
+            document.getElementById('sun').innerHTML = "<a href='./player.html?key="+uk+"'>"+un+"</a>";
+        } else {
+            document.getElementById('sun').innerHTML = un;
+        }
         document.getElementById('regRow').style.display = 'none';
         document.getElementById('guestRow1').style.display = 'none';
         document.getElementById('guestRow2').style.display = 'none';
@@ -102,7 +106,7 @@
                 if (user.is_authenticated && user.is_active) {
                     document.getElementById('un').style.display = 'none';
                     document.getElementById('answerRow').style.display = 'none';
-                    document.getElementById('sun').innerHTML = user.username;
+                    document.getElementById('sun').innerHTML = "<a href='./player.html?key='"+user.user_key+">"+user.username+"</a>";
                     document.getElementById('regRow').style.display = 'none';
                     document.getElementById('guestRow1').style.display = 'none';
                     document.getElementById('guestRow2').style.display = 'none';
@@ -165,8 +169,11 @@
 
     let solved = localStorage.getItem('sessionLast_solved'),
         moves = localStorage.getItem('sessionLast_moves');
-    document.getElementById('solved').innerHTML = solved;
-    document.getElementById('moves').innerHTML = moves;
+    if (solved) {
+        document.getElementById('session_summary').style.display = '';
+        document.getElementById('solved').innerHTML = solved;
+        document.getElementById('moves').innerHTML = moves;
+    }
 
     window.onload = function() {
         promise_post('https://tactics.prototypeholdings.com/x/report.php?action=by_user')
@@ -175,7 +182,7 @@
                 let userPuzzles = "";
                 for (let i = 0; i < us.length; i++) {
                     let u = us[i];
-                    userPuzzles += "<tr><td>"+u.name+"</td><td>"+u.games+"</td><tr>";
+                    userPuzzles += "<tr><td><a href='./player.html?key="+u.user_key+"'>"+u.name+"</a></td><td>"+u.games+"</td><tr>";
                 }
                 userTable.innerHTML += userPuzzles;
             });

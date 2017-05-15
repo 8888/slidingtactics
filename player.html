@@ -1,0 +1,95 @@
+<!doctype html>
+    <head>
+        <title>Sliding Tactics</title>
+    </head>
+    <body id='myBody'>
+        <div style='max-width: 960px; margin: auto;'>
+            <table style='width: 100%;'>
+                <tr style='border-bottom: 1px solid black;'>
+                    <td colspan='2'><h1>Sliding Tactics</h1></td>
+                </tr>
+                <tr>
+                    <td>
+                        <table id="player_summary" style='width: 100%;'>
+                            <tr><td colspan="2" style='text-align: center;'><span id="playerName"></span> - Player Statistics</td></tr>
+                        </table>
+                    </td>
+                </tr><tr>
+                    <td>
+                        <table id="puzzle_summary" style='width: 100%;'>
+                            <tr><td align="center" colspan='4'>Puzzles by Move Count</td></tr>
+                            <tr><td>moves</td><td>games</td><td>solved</td><td>seconds</td></tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </body>
+<script>
+    function promise_post(destination, parameters) {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", destination, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onload = function() {
+                if (xhr.status == 200) {
+                    if (xhr.responseText == "not authorized") {
+                        reject("not authorized");
+                    } else {
+                        resolve(JSON.parse(xhr.responseText));
+                    }
+                }
+            };
+            xhr.onerror = function() { reject("Network Issue"); };
+            xhr.send(parameters);
+        });
+    };
+
+    var qs = {};
+    location.search.substr(1).split('&').forEach(function(a) {
+        qs[a.split('=')[0]] = a.split('=')[1];
+    });
+
+    window.onload = function() {
+        promise_post('https://tactics.prototypeholdings.com/x/player.php?action=puzzle_moves&player_key='+qs['key'])
+            .then((ps) => {
+                let stats = {
+                    games: 0,
+                    moves: 0,
+                    seconds: 0,
+                    solved: 0
+                };
+
+                let puzzle_summary = '';
+                for (let i = 0, l = ps.length; i < l; i++) {
+                    let p = ps[i];
+                    p.moves = +p.moves;
+                    if (p.moves > 0) {
+                        stats.moves += p.moves;
+                        if (p.moves == 20) {
+                            p.moves = "20+";
+                        }
+                    }
+                    if (+p.seconds > 0) {
+                        stats.seconds += +p.seconds;
+                    }
+                    stats.games += +p.games;
+                    stats.solved += +p.solved;
+                    puzzle_summary += "<tr><td>"+p.moves+"</td><td>"+p.games+"</td><td>"+p.solved+"</td><td>"+p.seconds+"</td></tr>";
+                }
+                let puzzleTable = document.getElementById('puzzle_summary');
+                puzzleTable.innerHTML += puzzle_summary;
+                document.getElementById('playerName').innerHTML = ps[0].name.toUpperCase();
+
+                let statsTable = document.getElementById('player_summary');
+                let statsInfo = "<tr><td>Total Games:&nbsp;</td><td>"+stats.games+"</td></tr>" +
+                    "<tr><td>Total Moves:&nbsp;</td><td>"+stats.moves+"</td></tr>" +
+                    "<tr><td>Total Solved:&nbsp;</td><td>"+stats.solved+"</td></tr>" +
+                    "<tr><td>Total Time:&nbsp;</td><td>"+(stats.seconds > 3600 ? stats.seconds/60/60 : stats.seconds/60).toFixed(2)+(stats.seconds > 3600 ? " hrs" : " mins")+"</td></tr>" +
+                    "<tr><td>Moves/Game:&nbsp;</td><td>"+(stats.moves/stats.games).toFixed(2)+"</td></tr>" +
+                    "<tr><td>Time/Move:&nbsp;</td><td>"+(stats.seconds/stats.moves).toFixed(2)+" secs</td></tr>";
+                statsTable.innerHTML += statsInfo;
+            });
+    };
+</script>
+</html>
