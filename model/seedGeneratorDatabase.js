@@ -14,7 +14,7 @@ class SeedGeneratorDatabase extends SeedGenerator {
 
     generate(callback) {
         let that = this;
-        let seedGet = this.provider.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=get', 'r=1');
+        let seedGet = this.provider.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=get', 'r='+(+this.isRanked));
         seedGet.then(callback)
         .catch((e) => {
             console.log(e);

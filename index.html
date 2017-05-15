@@ -36,7 +36,8 @@
                     <td rowspan="2"><img src='images/slidingtactics.gif'></td>
                 </tr><tr>
                     <td valign='top'>
-                        <button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button>
+                        <button id='playbutton' style='display: none;' onclick='javascript:window.location="puzzle.html";'>CLICK TO PLAY</button><br/>
+                        <button id='practicebutton' style='display: none;' onclick='javascript:window.location="puzzle.html?practice";'>CLICK TO PRACTICE</button>
                         <table>
                             <tr><td align="center">Leaderboard</td></tr>
                             <tr><td>
@@ -85,6 +86,7 @@
         document.getElementById('guestRow2').style.display = 'none';
         document.getElementById('info').innerHTML = '';
         document.getElementById('playbutton').style.display = 'inline';
+        document.getElementById('practicebutton').style.display = 'inline';
         document.getElementById('in').style.display = 'none';
         document.getElementById('out').style.display = 'inline';
     }
@@ -112,6 +114,7 @@
                     document.getElementById('guestRow2').style.display = 'none';
                     document.getElementById('info').innerHTML = '';
                     document.getElementById('playbutton').style.display = 'inline';
+                    document.getElementById('practicebutton').style.display = 'inline';
                     document.getElementById('in').style.display = 'none';
                     document.getElementById('out').style.display = 'inline';
                 } else {
@@ -133,6 +136,7 @@
         document.getElementById('guestRow2').style.display = '';
         document.getElementById('info').innerHTML = '';
         document.getElementById('playbutton').style.display = 'none';
+        document.getElementById('practicebutton').style.display = 'none';
         document.getElementById('in').style.display = 'inline';
         document.getElementById('out').style.display = 'none';
     }

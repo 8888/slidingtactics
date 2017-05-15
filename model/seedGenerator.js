@@ -2,6 +2,7 @@
 
 class SeedGenerator {
     constructor() {
+        this.isRanked = true;
     }
 
     generate() {

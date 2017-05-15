@@ -35,6 +35,7 @@ class PlayField {
         this.boardSize = 16;
         this.is_guest = parseInt(is_guest);
         this.seedGenerator = this.is_guest ? new SeedGeneratorGuest() : new SeedGenerator();
+        this.seedGenerator.isRanked = location.search.indexOf('practice') === -1;
         this.view = View;
         this.buttons = [];
     }
