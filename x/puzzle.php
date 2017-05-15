@@ -32,7 +32,7 @@ function xy2index($x, $y) {
     return $x + $y * 16;
 }
 
-function puzzle_add($user_key) {
+function puzzle_add($user_key, $is_ranked) {
     $boardSections = json_decode('[
 	{
 		"key": 1,
@@ -217,8 +217,8 @@ function puzzle_add($user_key) {
 
 	$conn->close();
 	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
-	if ($stmt = $conn->prepare ("CALL puzzle_user_create (?,?);")) {
-		$stmt->bind_param("ii", $seed["puzzle"], $user_key);
+	if ($stmt = $conn->prepare ("CALL puzzle_user_create (?,?,?);")) {
+		$stmt->bind_param("iii", $seed["puzzle"], $user_key, $is_ranked);
 		$stmt->execute();
 		$stmt->bind_result($puzzle_user_key);
 		if($stmt->fetch()){
@@ -283,10 +283,11 @@ if (isset($token) && $user_key > 0) {
     switch ($action) {
         case "get":
             $puzzle_key = $_POST["key"];
+			$is_ranked = $_POST["r"];
             if (isset($puzzle_key) && $puzzle_key > 0) {
                 echo json_encode(puzzle_get());
             } else {
-                echo json_encode(puzzle_add($user_key));
+                echo json_encode(puzzle_add($user_key, $is_ranked));
             }
             break;
 		case "update":
