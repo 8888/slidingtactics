@@ -1,7 +1,7 @@
 <?php
-include 'constants.php';
-include 'database.php';
-include 'password.php';
+include 'include/constants.php';
+include 'include/database.php';
+include 'include/password.php';
 
 class user {
     public $username;

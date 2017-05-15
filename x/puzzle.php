@@ -1,5 +1,5 @@
 <?php
-include 'security.php';
+include 'include/security.php';
 
 function randBoardLocation($players, $goal) {
     $noSpace = array_merge (array(119,120,135,136), $players);
