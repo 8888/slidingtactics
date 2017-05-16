@@ -3,11 +3,11 @@ if (IS_PRODUCTION) {
     abstract class DatabaseNames {
         const Tactic = "2080823_tactic";
     }
-}/* elseif (IS_TEST) {
+} elseif (IS_TEST) {
     abstract class DatabaseNames {
         const Tactic = "2080823_devtactic";
     }
-} else {
+}/* else {
     abstract class DatabaseNames {
         const Tactic = ""
     }

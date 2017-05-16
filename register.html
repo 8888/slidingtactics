@@ -39,7 +39,7 @@
         let un = document.getElementById('un').value,
             an = document.getElementById('an1').value,
             em = document.getElementById('em1').value;
-        let auth = promise_post('https://tactics.prototypeholdings.com/x/login.php?action=register',
+        let auth = ajax.promise_post('login.php?action=register',
         'un='+un+'&an='+an+'&em='+em)
             .then((user) => {
                 if (+user.user_key > 0) {
@@ -49,27 +49,8 @@
                 }
             })
             .catch((r) => {
-                document.getElementById('info').innerHTML = "server issue!";
+                document.getElementById('info').innerHTML = "unable to verify";
             });
     }
-
-    function promise_post(destination, parameters) {
-        return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open("POST", destination, true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onload = function() {
-                if (xhr.status == 200) {
-                    if (xhr.responseText == "not authorized") {
-                        reject("not authorized");
-                    } else {
-                        resolve(JSON.parse(xhr.responseText));
-                    }
-                }
-            };
-            xhr.onerror = function() { reject("Network Issue"); };
-            xhr.send(parameters);
-        });
-    };
     </script>
 </html>

@@ -1,5 +1,5 @@
 'use strict';
-
+//// COPY FROM MODEL WITHOUT module.exports
 let ajax = {};
 
 ajax.isProduction = location.href.indexOf('/tactics.prototypeholdings.com/') !== -1;
@@ -38,5 +38,3 @@ ajax.promise_post = function(destination, parameters) {
         xhr.send("token="+localStorage.getItem('user_token')+"&"+parameters);
     });
 };
-
-module.exports = ajax;

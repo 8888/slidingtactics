@@ -80,7 +80,7 @@ class PlayField {
             that.games.countSolved++;
             that.games.countMoves += g.moveCount;
             if(!that.is_guest) {
-                let puzzleUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=update',
+                let puzzleUpdate = AJAX.promise_post('puzzle.php?action=update',
                     'key='+g.puzzle_instance_key+'&s=1&m='+g.moveCount);
             }
             if (g.isFinalPuzzle) {
@@ -91,7 +91,7 @@ class PlayField {
         });
         onMoveCallback || (onMoveCallback = function(key, move, piece, direction, start, end) {
             if (!that.is_guest) {
-                let moveUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=addMove',
+                let moveUpdate = AJAX.promise_post('puzzle.php?action=addMove',
                     'key='+key+'&m='+move+'&p='+piece+'&d='+direction+'&s='+start+'&e='+end);
                 moveUpdate.then((d) => {
                     this.moveHistory[this.moveHistory.length-1].key = d.puzzle_user_move_key;
@@ -100,13 +100,13 @@ class PlayField {
         });
         onUndoCallback || (onUndoCallback = function(key) {
             if (!that.is_guest) {
-                let undoUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=undoMove',
+                let undoUpdate = AJAX.promise_post('puzzle.php?action=undoMove',
                     'key='+key);
             }
         });
         onRestartCallback || (onRestartCallback = function(key) {
             if (!that.is_guest) {
-                let restartUpdate = AJAX.promise_post('https://tactics.prototypeholdings.com/x/puzzle.php?action=restartPuzzle',
+                let restartUpdate = AJAX.promise_post('puzzle.php?action=restartPuzzle',
                     'key='+key);
             }
         });

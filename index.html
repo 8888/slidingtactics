@@ -1,6 +1,7 @@
 <!doctype html>
     <head>
         <title>Sliding Tactics</title>
+        <script src='./ajax.js' type='text/javascript'></script>
     </head>
     <body id='myBody'>
         <div style='max-width: 960px; margin: auto;'>
@@ -95,7 +96,7 @@
         let un = document.getElementById("un").value,
             an = document.getElementById("an").value;
 
-        let auth = promise_post('https://tactics.prototypeholdings.com/x/login.php?action=authenticate', 'un='+un+'&an='+an)
+        let auth = ajax.promise_post('login.php?action=authenticate', 'un='+un+'&an='+an)
             .then((user) => {
                 localStorage.clear();
                 localStorage.setItem('user_key', user.user_key);
@@ -152,25 +153,6 @@
         javascript:window.location="puzzle.html";
     }
 
-    function promise_post(destination, parameters) {
-        return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open("POST", destination, true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onload = function() {
-                if (xhr.status == 200) {
-                    if (xhr.responseText == "not authorized") {
-                        reject("not authorized");
-                    } else {
-                        resolve(JSON.parse(xhr.responseText));
-                    }
-                }
-            };
-            xhr.onerror = function() { reject("Network Issue"); };
-            xhr.send(parameters);
-        });
-    };
-
     let solved = localStorage.getItem('sessionLast_solved'),
         moves = localStorage.getItem('sessionLast_moves');
     if (solved) {
@@ -180,7 +162,7 @@
     }
 
     window.onload = function() {
-        promise_post('https://tactics.prototypeholdings.com/x/report.php?action=by_user')
+        ajax.promise_post('report.php?action=by_user')
             .then((us) => {
                 let userTable = document.getElementById('puzzle_by_user');
                 let userPuzzles = "";
@@ -190,7 +172,7 @@
                 }
                 userTable.innerHTML += userPuzzles;
             });
-        promise_post('https://tactics.prototypeholdings.com/x/report.php?action=summary')
+        ajax.promise_post('report.php?action=summary')
             .then((stats) => {
                 let statsTable = document.getElementById('puzzle_stats');
                 stats = stats[0];
