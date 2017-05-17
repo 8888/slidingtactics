@@ -9,11 +9,11 @@ ajax.locationTesting = 'https://devtactics.prototypeholdings.com/x/';
 ajax.locationLocal = '//localhost:61588/x/';
 
 ajax.promise_post = function(destination, parameters) {
-    if (ajax.isProduction) {
+    //if (ajax.isProduction) {
         destination = ajax.locationProduction + destination;
-    } else {//if (ajax.isTesting) {
-        destination = ajax.locationTesting + destination;
-    }// else {
+    //} else {//if (ajax.isTesting) {
+    //    destination = ajax.locationTesting + destination;
+    //}// else {
     //    destination = ajax.locationLocal + destination
     //}
 
