@@ -3,15 +3,15 @@ import copy
 import time
 from collections import deque
 
-E = EAST = 4
 N = NORTH = 1
+E = EAST = 2
+S = SOUTH = 4
 W = WEST = 8
-S = SOUTH = 2
-DIRECTIONS = [N, S, E, W]
+DIRECTIONS = [N, E, S, W]
 DIRECTIONWORD = {
     N: "North",
-    S: "South",
     E: "East",
+    S: "South",
     W: "West"
 }
 
@@ -178,7 +178,28 @@ class SolutionGenerator(object):
             skipped_count,
             len(positions_seen)))
 
+
+BOARD_WALLS = [
+    9, 1, 1, 1, 3, 9, 1, 1, 1, 1, 1, 3, 9, 5, 1, 3,
+    8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9, 0, 2,
+    12, 0, 0, 0, 0, 0, 6, 8, 0, 6, 8, 0, 0, 0, 0, 2,
+    9, 0, 4, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 6,
+    8, 0, 3, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+    8, 0, 0, 1, 0, 4, 0, 0, 0, 0, 0, 4, 0, 2, 12, 2,
+    8, 0, 0, 0, 2, 9, 0, 4, 4, 0, 0, 3, 8, 0, 1, 2,
+    8, 0, 0, 0, 0, 0, 2, 9, 3, 8, 0, 0, 0, 0, 0, 2,
+    8, 0, 0, 4, 0, 0, 2, 12, 6, 8, 0, 0, 0, 0, 0, 2,
+    8, 0, 0, 3, 8, 0, 0, 1, 1, 0, 0, 0, 2, 12, 0, 2,
+    8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2,
+    10, 12, 0, 0, 0, 0, 0, 0, 0, 6, 8, 0, 0, 0, 0, 6,
+    8, 1, 0, 0, 0, 0, 6, 8, 0, 1, 0, 0, 0, 0, 4, 3,
+    12, 0, 4, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 3, 10,
+    9, 2, 9, 0, 0, 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 2,
+    12, 4, 4, 4, 4, 6, 12, 4, 4, 4, 4, 6, 12, 4, 4, 6,
+]
+
 #    N = 1; E = 4; S = 2; W = 8;
+'''
 BOARD_WALLS = [
     9, 1, 1, 1, 1, 5, 9, 1, 1, 1, 1, 5, 9, 3, 1, 5,
     8, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 0, 4,
@@ -196,6 +217,7 @@ BOARD_WALLS = [
     10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
     9, 0, 0, 0, 6, 8, 0, 0, 0, 0, 0, 0, 6, 8, 0, 4,
     10, 2, 2, 2, 3, 2, 6, 10, 2, 2, 2, 2, 3, 6, 10, 6]
+'''
 #         _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 #        |. . . . . .|. . . . . .|. _ . .|
 #        |. . . _ . . . . . . . . .|. . .|
@@ -214,14 +236,15 @@ BOARD_WALLS = [
 #        |. . . . _|. . . . . . . _|. . .|
 #        |_ _ _ _ _ _ _|_ _ _ _ _ _ _|_ _|
 SOLVER_INSTANCE = SolutionGenerator(BOARD_WALLS, DIRECTIONS)
-ROBOT_LOCATIONS = [(43, None), (100, None), (202, None), (41, None)]
+ROBOT_LOCATIONS = [(182, None), (147, None), (142, None), (155, None)]
     #GOAL ROBOT MUST BE LAST
+    #JS player piece is index 0
 
 #import cProfile, pstats
 #PROFILER = cProfile.Profile()
 #PROFILER.enable()
 
-SOLUTION_ANSWER = SOLVER_INSTANCE.generate(ROBOT_LOCATIONS, 12*16+9, True)
+SOLUTION_ANSWER = SOLVER_INSTANCE.generate(ROBOT_LOCATIONS, 38, True)
 
 #PROFILER.disable()
 #PROFILER_STATS = pstats.Stats(PROFILER).sort_stats('cumulative')
@@ -263,3 +286,52 @@ if SOLUTION_ANSWER is not None:
 # 07. (11, 02)            (15, 13) East   (10, 00) North  (06, 10) South
 # 08. (11, 02)            (15, 13) East   (10, 00) North  (15, 10) East
 # 09. (11, 02)            (15, 13) East   (10, 00) North  (15, 12) South
+
+
+# JS board object
+# Board {
+#   area: [
+#           9, 1, 1, 1, 3, 9, 1, 1, 1, 1, 1, 3, 9, 5, 1, 3,
+#           8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9, 0, 2,
+#           12, 0, 0, 0, 0, 0, 6, 8, 0, 6, 8, 0, 0, 0, 0, 2,
+#           9, 0, 4, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 6,
+#           8, 0, 3, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+#           8, 0, 0, 1, 0, 4, 0, 0, 0, 0, 0, 4, 0, 2, 12, 2,
+#           8, 0, 0, 0, 2, 9, 0, 4, 4, 0, 0, 3, 8, 0, 1, 2,
+#           8, 0, 0, 0, 0, 0, 2, 9, 3, 8, 0, 0, 0, 0, 0, 2,
+#           8, 0, 0, 4, 0, 0, 2, 12, 6, 8, 0, 0, 0, 0, 0, 2,
+#           8, 0, 0, 3, 8, 0, 0, 1, 1, 0, 0, 0, 2, 12, 0, 2,
+#           8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2,
+#           10, 12, 0, 0, 0, 0, 0, 0, 0, 6, 8, 0, 0, 0, 0, 6,
+#           8, 1, 0, 0, 0, 0, 6, 8, 0, 1, 0, 0, 0, 0, 4, 3,
+#           12, 0, 4, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 3, 10,
+#           9, 2, 9, 0, 0, 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 2,
+#           12, 4, 4, 4, 4, 6, 12, 4, 4, 4, 4, 6, 12, 4, 4, 6,
+#   ]
+#   goals: [17, 38, 66, 87, 62, 108, 27, 73, 217, 189, 188, 154, 209, 147, 181, 230]
+#   key: 17
+#   name: "D3,A2,A2,A1"
+#   type: "classic"
+# }
+#
+# JS Seed object
+# Seed {
+#   b: [15, 2, 2, 1]
+#   g: 38
+#   p: [155, 142, 147, 182]
+# }
+#
+# JS Goal object
+# Goal {
+#   index: 38
+#   x: 268
+#   y: 96
+# }
+
+
+# DB puzzle
+# puzzle_key,
+# board_1_key, board_2_key, board_3_key, board_4_key,
+# goal_index,
+# player_1_index, player_2_index, player_3_index, player_4_index
+# ]
