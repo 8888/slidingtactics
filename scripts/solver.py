@@ -19,10 +19,10 @@ class SolutionGenerator(object):
     """ SOLUTION GENERATOR CLASS """
     direction_reverse = {}
     direction_delta = {}
+    board = None
 
-    def __init__(self, board, directions):
+    def __init__(self, directions):
         self.board_width = 16
-        self.board = board
         self.directions = directions
         self.direction_reverse = {N: S, S: N, E: W, W: E}
         self.direction_delta = {N: -self.board_width, S: +self.board_width, E: +1, W: -1}
@@ -42,8 +42,9 @@ class SolutionGenerator(object):
             break
         return index
 
-    def generate(self, robots, goal_index, verbose=False):
+    def generate(self, board, robots, goal_index, verbose=False):
         """ Solve for `robots` to `goal_index` on `board` """
+        self.board = board
         assert len(robots) == 4
         time_start = time.clock()
         minx = maxx = miny = maxy = None
@@ -292,10 +293,8 @@ PUZZLE_E = Puzzle([
     [(205, None), (37, None), (111, None), (146, None)]
 )
 
-
-
-SOLVER_INSTANCE = SolutionGenerator(PUZZLE_A.board, DIRECTIONS)
-ROBOT_LOCATIONS = [(182, None), (147, None), (142, None), (155, None)]
+PUZZLES = [PUZZLE_A, PUZZLE_B, PUZZLE_C, PUZZLE_D, PUZZLE_E]
+SOLVER_INSTANCE = SolutionGenerator(DIRECTIONS)
     #GOAL ROBOT MUST BE LAST
     #JS player piece is index 0
 
@@ -303,23 +302,26 @@ ROBOT_LOCATIONS = [(182, None), (147, None), (142, None), (155, None)]
 #PROFILER = cProfile.Profile()
 #PROFILER.enable()
 
-SOLUTION_ANSWER = SOLVER_INSTANCE.generate(PUZZLE_A.piece_locations, PUZZLE_A.goal, True)
+for p in PUZZLES:
+    SOLUTION_ANSWER = SOLVER_INSTANCE.generate(
+        p.board, p.piece_locations, p.goal, True
+    )
 
-#PROFILER.disable()
-#PROFILER_STATS = pstats.Stats(PROFILER).sort_stats('cumulative')
-#PROFILER_STATS.print_stats()
+    #PROFILER.disable()
+    #PROFILER_STATS = pstats.Stats(PROFILER).sort_stats('cumulative')
+    #PROFILER_STATS.print_stats()
 
-if SOLUTION_ANSWER is not None:
-    print("Move\t{}".format("\t\t".join([str(i) for i in range(len(ROBOT_LOCATIONS))])))
-    for i, move in enumerate(SOLUTION_ANSWER):
-        print("{:02d}. {}".format(
-            i,
-            "\t".join(["({:02d}, {:02d}) {}".format(
-                robot[0] % 16,
-                int(robot[0] / 16),
-                "     " if robot[1] == None else next(
-                    DIRECTIONWORD[direction]
-                    for direction
-                    in DIRECTIONS
-                    if direction == robot[1])
-            ) for robot in move])))
+    if SOLUTION_ANSWER is not None:
+        print("Move\t{}".format("\t\t".join([str(i) for i in range(len(p.piece_locations))])))
+        for i, move in enumerate(SOLUTION_ANSWER):
+            print("{:02d}. {}".format(
+                i,
+                "\t".join(["({:02d}, {:02d}) {}".format(
+                    robot[0] % 16,
+                    int(robot[0] / 16),
+                    "     " if robot[1] == None else next(
+                        DIRECTIONWORD[direction]
+                        for direction
+                        in DIRECTIONS
+                        if direction == robot[1])
+                ) for robot in move])))
