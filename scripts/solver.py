@@ -2,6 +2,7 @@
 import copy
 import time
 from collections import deque
+from login import server_authenticate as auth
 
 N = NORTH = 1
 E = EAST = 2
@@ -179,14 +180,29 @@ class SolutionGenerator(object):
             skipped_count,
             len(positions_seen)))
 
-
+    def display_solution(self, solution):
+        ''' prints the solution to the console '''
+        if solution is not None:
+            print("Move\t{}".format("\t\t".join([str(i) for i in range(len(solution[0]))])))
+            for i, move in enumerate(solution):
+                print("{:02d}. {}".format(
+                    i,
+                    "\t".join(["({:02d}, {:02d}) {}".format(
+                        robot[0] % 16,
+                        int(robot[0] / 16),
+                        "     " if robot[1] is None else next(
+                            DIRECTIONWORD[direction]
+                            for direction
+                            in DIRECTIONS
+                            if direction == robot[1])
+                    ) for robot in move])))
 
 class Puzzle(object):
     """ PUZZLE CLASS TO BE SOLVED """
-    def __init__(self, board, goal, pieceLocations):
+    def __init__(self, board, goal, piece_locations):
         self.board = board
         self.goal = goal
-        self.piece_locations = pieceLocations
+        self.piece_locations = piece_locations
 
 PUZZLE_A = Puzzle([
     9, 1, 1, 1, 3, 9, 1, 1, 1, 1, 1, 3, 9, 5, 1, 3,
@@ -293,35 +309,51 @@ PUZZLE_E = Puzzle([
     [(205, None), (37, None), (111, None), (146, None)]
 )
 
-PUZZLES = [PUZZLE_A, PUZZLE_B, PUZZLE_C, PUZZLE_D, PUZZLE_E]
-SOLVER_INSTANCE = SolutionGenerator(DIRECTIONS)
-    #GOAL ROBOT MUST BE LAST
-    #JS player piece is index 0
+def main_hardcode():
+    """ run the solver using the hardcoded data """
+    PUZZLES = [PUZZLE_A, PUZZLE_B, PUZZLE_C, PUZZLE_D, PUZZLE_E]
+    SOLVER_INSTANCE = SolutionGenerator(DIRECTIONS)
+        #GOAL ROBOT MUST BE LAST
+        #JS player piece is index 0
 
-#import cProfile, pstats
-#PROFILER = cProfile.Profile()
-#PROFILER.enable()
+    #import cProfile, pstats
+    #PROFILER = cProfile.Profile()
+    #PROFILER.enable()
 
-for p in PUZZLES:
-    SOLUTION_ANSWER = SOLVER_INSTANCE.generate(
-        p.board, p.piece_locations, p.goal, True
-    )
+    VERBOSE = True
+    for p in PUZZLES:
+        solution_answer = SOLVER_INSTANCE.generate(
+            p.board, p.piece_locations, p.goal, VERBOSE
+        )
 
-    #PROFILER.disable()
-    #PROFILER_STATS = pstats.Stats(PROFILER).sort_stats('cumulative')
-    #PROFILER_STATS.print_stats()
+        #PROFILER.disable()
+        #PROFILER_STATS = pstats.Stats(PROFILER).sort_stats('cumulative')
+        #PROFILER_STATS.print_stats()
 
-    if SOLUTION_ANSWER is not None:
-        print("Move\t{}".format("\t\t".join([str(i) for i in range(len(p.piece_locations))])))
-        for i, move in enumerate(SOLUTION_ANSWER):
-            print("{:02d}. {}".format(
-                i,
-                "\t".join(["({:02d}, {:02d}) {}".format(
-                    robot[0] % 16,
-                    int(robot[0] / 16),
-                    "     " if robot[1] == None else next(
-                        DIRECTIONWORD[direction]
-                        for direction
-                        in DIRECTIONS
-                        if direction == robot[1])
-                ) for robot in move])))
+        if solution_answer is not None and VERBOSE:
+            SOLVER_INSTANCE.display_solution(solution_answer)
+            print("The optimal solution uses " + str(len(solution_answer)) + " moves")
+            # the solution is all but the last move, but includes starting positions
+            # len = optimal moves
+
+def main_db():
+    """ run the solver using DB data """
+    token = auth("lee", "halcyon88") # make some include w/ this info
+    print(token)
+
+
+main_hardcode()
+#main_db()
+
+'''
+php creates puzzle in sql
+cron job every 3 minutes
+ran locally on server
+python script -> give me some unsolved puzzles, I work on them
+
+import requests
+requests.get
+python -> php
+
+token = server_authenticate()
+'''
