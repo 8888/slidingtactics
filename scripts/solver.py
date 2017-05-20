@@ -1,8 +1,11 @@
 """ SOLUTION GENERATOR MODULE """
 import copy
 import time
+import json
 from collections import deque
+import requests
 from login import server_authenticate as auth
+from boardGenerator import BoardGenerator
 
 N = NORTH = 1
 E = EAST = 2
@@ -338,12 +341,34 @@ def main_hardcode():
 
 def main_db():
     """ run the solver using DB data """
+    solver = SolutionGenerator(DIRECTIONS)
+    board_generator = BoardGenerator()
     token = auth("lee", "halcyon88") # make some include w/ this info
-    print(token)
+    r = requests.post(
+        "https://devtactics.prototypeholdings.com/x/puzzle.php?action=solver_get",
+        data={"token": token}
+    )
+    if r.text and r.status_code == 200:
+        data = json.loads(r.text)
+        goal = data['goal_index']
+        board = board_generator.generate(
+            data['board_1_key'], data['board_2_key'], data['board_3_key'], data['board_4_key']
+        )
+        pieces = [
+            (data['player_4_index'], None),
+            (data['player_3_index'], None),
+            (data['player_2_index'], None),
+            (data['player_1_index'], None)
+        ]
+        # GOAL ROBOT MUST BE LAST
+        # JS player piece is index 0
+        solution_answer = solver.generate(board, pieces, goal, True)
+        solver.display_solution(solution_answer)
+    else:
+        raise ValueError("Malformed response", r.text, r.status_code, r.reason)
 
-
-main_hardcode()
-#main_db()
+#main_hardcode()
+main_db()
 
 '''
 php creates puzzle in sql
@@ -354,6 +379,4 @@ python script -> give me some unsolved puzzles, I work on them
 import requests
 requests.get
 python -> php
-
-token = server_authenticate()
 '''

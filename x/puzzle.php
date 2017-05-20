@@ -275,6 +275,34 @@ function puzzle_restart($puzzle_user_key) {
 	$conn->close();
 }
 
+function solver_get() {
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn->prepare ("SELECT * FROM puzzle WHERE puzzle_key = 128")) {
+		$stmt->execute();
+		$stmt->bind_result(
+			$puzzle_key,
+			$board_1_key, $board_2_key, $board_3_key, $board_4_key,
+			$goal_index,
+			$player_1_index, $player_2_index, $player_3_index, $player_4_index
+		);
+		if($stmt->fetch()){
+			$puzzle["puzzle_key"] = $puzzle_key;
+			$puzzle["board_1_key"] = $board_1_key;
+			$puzzle["board_2_key"] = $board_2_key;
+			$puzzle["board_3_key"] = $board_3_key;
+			$puzzle["board_4_key"] = $board_4_key;
+			$puzzle["goal_index"] = $goal_index;
+			$puzzle["player_1_index"] = $player_1_index;
+			$puzzle["player_2_index"] = $player_2_index;
+			$puzzle["player_3_index"] = $player_3_index;
+			$puzzle["player_4_index"] = $player_4_index;
+		}
+	}
+
+	$conn->close();
+	return $puzzle;
+}
+
 $token = $_POST["token"];
 $user_key = user_authenticate_by_token($token);
 
@@ -312,6 +340,9 @@ if (isset($token) && $user_key > 0) {
 		case "restartPuzzle":
 			$puzzle_user_key = $_POST["key"];
 			puzzle_restart($puzzle_user_key);
+			break;
+		case "solver_get":
+			echo json_encode(solver_get());
 			break;
     }
 } else {
