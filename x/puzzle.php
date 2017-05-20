@@ -277,13 +277,14 @@ function puzzle_restart($puzzle_user_key) {
 
 function solver_get() {
 	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
-	if ($stmt = $conn->prepare ("SELECT * FROM puzzle WHERE puzzle_key = 128")) {
+	if ($stmt = $conn->prepare ("SELECT * FROM puzzle WHERE solution IS NULL LIMIT 1")) {
 		$stmt->execute();
 		$stmt->bind_result(
 			$puzzle_key,
 			$board_1_key, $board_2_key, $board_3_key, $board_4_key,
 			$goal_index,
-			$player_1_index, $player_2_index, $player_3_index, $player_4_index
+			$player_1_index, $player_2_index, $player_3_index, $player_4_index,
+			$solution
 		);
 		if($stmt->fetch()){
 			$puzzle["puzzle_key"] = $puzzle_key;
@@ -301,6 +302,15 @@ function solver_get() {
 
 	$conn->close();
 	return $puzzle;
+}
+
+function add_solution($puzzle_key, $solution) {
+	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
+	if ($stmt = $conn->prepare ("UPDATE puzzle SET solution = $solution WHERE puzzle_key = $puzzle_key")) {
+		$stmt->execute();
+	}
+
+	$conn->close();
 }
 
 $token = $_POST["token"];
@@ -343,6 +353,11 @@ if (isset($token) && $user_key > 0) {
 			break;
 		case "solver_get":
 			echo json_encode(solver_get());
+			break;
+		case "add_solution":
+			$puzzle_key = $_POST["key"];
+			$solution = $_POST["solution"];
+			add_solution($puzzle_key, $solution);
 			break;
     }
 } else {

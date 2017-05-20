@@ -350,6 +350,7 @@ def main_db():
     )
     if r.text and r.status_code == 200:
         data = json.loads(r.text)
+        key = data['puzzle_key']
         goal = data['goal_index']
         board = board_generator.generate(
             data['board_1_key'], data['board_2_key'], data['board_3_key'], data['board_4_key']
@@ -364,19 +365,14 @@ def main_db():
         # JS player piece is index 0
         solution_answer = solver.generate(board, pieces, goal, True)
         solver.display_solution(solution_answer)
+        if solution_answer is not None:
+            solution = len(solution_answer)
+            r = requests.post(
+                "https://devtactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
+                data={"token": token, "key": key, "solution": solution}
+            )
     else:
         raise ValueError("Malformed response", r.text, r.status_code, r.reason)
 
 #main_hardcode()
 main_db()
-
-'''
-php creates puzzle in sql
-cron job every 3 minutes
-ran locally on server
-python script -> give me some unsolved puzzles, I work on them
-
-import requests
-requests.get
-python -> php
-'''
