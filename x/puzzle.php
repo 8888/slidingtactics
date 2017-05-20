@@ -276,32 +276,32 @@ function puzzle_restart($puzzle_user_key) {
 }
 
 function solver_get() {
+	$puzzles = [];
 	$conn = new mysqli(DATABASE_SERVERNAME, DATABASE_USERNAME, DATABASE_PASSWORD, DatabaseNames::Tactic);
-	if ($stmt = $conn->prepare ("SELECT * FROM puzzle WHERE solution IS NULL LIMIT 1")) {
+	if ($stmt = $conn->prepare ("SELECT * FROM puzzle WHERE solution IS NULL LIMIT 5")) {
 		$stmt->execute();
-		$stmt->bind_result(
-			$puzzle_key,
-			$board_1_key, $board_2_key, $board_3_key, $board_4_key,
-			$goal_index,
-			$player_1_index, $player_2_index, $player_3_index, $player_4_index,
-			$solution
-		);
-		if($stmt->fetch()){
-			$puzzle["puzzle_key"] = $puzzle_key;
-			$puzzle["board_1_key"] = $board_1_key;
-			$puzzle["board_2_key"] = $board_2_key;
-			$puzzle["board_3_key"] = $board_3_key;
-			$puzzle["board_4_key"] = $board_4_key;
-			$puzzle["goal_index"] = $goal_index;
-			$puzzle["player_1_index"] = $player_1_index;
-			$puzzle["player_2_index"] = $player_2_index;
-			$puzzle["player_3_index"] = $player_3_index;
-			$puzzle["player_4_index"] = $player_4_index;
+		$resultSet = $stmt->get_result();
+		if ($resultSet) {
+			$puzzle_result = $resultSet->fetch_all(MYSQLI_ASSOC);
+			foreach ($puzzle_result as $row) {
+				array_push($puzzles, array(
+					$row["puzzle_key"],
+					$row["board_1_key"],
+					$row["board_2_key"],
+					$row["board_3_key"],
+					$row["board_4_key"],
+					$row["goal_index"],
+					$row["player_1_index"],
+					$row["player_2_index"],
+					$row["player_3_index"],
+					$row["player_4_index"]
+				));
+			}
 		}
 	}
 
 	$conn->close();
-	return $puzzle;
+	return $puzzles;
 }
 
 function add_solution($puzzle_key, $solution) {

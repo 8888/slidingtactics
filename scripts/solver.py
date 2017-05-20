@@ -211,29 +211,34 @@ def main_db():
     )
     if r.text and r.status_code == 200:
         data = json.loads(r.text)
-        key = data['puzzle_key']
-        goal = data['goal_index']
-        board = board_generator.generate(
-            data['board_1_key'], data['board_2_key'], data['board_3_key'], data['board_4_key']
-        ) # returns the board as a list
-        pieces = [
-            (data['player_4_index'], None), # (piece index, last direction moved)
-            (data['player_3_index'], None),
-            (data['player_2_index'], None),
-            (data['player_1_index'], None)
-        ]
-        # GOAL ROBOT MUST BE LAST
-        # JS player piece is index 0
-        solution_answer = solver.generate(board, pieces, goal, True)
-        solver.display_solution(solution_answer)
-        if solution_answer is not None:
-            solution = len(solution_answer)
-            # the solution is all but the last move, but includes starting positions
-            # len = optimal moves
-            r = requests.post(
-                "https://devtactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
-                data={"token": token, "key": key, "solution": solution}
-            )
+        # array containing arrays of puzzles
+        # puzzle array == [
+        #   puzzle_key, board_1_key, board_2_key, board_3_key, board_4_key,
+        #   goal_index, player_1_index, player_2_index, player_3_index, player_4_index]
+        for puzzle in data:
+            key = puzzle[0]
+            board = board_generator.generate(
+                puzzle[1], puzzle[2], puzzle[3], puzzle[4]
+            ) # returns the board as a list
+            goal = puzzle[5]
+            pieces = [
+                (puzzle[9], None), # (piece index, last direction moved)
+                (puzzle[8], None),
+                (puzzle[7], None),
+                (puzzle[6], None)
+            ]
+            # Goal piece needs to be last in the above array
+            # But the goal piece is the first piece in the array (player_1_index)
+            solution_answer = solver.generate(board, pieces, goal, True)
+            solver.display_solution(solution_answer)
+            if solution_answer is not None:
+                solution = len(solution_answer)
+                # the solution is all but the last move, but includes starting positions
+                # len = optimal moves
+                r = requests.post(
+                    "https://devtactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
+                    data={"token": token, "key": key, "solution": solution}
+                )
     else:
         raise ValueError("Malformed response", r.text, r.status_code, r.reason)
 
