@@ -184,7 +184,7 @@ class SolutionGenerator(object):
             len(positions_seen)))
 
     def display_solution(self, solution):
-        ''' prints the solution to the console '''
+        """ prints the solution to the console """
         if solution is not None:
             print("Move\t{}".format("\t\t".join([str(i) for i in range(len(solution[0]))])))
             for i, move in enumerate(solution):
@@ -199,145 +199,6 @@ class SolutionGenerator(object):
                             in DIRECTIONS
                             if direction == robot[1])
                     ) for robot in move])))
-
-class Puzzle(object):
-    """ PUZZLE CLASS TO BE SOLVED """
-    def __init__(self, board, goal, piece_locations):
-        self.board = board
-        self.goal = goal
-        self.piece_locations = piece_locations
-
-PUZZLE_A = Puzzle([
-    9, 1, 1, 1, 3, 9, 1, 1, 1, 1, 1, 3, 9, 5, 1, 3,
-    8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9, 0, 2,
-    12, 0, 0, 0, 0, 0, 6, 8, 0, 6, 8, 0, 0, 0, 0, 2,
-    9, 0, 4, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 6,
-    8, 0, 3, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
-    8, 0, 0, 1, 0, 4, 0, 0, 0, 0, 0, 4, 0, 2, 12, 2,
-    8, 0, 0, 0, 2, 9, 0, 4, 4, 0, 0, 3, 8, 0, 1, 2,
-    8, 0, 0, 0, 0, 0, 2, 9, 3, 8, 0, 0, 0, 0, 0, 2,
-    8, 0, 0, 4, 0, 0, 2, 12, 6, 8, 0, 0, 0, 0, 0, 2,
-    8, 0, 0, 3, 8, 0, 0, 1, 1, 0, 0, 0, 2, 12, 0, 2,
-    8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2,
-    10, 12, 0, 0, 0, 0, 0, 0, 0, 6, 8, 0, 0, 0, 0, 6,
-    8, 1, 0, 0, 0, 0, 6, 8, 0, 1, 0, 0, 0, 0, 4, 3,
-    12, 0, 4, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 3, 10,
-    9, 2, 9, 0, 0, 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 2,
-    12, 4, 4, 4, 4, 6, 12, 4, 4, 4, 4, 6, 12, 4, 4, 6],
-    38,
-    [(182, None), (147, None), (142, None), (155, None)]
-)
-
-PUZZLE_B = Puzzle([
-    9, 1, 1, 1, 3, 9, 1, 1, 1, 3, 9, 1, 1, 5, 1, 3,
-    8, 0, 6, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 2,
-    8, 0, 1, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 2,
-    10, 12, 0, 0, 0, 0, 4, 0, 2, 9, 0, 0, 0, 0, 0, 2,
-    12, 1, 0, 0, 0, 2, 9, 0, 0, 0, 0, 0, 0, 0, 0, 6,
-    9, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
-    8, 0, 0, 0, 0, 3, 8, 4, 4, 0, 6, 8, 0, 2, 12, 2,
-    8, 0, 0, 6, 8, 0, 2, 9, 3, 8, 1, 0, 0, 0, 1, 2,
-    8, 0, 0, 1, 0, 0, 2, 12, 6, 8, 0, 0, 0, 0, 0, 2,
-    8, 2, 12, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 6, 10,
-    12, 0, 1, 0, 0, 0, 0, 3, 11, 8, 0, 0, 0, 0, 1, 6,
-    9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 0, 3,
-    8, 0, 0, 6, 8, 0, 0, 0, 0, 0, 4, 0, 0, 1, 0, 2,
-    8, 0, 2, 9, 0, 4, 0, 0, 0, 2, 9, 0, 0, 0, 0, 2,
-    8, 0, 0, 0, 0, 3, 8, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-    12, 4, 4, 4, 4, 4, 6, 12, 4, 4, 4, 6, 12, 4, 4, 6],
-    70,
-    [(222, None), (185, None), (107, None), (157, None)]
-)
-
-PUZZLE_C = Puzzle([
-    9, 3, 9, 1, 5, 1, 1, 1, 1, 3, 9, 1, 1, 5, 1, 3,
-    8, 0, 0, 0, 3, 8, 0, 0, 0, 0, 0, 0, 0, 3, 8, 2,
-    8, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 2,
-    10, 12, 0, 0, 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 0, 2,
-    8, 1, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6,
-    12, 0, 0, 0, 2, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
-    9, 0, 0, 6, 8, 0, 0, 4, 4, 0, 6, 8, 0, 2, 12, 2,
-    8, 0, 0, 1, 0, 0, 2, 9, 3, 8, 1, 0, 0, 0, 1, 2,
-    8, 0, 0, 0, 4, 0, 2, 12, 6, 8, 0, 0, 0, 0, 0, 2,
-    12, 0, 0, 0, 3, 8, 0, 1, 1, 0, 0, 0, 2, 12, 0, 2,
-    9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2,
-    8, 0, 0, 0, 0, 0, 0, 0, 0, 6, 8, 0, 0, 0, 0, 6,
-    8, 0, 0, 0, 0, 0, 6, 8, 0, 1, 0, 0, 0, 0, 4, 3,
-    8, 0, 0, 0, 0, 2, 9, 0, 0, 0, 4, 0, 0, 0, 3, 10,
-    8, 0, 2, 12, 0, 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 2,
-    12, 4, 4, 5, 4, 6, 12, 4, 4, 4, 4, 6, 12, 4, 4, 6],
-    99,
-    [(64, None), (59, None), (60, None), (42, None)]
-)
-
-PUZZLE_D = Puzzle([
-    9, 1, 1, 1, 3, 9, 1, 1, 1, 1, 3, 9, 5, 1, 1, 3,
-    8, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 2, 9, 0, 0, 2,
-    8, 0, 4, 0, 0, 2, 9, 0, 0, 0, 0, 0, 0, 2, 12, 2,
-    8, 0, 3, 12, 0, 0, 0, 2, 12, 0, 0, 0, 0, 0, 1, 2,
-    8, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 6,
-    8, 6, 8, 0, 0, 0, 0, 0, 0, 6, 8, 4, 0, 0, 0, 3,
-    12, 1, 0, 0, 0, 0, 0, 4, 4, 1, 0, 3, 8, 0, 0, 2,
-    9, 0, 0, 0, 0, 6, 10, 9, 3, 8, 0, 0, 0, 0, 0, 2,
-    8, 0, 0, 0, 4, 1, 2, 12, 6, 8, 0, 0, 0, 0, 4, 2,
-    12, 0, 0, 0, 3, 8, 0, 1, 1, 0, 0, 0, 0, 2, 9, 2,
-    9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 0, 0, 0, 6,
-    8, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 1, 0, 0, 0, 3,
-    8, 0, 0, 0, 0, 0, 6, 8, 0, 3, 8, 0, 0, 0, 0, 2,
-    8, 0, 0, 0, 0, 2, 9, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-    8, 0, 2, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 8, 2,
-    12, 4, 4, 5, 4, 6, 12, 4, 4, 4, 6, 12, 4, 5, 4, 6],
-    38,
-    [(102, None), (151, None), (97, None), (153, None)]
-)
-
-PUZZLE_E = Puzzle([
-    9, 1, 1, 3, 9, 1, 1, 1, 1, 3, 9, 1, 1, 1, 5, 3,
-    8, 0, 0, 0, 0, 2, 12, 0, 0, 0, 0, 0, 0, 2, 9, 2,
-    8, 4, 0, 0, 0, 0, 1, 0, 0, 0, 2, 12, 0, 0, 0, 2,
-    8, 3, 8, 0, 0, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 6,
-    8, 0, 0, 0, 2, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
-    8, 0, 6, 8, 0, 0, 0, 6, 8, 0, 0, 0, 0, 0, 0, 2,
-    12, 0, 1, 0, 0, 0, 0, 5, 4, 0, 4, 0, 0, 6, 8, 2,
-    9, 0, 0, 0, 0, 0, 2, 9, 3, 8, 3, 8, 0, 1, 0, 2,
-    8, 0, 4, 0, 2, 12, 2, 12, 6, 8, 0, 0, 0, 0, 0, 2,
-    8, 2, 9, 0, 0, 1, 0, 1, 5, 0, 0, 0, 0, 0, 6, 10,
-    8, 0, 0, 0, 0, 0, 0, 0, 3, 8, 0, 0, 0, 0, 1, 6,
-    12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 0, 3,
-    9, 0, 0, 0, 4, 0, 0, 0, 0, 0, 4, 0, 0, 1, 0, 2,
-    8, 0, 0, 0, 3, 8, 0, 0, 0, 2, 9, 0, 0, 0, 0, 2,
-    8, 6, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-    12, 5, 4, 4, 4, 6, 12, 4, 4, 4, 4, 6, 12, 4, 4, 6],
-    225,
-    [(205, None), (37, None), (111, None), (146, None)]
-)
-
-def main_hardcode():
-    """ run the solver using the hardcoded data """
-    PUZZLES = [PUZZLE_A, PUZZLE_B, PUZZLE_C, PUZZLE_D, PUZZLE_E]
-    SOLVER_INSTANCE = SolutionGenerator(DIRECTIONS)
-        #GOAL ROBOT MUST BE LAST
-        #JS player piece is index 0
-
-    #import cProfile, pstats
-    #PROFILER = cProfile.Profile()
-    #PROFILER.enable()
-
-    VERBOSE = True
-    for p in PUZZLES:
-        solution_answer = SOLVER_INSTANCE.generate(
-            p.board, p.piece_locations, p.goal, VERBOSE
-        )
-
-        #PROFILER.disable()
-        #PROFILER_STATS = pstats.Stats(PROFILER).sort_stats('cumulative')
-        #PROFILER_STATS.print_stats()
-
-        if solution_answer is not None and VERBOSE:
-            SOLVER_INSTANCE.display_solution(solution_answer)
-            print("The optimal solution uses " + str(len(solution_answer)) + " moves")
-            # the solution is all but the last move, but includes starting positions
-            # len = optimal moves
 
 def main_db():
     """ run the solver using DB data """
@@ -354,9 +215,9 @@ def main_db():
         goal = data['goal_index']
         board = board_generator.generate(
             data['board_1_key'], data['board_2_key'], data['board_3_key'], data['board_4_key']
-        )
+        ) # returns the board as a list
         pieces = [
-            (data['player_4_index'], None),
+            (data['player_4_index'], None), # (piece index, last direction moved)
             (data['player_3_index'], None),
             (data['player_2_index'], None),
             (data['player_1_index'], None)
@@ -367,6 +228,8 @@ def main_db():
         solver.display_solution(solution_answer)
         if solution_answer is not None:
             solution = len(solution_answer)
+            # the solution is all but the last move, but includes starting positions
+            # len = optimal moves
             r = requests.post(
                 "https://devtactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
                 data={"token": token, "key": key, "solution": solution}
@@ -374,5 +237,5 @@ def main_db():
     else:
         raise ValueError("Malformed response", r.text, r.status_code, r.reason)
 
-#main_hardcode()
-main_db()
+if __name__ == "__main__":
+    main_db()

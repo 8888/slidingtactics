@@ -122,6 +122,7 @@ class BoardGenerator(object):
         self.section_width = 8
 
     def generate(self, key1, key2, key3, key4):
+        """ returns an array of all spaces and walls """
         keys = [key1 - 1, key2 -1, key3 -1, key4 - 1]
         N, E, S, W = 1, 2, 4, 8
         directions_abbr = {
@@ -167,7 +168,7 @@ class BoardGenerator(object):
 
     def rotate(self, walls, d):
         """
-        rotates binary walls
+        rotates binary walls within each cell
         d=1=90deg, 2=180deg, 3=270deg
         """
         assert walls <= 0b1111
