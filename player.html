@@ -11,15 +11,16 @@
                 </tr>
                 <tr>
                     <td>
-                        <table id="player_summary" style='width: 100%;'>
-                            <tr><td colspan="2" style='text-align: center;'><span id="playerName"></span> - Player Statistics</td></tr>
+                        <table id="player_summary" style='width: 500px; margin: auto;'>
+                            <tr><td colspan="3" style='text-align: center;'><span id="playerName"></span> - Player Statistics</td></tr>
+                            <tr><td>&nbsp;</td><td>Ranked</td><td>Practice</td></tr>
                         </table>
                     </td>
                 </tr><tr>
                     <td>
-                        <table id="puzzle_summary" style='width: 100%;'>
-                            <tr><td align="center" colspan='4'>Puzzles by Move Count</td></tr>
-                            <tr><td>moves</td><td>games</td><td>solved</td><td>ranked</td><td>seconds</td></tr>
+                        <table id="puzzle_summary" style='width: 500px; margin: auto;'>
+                            <tr><td align="center" colspan='7'>Puzzles by Move Count</td></tr>
+                            <tr><td>par</td><td>ranked</td><td>games</td><td>solved (%)</td><td>par (%)</td><td>moves</td><td>seconds</td></tr>
                         </table>
                     </td>
                 </tr>
@@ -33,47 +34,63 @@
     });
 
     window.onload = function() {
-        ajax.promise_post('player.php?action=puzzle_moves&player_key='+qs['key'])
+        ajax.promise_post('player.php?action=report_puzzle_user&player_key='+qs['key'])
             .then((ps) => {
                 let stats = {
                     games: 0,
                     moves: 0,
+                    movesPractice: 0,
+                    par: 0,
+                    parPractice: 0,
                     ranked: 0,
                     seconds: 0,
-                    solved: 0
+                    secondsPractice: 0,
+                    solved: 0,
+                    solvedPractice: 0,
+                    solvedRankedOverPar: 0,
+                    solvedRankedCount: 0
                 };
 
                 let puzzle_summary = '';
                 for (let i = 0, l = ps.length; i < l; i++) {
                     let p = ps[i];
-                    p.moves = +p.moves;
-                    if (p.moves > 0) {
-                        stats.moves += p.moves;
-                        if (p.moves == 20) {
-                            p.moves = "20+";
-                        }
-                    }
-                    if (+p.seconds > 0) {
-                        stats.seconds += +p.seconds;
-                    }
+                    p.moves = (+p.moves > 0) ? +p.moves : 0;
+                    p.movesDisplay = (p.moves >= 20) ? "20+" : p.moves;
+                    p.seconds = (+p.seconds > 0) ? +p.seconds : 0;
                     stats.games += +p.games;
-                    stats.solved += +p.solved;
-                    stats.ranked += +p.ranked;
-                    puzzle_summary += "<tr><td>"+p.moves+"</td><td>"+p.games+"</td><td>"+p.solved+"</td><td>"+p.ranked+"</td><td>"+p.seconds+"</td></tr>";
+                    p.ranked = +p.ranked;
+                    stats.ranked += p.ranked;
+                    p.par = +p.par;
+                    stats.solvedRankedOverPar += +p.ranked_solved_over_par;
+                    stats.solvedRankedCount += +p.ranked_solved_count;
+                    if (p.ranked) {
+                        stats.solved += +p.solved;
+                        stats.seconds += p.seconds;
+                        stats.moves += p.moves;
+                        stats.par += p.par;
+                    } else {
+                        stats.solvedPractice += +p.solved;
+                        stats.secondsPractice += p.seconds;
+                        stats.movesPractice += p.moves;
+                        stats.parPractice += p.par;
+                    }
+                    puzzle_summary += "<tr><td>"+p.solution+"</td><td>"+(p.ranked>0 ? 'Yes' : '')+"</td><td>"+p.games+"</td><td>"+p.solved+(p.games && p.solved ? ' (' + ((p.solved/p.games)*100).toFixed(0) + '%)' : '')+"</td>" + 
+                        "<td>"+p.par+(p.solved && p.par ? ' (' + ((p.par/p.solved)*100).toFixed(0) + '%)' : '')+"</td><td>"+p.moves+"</td><td>"+p.seconds+"</td></tr>";
                 }
                 let puzzleTable = document.getElementById('puzzle_summary');
                 puzzleTable.innerHTML += puzzle_summary;
                 document.getElementById('playerName').innerHTML = ps[0].name.toUpperCase();
 
                 let statsTable = document.getElementById('player_summary');
-                let statsInfo = "<tr><td>Total Games:&nbsp;</td><td>"+stats.games+"</td></tr>" +
-                    "<tr><td>Total Moves:&nbsp;</td><td>"+stats.moves+"</td></tr>" +
-                    "<tr><td>Total Solved:&nbsp;</td><td>"+stats.solved+"</td></tr>" +
-                    "<tr><td>Total Ranked:&nbsp;</td><td>"+stats.ranked+"</td></tr>" +
-                    "<tr><td>Total Practice:&nbsp;</td><td>"+(stats.games-stats.ranked)+"</td></tr>" +
-                    "<tr><td>Total Time:&nbsp;</td><td>"+(stats.seconds > 3600 ? stats.seconds/60/60 : stats.seconds/60).toFixed(2)+(stats.seconds > 3600 ? " hrs" : " mins")+"</td></tr>" +
-                    "<tr><td>Moves/Game:&nbsp;</td><td>"+(stats.moves/stats.games).toFixed(2)+"</td></tr>" +
-                    "<tr><td>Time/Move:&nbsp;</td><td>"+(stats.seconds/stats.moves).toFixed(2)+" secs</td></tr>";
+                let statsInfo = "<tr><td>Total Games:&nbsp;</td><td>"+stats.ranked+"</td><td>"+(stats.games-stats.ranked)+"</td></tr>" +
+                    "<tr><td>Solved:&nbsp;</td><td>"+(stats.ranked ? (stats.solved/stats.ranked)*100 : 0).toFixed(2)+"%</td><td>"+
+                        (stats.games ? (stats.solvedPractice/(stats.games-stats.ranked)*100) : 0).toFixed(2)+"%</td></tr>" +
+                    "<tr><td>Solved Par:&nbsp;</td><td>"+(stats.ranked ? (stats.par/stats.solved)*100 : 0).toFixed(2)+"%</td><td>"+
+                        (stats.games ? (stats.parPractice/stats.solvedPractice)*100 : 0).toFixed(2)+"%</td></tr>" +
+                    "<tr><td>Moves:&nbsp;</td><td>"+stats.moves+"</td><td>"+stats.movesPractice+"</td></tr>" +
+                    "<tr><td>Total Time:&nbsp;</td><td>"+(stats.seconds > 3600 ? stats.seconds/60/60 : stats.seconds/60).toFixed(2)+(stats.seconds > 3600 ? " hrs" : " mins")+"</td>" +
+                        "<td>"+(stats.secondsPractice > 3600 ? stats.secondsPractice/60/60 : stats.secondsPractice/60).toFixed(2)+(stats.secondsPractice > 3600 ? " hrs" : " mins")+"</td></tr>" +
+                    "<tr><td>Avg Moves over Par:&nbsp;</td><td>"+(stats.solvedRankedCount ? (stats.solvedRankedOverPar/stats.solvedRankedCount).toFixed(2) : '')+"</td><td>&nbsp;</td></tr>";
                 statsTable.innerHTML += statsInfo;
             });
     };

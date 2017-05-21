@@ -1,6 +1,7 @@
 <!doctype html>
     <head>
         <title>Sliding Tactics</title>
+        <script src='./ajax.js' type='text/javascript'></script>
     </head>
     <body id='myBody'>
         <h1>register</h1>
@@ -39,8 +40,7 @@
         let un = document.getElementById('un').value,
             an = document.getElementById('an1').value,
             em = document.getElementById('em1').value;
-        let auth = ajax.promise_post('login.php?action=register',
-        'un='+un+'&an='+an+'&em='+em)
+        let auth = ajax.promise_post('login.php?action=register', 'un='+un+'&an='+an+'&em='+em)
             .then((user) => {
                 if (+user.user_key > 0) {
                     document.getElementById('info').innerHTML = "user created!";
