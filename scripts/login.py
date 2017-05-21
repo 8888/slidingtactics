@@ -1,9 +1,10 @@
+#!/usr/bin/python
 import json
 import requests
 
 def server_authenticate(username, password):
     ''' authenticates the user '''
-    r = requests.post("https://devtactics.prototypeholdings.com/x/login.php?action=authenticate", data={"un": username, "an": password})
+    r = requests.post("https://tactics.prototypeholdings.com/x/login.php?action=authenticate", data={"un": username, "an": password})
     if r.text and r.status_code == 200:
         user = json.loads(r.text)
         if "token" in user:

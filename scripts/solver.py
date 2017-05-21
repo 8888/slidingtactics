@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """ SOLUTION GENERATOR MODULE """
 import copy
 import time
@@ -24,6 +25,7 @@ class SolutionGenerator(object):
     direction_reverse = {}
     direction_delta = {}
     board = None
+    timeout = 30
 
     def __init__(self, directions):
         self.board_width = 16
@@ -75,7 +77,7 @@ class SolutionGenerator(object):
         skipped_count = 0
         queue = deque()
         queue.append([robots])
-        while queue:
+        while queue and time.clock() - time_start < self.timeout:
             path = queue.popleft() #pops the next node that is to be searched from
             node = path[-1] #list of tuples with (robot_index, last_direction)
             if len(path) != path_length:
@@ -206,7 +208,7 @@ def main_db():
     board_generator = BoardGenerator()
     token = auth("lee", "halcyon88") # make some include w/ this info
     r = requests.post(
-        "https://devtactics.prototypeholdings.com/x/puzzle.php?action=solver_get",
+        "https://tactics.prototypeholdings.com/x/puzzle.php?action=solver_get",
         data={"token": token}
     )
     if r.text and r.status_code == 200:
@@ -236,7 +238,7 @@ def main_db():
                 # the solution is all but the last move, but includes starting positions
                 # len = optimal moves
                 r = requests.post(
-                    "https://devtactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
+                    "https://tactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
                     data={"token": token, "key": key, "solution": solution}
                 )
     else:
