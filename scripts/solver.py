@@ -134,7 +134,7 @@ class SolutionGenerator(object):
                             total_seen_count,
                             skipped_count,
                             len(positions_seen)))
-                    return path # This is the end, a solution has been found
+                    return {'path' : path, 'solved' : True} # This is the end, solution found
 
             adjacent = deque()
             for index in range(0, 4): #ROBOT COUNT
@@ -184,6 +184,7 @@ class SolutionGenerator(object):
             total_seen_count,
             skipped_count,
             len(positions_seen)))
+        return {'path' : path, 'solved' : False} # No solution found
 
     def display_solution(self, solution):
         """ prints the solution to the console """
@@ -231,16 +232,15 @@ def main_db():
             ]
             # Goal piece needs to be last in the above array
             # But the goal piece is the first piece in the array (player_1_index)
-            solution_answer = solver.generate(board, pieces, goal, True)
-            solver.display_solution(solution_answer)
-            if solution_answer is not None:
-                solution = len(solution_answer)
-                # the solution is all but the last move, but includes starting positions
-                # len = optimal moves
-                r = requests.post(
-                    "https://tactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
-                    data={"token": token, "key": key, "solution": solution}
-                )
+            solver_result = solver.generate(board, pieces, goal, True)
+            solver.display_solution(solver_result['path'])
+            solution = len(solver_result['path']) if solver_result['solved'] else -len(solver_result['path'])
+            # the solution is all but the last move, but includes starting positions
+            # len = optimal moves
+            r = requests.post(
+                "https://tactics.prototypeholdings.com/x/puzzle.php?action=add_solution",
+                data={"token": token, "key": key, "solution": solution}
+            )
     else:
         raise ValueError("Malformed response", r.text, r.status_code, r.reason)
 
